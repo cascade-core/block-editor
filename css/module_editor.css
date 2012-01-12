@@ -1,5 +1,6 @@
-<?php
 /*
+ * Module Editor Widget
+ *
  * Copyright (c) 2011, Josef Kufner  <jk@frozen-doe.net>
  * All rights reserved.
  *
@@ -28,12 +29,71 @@
  * SUCH DAMAGE.
  */
 
-
-function TPL_html5__module_editor__html_head($t, $id, $d, $so)
-{
-	echo "\t<!-- Module Editor plugin -->\n",
-		"\t<link rel=\"stylesheet\" href=\"/plugin/module_editor/css/module_editor.css\" type=\"text/css\">\n",
-		"\t<script type=\"text/javascript\" src=\"/plugin/module_editor/js/module_editor.js\"></script>\n",
-		"\n";
+.module_editor_widget {
+	display: block !important;
+	position: relative !important;
+	padding: 0px !important;
+	margin: 1em 0em;
+	color: #000;
+	background: #fff;
+	border: 1px solid #aaa;
 }
+
+	.module_editor_widget__module {
+		float: left;
+		width: auto;
+		margin: 1em;
+		font-size: 0.8em;
+		pointer: normal;
+	}
+
+	.module_editor_widget__module,
+	.module_editor_widget__module td,
+	.module_editor_widget__module th,
+	.module_editor_widget__module div {
+		cursor: default;
+	}
+
+	.module_editor_widget__module table {
+		border-collapse: collapse;
+		border: 1px solid #000;
+	}
+
+	.module_editor_widget__module table td,
+	.module_editor_widget__module table th {
+		color: #000;
+		padding: 2px;
+		font-size: 0.8em;
+		white-space: nowrap;
+		vertical-align: top;
+	}
+
+	.module_editor_widget__module table th {
+		font-weight: normal;
+		text-align: center !important;
+		border: 1px solid #000;
+		background: #eee;
+	}
+
+		.module_editor_widget__module table th .module_editor_widget__module_id {
+			font-weight: bold;
+		}
+
+		.module_editor_widget__module table th .module_editor_widget__module_name {
+			font-style: italic;
+			font-size: 90%;
+		}
+
+	.module_editor_widget__module table td {
+	}
+
+		.module_editor_widget__module table td.module_editor_widget__in {
+			text-align: left !important;
+			padding-right: 1ex !important;
+		}
+
+		.module_editor_widget__module table td.module_editor_widget__out {
+			text-align: right !important;
+			padding-left: 1ex !important;
+		}
 

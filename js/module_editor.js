@@ -27,6 +27,7 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
+ *
  */
 
 (function($) {
@@ -50,7 +51,35 @@
 				height:		$this.css('height'),
 				width:		$this.css('width')
 			});
+			widget.disableSelection();
 			widget.insertBefore($this);
+
+			widget.createMoulde = function(id, module, connections) {
+				var m = $('<div class="module_editor_widget__module"></div>');
+
+				var inputs = $('<td width="50%" class="module_editor_widget__in"></td>');
+				var outputs = $('<td width="50%" class="module_editor_widget__out"></td>').text('output');
+
+				m.append($('<table width="100%"></table>')
+					.append($('<tr></tr>').append($('<th colspan="2"></th>')
+						.append($('<div class="module_editor_widget__module_id"></div>').text(id))
+						.append($('<div class="module_editor_widget__module_name"></div>').text(module))))
+					.append($('<tr></tr>').append(inputs).append(outputs))
+				);
+				// m.append($('<a href="#" class="module_editor_widget__add_input">add input</a>'));
+
+				// Inputs
+				for (var c in connections) {
+					if (c[0] == '.') {
+						continue;
+					}
+
+					if (typeof(connections[c]) == 'object') {
+						inputs.append($('<div></div>').text(c));
+					}
+				}
+				return m;
+			};
 
 			widget.updateFromTextarea = function() {
 				var d = eval('(' + this.textarea.val() + ')');
@@ -63,22 +92,10 @@
 				for (var i in d) {
 					if (i.substr(0, 7) == 'module:') {
 						var id = i.substr(7);
+						var module = d[i]['.module'];
 						var connections = d[i];
 
-						var m = $('<div class="module_editor_widget__module"></div>').css({
-								'width': 'auto',
-								'float': 'left',
-								'border': '1px solid grey',
-								'margin': '1ex'
-							});
-						var t = $('<table width="100%"></table>');
-						t.append($('<tr></tr>').append($('<th colspan="3" style="text-align:center;"></th>').text(id)));
-						t.append($('<tr></tr>')
-								.append($('<td width="45%" style="text-align:left;"></td>').text('input'))
-								.append($('<td width="10%"></td>'))
-								.append($('<td width="45%" style="text-align:right;"></td>').text('output'))
-								);
-						m.append(t);
+						var m = this.createMoulde(id, module, connections);
 						this.append(m);
 					}
 				}
