@@ -35,7 +35,9 @@ function TPL_html5__module_editor__test($t, $id, $d, $so)
 
 	echo "<form class=\"module_editor\" id=\"", htmlspecialchars($id), "\">\n";
 
-	echo "\t<textarea class=\"module_editor_widget\" rows=\"30\">", htmlspecialchars(json_encode($d['cfg'])), "</textarea>\n";
+	echo "\t<textarea class=\"module_editor_widget\" rows=\"30\" ",
+			"data-doc_link=\"", htmlspecialchars($doc_link), "\">",
+		htmlspecialchars(json_encode($cfg)), "</textarea>\n";
 
 	echo "</form>\n";
 

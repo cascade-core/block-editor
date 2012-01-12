@@ -63,7 +63,11 @@
 				m.append($('<table width="100%"></table>')
 					.append($('<tr></tr>').append($('<th colspan="2"></th>')
 						.append($('<div class="module_editor_widget__module_id"></div>').text(id))
-						.append($('<div class="module_editor_widget__module_name"></div>').text(module))))
+						.append($('<div class="module_editor_widget__module_name"></div>')
+							.append($('<a></a>').text(module)
+								.attr('href', this.textarea.attr('data-doc_link') + module)
+								.attr('target', '_blank')
+							))))
 					.append($('<tr></tr>').append(inputs).append(outputs))
 				);
 				// m.append($('<a href="#" class="module_editor_widget__add_input">add input</a>'));

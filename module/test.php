@@ -32,6 +32,7 @@ class M_module_editor__test extends Module {
 
 	protected $inputs = array(
 		'file' => FILE_APP_CONFIG,
+		'doc_link' => '/doc/',
 		'slot' => 'default',
 		'slot-weight' => 50,
 	);
@@ -58,6 +59,7 @@ class M_module_editor__test extends Module {
 		$this->template_add(null, 'module_editor/test', array(
 				'file' => $file,
 				'cfg' => $cfg,
+				'doc_link' => $this->in('doc_link'),
 			));
 
 		$this->out('file', $file);
