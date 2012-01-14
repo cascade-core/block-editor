@@ -97,16 +97,13 @@
 				}
 				return;
 			}
-			textarea.hide();
 
 			// Create widget
 			var widget = $('<div class="module_editor_widget widget"></div>');
-			widget.css({
-				height:		textarea.css('height'),
-				width:		textarea.css('width')
-			});
+			widget.css('height', textarea.css('height'));
 			widget.disableSelection();
 			widget.insertBefore(textarea);
+			textarea.css('display', 'none !important');
 
 			var canvas = $('<div class="module_editor_widget__canvas"></div>');
 			widget.append(canvas);
@@ -117,6 +114,14 @@
 			var palette_modules = $('<div class="module_editor_widget__palette_modules"></div>');
 			palette_holder.append(palette_toolbar).append(palette_modules);
 			widget.append(palette_holder);
+
+			// Maximize button
+			palette_toolbar.append($('<a href="#" class="module_editor_widget__maximize" title="Maximize">&uarr;</a>').click(function() {
+				var w = $(this).parents('.module_editor_widget');
+				w.toggleClass('module_editor_widget__maximized');
+				$(this).html(w.hasClass('module_editor_widget__maximized') ? '&darr;' : '&uarr;')
+				return false;
+			}));
 
 			// Load available modules
 			var select = $('<select></select>');
@@ -135,13 +140,13 @@
 			};
 			select.change(on_filter).keyup(on_filter);
 			palette_toolbar.append($('<div>Filter: </div>').append(select));
-			var modules = eval('(' + textarea.attr('data-available_modules') + ')');
-			console.log(modules);
+			var available_modules = eval('(' + textarea.attr('data-available_modules') + ')');
 			var last_class = null;
-			for (var module in modules) {
+			for (var module in available_modules) {
 				var m = $('<div class="module_editor_widget__palette_item"></div>')
 					.text(module);
-				palette_modules.append(createModule(module.replace(/.*\//, ''), module, modules[module].inputs, modules[module].outputs, doc_link));
+				palette_modules.append(createModule(module.replace(/.*\//, ''), module,
+							available_modules[module].inputs, available_modules[module].outputs, doc_link));
 				var module_class = getModuleClass(module);
 				if (module_class != last_class) {
 					select.append($('<option></option>').attr('value', module_class).text(module.replace(/\/[^\/]*$/, '')));
@@ -162,9 +167,14 @@
 					if (i.substr(0, 7) == 'module:') {
 						var id = i.substr(7);
 						var module = d[i]['.module'];
-						var inputs = d[i];
+						var inputs = available_modules[module].inputs;
+						var outputs = available_modules[module].outputs;
 
-						var m = createModule(id, module, inputs, { '*': true }, doc_link);
+						for (var input in d[i]) {
+							inputs[input] = d[i][input];
+						}
+
+						var m = createModule(id, module, inputs, outputs, doc_link);
 						canvas.append(m);
 					}
 				}

@@ -39,6 +39,21 @@
 	border: 1px solid #aaa;
 	overflow: hidden;
 }
+	.module_editor_widget.module_editor_widget__maximized {
+		position: fixed !important;
+		top: 6% !important;
+		left: 1% !important;
+		bottom: 3% !important;
+		right: 1% !important;
+		width: auto !important;
+		height: auto !important;
+		z-index: 1000000 !important;
+		border: 1px solid #000 !important;
+		-moz-box-shadow: 0px 0px 30px #000 !important;
+		-webkit-box-shadow: 0px 0px 30px #000 !important;
+		box-shadow: 0px 0px 30 #000 !important;
+
+	}
 
 	.module_editor_widget__canvas,
 	.module_editor_widget__palette {
@@ -48,6 +63,21 @@
 		height: auto;
 		width: auto;
 		overflow: auto;
+	}
+
+	.module_editor_widget__maximize {
+		position: absolute;
+		top: 0px;
+		right: 0px;
+		bottom: 0px;
+		text-align: center;
+		width: auto;
+		height: auto;
+		padding: 0.4em;
+		text-decoration: none !important;
+		border-left: 1px solid #aaa;
+		background: #fff;
+		overflow: hidden;
 	}
 
 	.module_editor_widget__module {
