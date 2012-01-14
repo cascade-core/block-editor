@@ -88,28 +88,28 @@
 	
 	$.fn.moduleEditorWidget = function() {
 		this.each(function() {
-			var $this = $(this);
-			var doc_link = $this.attr('data-doc_link');
+			var textarea = $(this);
+			var doc_link = textarea.attr('data-doc_link');
 
-			if (!$this.hasClass('module_editor_widget') || this.tagName.toLowerCase() != 'textarea') {
+			if (!textarea.hasClass('module_editor_widget') || this.tagName.toLowerCase() != 'textarea') {
 				if (console) {
 					console.error('Cannot convert this element to Module Editor widget. It must be textarea with \'module_editor_widget\' class.');
 				}
 				return;
 			}
+			textarea.hide();
 
 			// Create widget
 			var widget = $('<div class="module_editor_widget widget"></div>');
 			widget.css({
-				height:		$this.css('height'),
-				width:		$this.css('width')
+				height:		textarea.css('height'),
+				width:		textarea.css('width')
 			});
 			widget.disableSelection();
-			widget.insertBefore($this);
+			widget.insertBefore(textarea);
 
-			var textarea = $this;
-			widget.canvas = $('<div class="module_editor_widget__canvas"></div>');
-			widget.append(widget.canvas);
+			var canvas = $('<div class="module_editor_widget__canvas"></div>');
+			widget.append(canvas);
 			
 			// Create palette
 			var palette_holder = $('<div class="module_editor_widget__palette"></div>');
@@ -121,12 +121,19 @@
 			// Load available modules
 			var select = $('<select></select>');
 			select.append($('<option></option>').attr('value', '').text('*'));
-			select.change(function() {
+			select.blur(function() {
+				palette_holder.removeClass('active');
+			});
+			select.focus(function() {
+				palette_holder.addClass('active');
+			});
+			var on_filter = function() {
 				var c = $(this).val();
 				palette_modules.children().each(function() {
 					$(this).css('display', c == '' || $(this).hasClass(c) ? 'block' : 'none');
 				});
-			});
+			};
+			select.change(on_filter).keyup(on_filter);
 			palette_toolbar.append($('<div>Filter: </div>').append(select));
 			var modules = eval('(' + textarea.attr('data-available_modules') + ')');
 			console.log(modules);
@@ -158,7 +165,7 @@
 						var inputs = d[i];
 
 						var m = createModule(id, module, inputs, { '*': true }, doc_link);
-						this.canvas.append(m);
+						canvas.append(m);
 					}
 				}
 			};

@@ -53,7 +53,7 @@
 	.module_editor_widget__module {
 		float: left;
 		width: auto;
-		margin: 1em;
+		margin: 2em;
 		font-size: 0.8em;
 		pointer: normal;
 	}
@@ -121,7 +121,8 @@
 		text-align: center;
 		overflow: hidden;
 	}
-		.module_editor_widget__palette:hover {
+		.module_editor_widget__palette:hover,
+		.module_editor_widget__palette.active {
 			width: 30%;
 		}
 
