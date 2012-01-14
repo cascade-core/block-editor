@@ -54,17 +54,56 @@ class M_module_editor__test extends Module {
 			return;
 		}
 
+		$available_modules = $this->get_available_modules();
+
 		$this->template_add_to_slot('head', 'html_head', 60, 'module_editor/html_head', array());
 
 		$this->template_add(null, 'module_editor/test', array(
 				'file' => $file,
 				'cfg' => $cfg,
 				'doc_link' => $this->in('doc_link'),
+				'available_modules' => $available_modules,
 			));
 
 		$this->out('file', $file);
 		$this->out('done', true);
+	}
 
+
+	private function get_available_modules()
+	{
+		$modules = M_core__devel__doc__index::get_modules();
+
+		$available_modules = array();
+
+		foreach ($modules as $plugin => $plugin_modules) {
+			foreach ($plugin_modules as $module) {
+				$class = get_module_class_name($module);
+				if ($class !== false) {
+					$m = new $class();
+					$available_modules[$module] = $m->describe_module();
+					$available_modules[$module]['plugin'] = $plugin;
+					unset($m);
+				} else {
+					$available_modules[$module] = array(
+						'module' => $module,
+						'plugin' => $plugin,
+						'force_exec' => TRUE,
+						'inputs' => array('*' => null),
+						'outputs' => array('*' => null),
+					);
+				}
+			}
+		}
+
+		ksort($available_modules);
+
+		/*
+		NDebug::barDump($available_modules, 'Available modules');
+		NDebug::barDump($modules, 'Module list');
+		// */
+
+		return $available_modules;
 	}
 }
 
