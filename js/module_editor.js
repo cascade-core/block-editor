@@ -46,10 +46,10 @@
 		this.widget = $('<div class="module_editor_widget__module"></div>');
 		this.widget.addClass(getModuleClass(module));
 
-		this.inputs_holder = $('<td width="50%" class="module_editor_widget__in"></td>');
-		this.outputs_holder = $('<td width="50%" class="module_editor_widget__out"></td>');
+		this.inputs_holder = $('<td class="module_editor_widget__in"></td>');
+		this.outputs_holder = $('<td class="module_editor_widget__out"></td>');
 
-		this.widget.append($('<table width="100%"></table>')
+		this.widget.append($('<table></table>')
 			.append($('<tr></tr>').append($('<th colspan="2"></th>')
 				.append($('<div class="module_editor_widget__module_id"></div>').text(id))
 				.append($('<div class="module_editor_widget__module_name"></div>')
@@ -108,23 +108,31 @@
 			}
 		};
 
+		this.positionOnCanvas = function(element)
+		{
+			var s = element.position();
+			element.parentsUntil('.module_editor_widget__canvas').each(function() {
+				$this = $(this);
+				if ($this.css('position') == 'absolute') {
+					var p = $this.position();
+					s.left += p.left;
+					s.top += p.top;
+				}
+			});
+			return s;
+		}
+
 		// Create or update all connections
 		this.connect = function(modules, raph) {
 			for (var i in this.inputs) {
 				var target = [this.id, i];
 				var source = this.inputs[i] && typeof(this.inputs[i]) == 'object' ? this.inputs[i][0].split(':') : null;
+				var line_path;
+				var arrow_path;
 
-				if (i in this.connections) {
-					if (source) {
-						// update
-					} else {
-						// remove
-					}
-				} else if (source) {
-					// create
-					console.log('Connection:', source, '->', target);
+				if (source) {
+					// update or create ... we need path anyway
 
-					var c = this.widget.parents('.module_editor_widget__canvas').offset();
 					// source
 					var s_div = modules[source[0]].output_divs[source[1]];
 					if (!s_div) {
@@ -135,25 +143,66 @@
 							continue;
 						}
 					}
-					var s = s_div.offset();
-					var sh = s_div.height();
-					var srcX = s.left - c.left + s_div.outerWidth();
-					var srcY = s.top - c.top + Math.round(sh / 2);
+					var s = this.positionOnCanvas(s_div);
+					var sh = Math.round(s_div.height() / 2);
+					var srcX = s.left + s_div.outerWidth();
+					var srcY = s.top + sh;
 
 					// destination
 					var d_div = this.input_divs[i];
 					if (!d_div) {
 						continue;
 					}
-					var d = d_div.offset();
-					var dh = d_div.height();
-					var dstX = d.left - c.left;
-					var dstY = d.top - c.top + Math.round(dh / 2);
-					
-					console.log(d, c);
-					raph.connectionLine(srcX, srcY, dstX, dstY, dh);
-					raph.arrowRight(dstX, dstY, 0.9 * dh);
+					var d = this.positionOnCanvas(d_div);
+					var dh = Math.round(d_div.height() / 2);
+					var dstX = d.left;
+					var dstY = d.top + dh;
+
+					// line path
+					var c = Math.abs(srcX - dstX) / 2;
+					line_path = [
+						'M', srcX, srcY,
+						'C', (srcX + c), srcY,  (dstX - c), dstY,  (dstX - dh), dstY,
+						'L', dstX + ' ' + dstY
+					].join(',')
+
+					// arrow path
+					arrow_path = [
+						'M', dstX, dstY,
+						'L', (dstX - dh), (dstY - (dh - 1)),
+						'L', (dstX - 0.7 * dh), dstY,
+						'L', (dstX - dh), (dstY + (dh - 1)),
+						'Z'
+					].join(',');
 				}
+
+				if (i in this.connections) {
+					if (source) {
+						// update
+						this.connections[i].line.attr('path', line_path);
+						this.connections[i].arrow.attr('path', arrow_path);
+					} else {
+						// remove
+						this.connections[i].line.remove();
+						this.connections[i].arrow.remove();
+						delete this.connections[i];
+					}
+				} else if (source) {
+					// create
+					//console.log('Connection:', source, '->', target);
+
+					this.connections[i] = {
+						arrow: raph.path(arrow_path).attr({
+							'stroke': '#000',
+							'fill': '#000'
+						}),
+						line: raph.path(line_path).attr({
+							'stroke': '#000',
+							'stroke-width': 1.4
+						})
+					};
+				}
+				raph.safari();
 			}
 		};
 	}
@@ -188,29 +237,13 @@
 			var canvas = $('<div class="module_editor_widget__canvas"></div>');
 			widget.append(canvas);
 
-			Raphael.fn.arrowRight = function(x, y, h) {
-				var w = h;
-				var h2 = Math.floor(h / 2);
-				return this.path(
-						'M' + x + ' ' + y
-						+ 'L' + (x - w) + ' ' + (y - h2)
-						+ 'L' + (x - 0.7 * w) + ' ' + (y)
-						+ 'L' + (x - w) + ' ' + (y + h2)
-						+ 'Z'
-					).attr('stroke', '#000').attr('fill', '#000');
-			};
-			Raphael.fn.connectionLine = function(srcX, srcY, dstX, dstY, d) {
-				var c = Math.round(0.5 * Math.abs(srcX - dstX) + d);
-				return this.path(
-						'M' + srcX + ' ' + srcY
-						+ 'C' + (srcX + c) + ' ' + srcY
-						+ ' ' + (dstX - c) + ' ' + dstY
-						+ ' ' + (dstX - d) + ' ' + dstY
-						+ 'L' + dstX + ' ' + dstY
-					).attr('stroke', '#000').attr('stroke-width', 1.4);
-			};
-			var canvas_raphael = Raphael(canvas[0], 2000, 2000);	// fixme
-			
+			var canvas_inner = $('<div class="module_editor_widget__canvas_inner"></div>').css({
+					position: 'relative'
+				});
+			canvas.append(canvas_inner);
+			var canvas_raphael = Raphael(canvas_inner[0], 3000, 3000);	// fixme
+			canvas.scrollTo(1000 - 50, 1000 - 50);
+
 			// Create palette
 			var palette_holder = $('<div class="module_editor_widget__palette"></div>');
 			var palette_toolbar = $('<div class="module_editor_widget__palette_toolbar"></div>');
@@ -281,10 +314,22 @@
 						m.addInputs(d[i]);
 
 						modules[id] = m;
-						m.widget.css('top', 50 + Math.round(p / 3) * 200);
-						m.widget.css('left', 50 + (p % 3) * 300);
+						m.widget.css('top', 1000 + Math.round(p / 4) * 200);
+						m.widget.css('left', 1000 + (p % 4) * 300);
 						p++;
-						canvas.append(m.widget);
+						canvas_inner.append(m.widget);
+						m.widget.draggable({
+							drag: function() {
+								for (var i in modules) {
+									modules[i].connect(modules, canvas_raphael);
+								}
+							},
+							stop: function() {
+								for (var i in modules) {
+									modules[i].connect(modules, canvas_raphael);
+								}
+							}
+						});
 					}
 				}
 
@@ -292,7 +337,13 @@
 					modules[i].connect(modules, canvas_raphael);
 				}
 
-				console.log('Modules:', modules);
+				$(window).load(function() {
+					for (var i in modules) {
+						modules[i].connect(modules, canvas_raphael);
+					}
+				});
+
+				//console.log('Modules:', modules);
 			};
 
 			widget.updateFromTextarea();

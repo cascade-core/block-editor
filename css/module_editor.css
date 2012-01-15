@@ -65,21 +65,6 @@
 		overflow: auto;
 	}
 
-	.module_editor_widget__maximize {
-		position: absolute;
-		top: 0px;
-		right: 0px;
-		bottom: 0px;
-		text-align: center;
-		width: auto;
-		height: auto;
-		padding: 0.4em;
-		text-decoration: none !important;
-		border-left: 1px solid #aaa;
-		background: #fff;
-		overflow: hidden;
-	}
-
 	.module_editor_widget__module {
 		width: auto;
 		margin: 2em;
@@ -101,6 +86,7 @@
 		border-collapse: collapse;
 		border: 1px solid #000;
 		background: #fff;
+		background: rgba(255, 255, 255, 0.7);
 	}
 
 	.module_editor_widget__module table td,
@@ -116,7 +102,8 @@
 		text-align: center !important;
 		border: 1px solid #000;
 		background: #eee;
-		padding: 3px;
+		background: rgba(238, 238, 238, 0.7);
+		padding: 3px 1em;
 	}
 
 		.module_editor_widget__module table th .module_editor_widget__module_id {
@@ -137,27 +124,33 @@
 
 		.module_editor_widget__module table td.module_editor_widget__in {
 			text-align: left !important;
-			padding-right: 1ex !important;
+			padding-right: 1em !important;
 		}
 
 		.module_editor_widget__module table td.module_editor_widget__out {
 			text-align: right !important;
-			padding-left: 1ex !important;
+			padding-left: 1em !important;
 		}
 
 	.module_editor_widget__canvas {
-		left: 0px;
-		right: 65px;
+		left: 60px;
+		right: 0px;
 	}
+
+		.module_editor_widget__canvas .module_editor_widget__canvas_inner {
+			position: relative;
+			padding: 0px;
+			margin: 0px;
+		}
 
 		.module_editor_widget__canvas .module_editor_widget__module {
 			position: absolute;
 		}
 
 	.module_editor_widget__palette {
-		right: 0px;
-		width: 64px;
-		border-left: 1px solid #aaa;
+		left: 0px;
+		width: 59px;
+		border-right: 1px solid #aaa;
 		background: #fff;
 		text-align: center;
 		overflow: hidden;
@@ -165,7 +158,7 @@
 	}
 		.module_editor_widget__palette:hover,
 		.module_editor_widget__palette.active {
-			width: 30%;
+			width: 20em;
 		}
 
 		.module_editor_widget__palette .module_editor_widget__module {
@@ -188,8 +181,23 @@
 			text-align: left;
 		}
 			.module_editor_widget__palette_toolbar div {
-				padding: 0.1em 1em;
+				padding: 0.1em 1em 0.1em 3em;
 			}
+
+		.module_editor_widget__maximize {
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			bottom: 0px;
+			text-align: center;
+			width: 2em;
+			height: auto;
+			padding: 0.4em 0em;
+			text-decoration: none !important;
+			border-right: 1px solid #aaa;
+			background: #fff;
+			overflow: hidden;
+		}
 
 		.module_editor_widget__palette_modules {
 			position: absolute;
