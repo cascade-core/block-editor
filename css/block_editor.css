@@ -1,5 +1,5 @@
 /*
- * Module Editor Widget
+ * Block Editor Widget
  *
  * Copyright (c) 2011, Josef Kufner  <jk@frozen-doe.net>
  * All rights reserved.
@@ -29,7 +29,7 @@
  * SUCH DAMAGE.
  */
 
-.module_editor_widget {
+.block_editor_widget {
 	display: block !important;
 	position: relative !important;
 	padding: 0px !important;
@@ -39,7 +39,7 @@
 	border: 1px solid #aaa;
 	overflow: hidden;
 }
-	.module_editor_widget.module_editor_widget__maximized {
+	.block_editor_widget.block_editor_widget__maximized {
 		position: fixed !important;
 		top: 6% !important;
 		left: 1% !important;
@@ -55,8 +55,8 @@
 
 	}
 
-	.module_editor_widget__canvas,
-	.module_editor_widget__palette {
+	.block_editor_widget__canvas,
+	.block_editor_widget__palette {
 		position: absolute;
 		top: 0px;
 		bottom: 0px;
@@ -65,7 +65,7 @@
 		overflow: auto;
 	}
 
-	.module_editor_widget__module {
+	.block_editor_widget__block {
 		width: auto;
 		margin: 2em;
 		font-size: 0.8em;
@@ -73,31 +73,31 @@
 		z-index: 10;
 	}
 
-	.module_editor_widget__module,
-	.module_editor_widget__module td,
-	.module_editor_widget__module th,
-	.module_editor_widget__module div {
+	.block_editor_widget__block,
+	.block_editor_widget__block td,
+	.block_editor_widget__block th,
+	.block_editor_widget__block div {
 		cursor: default;
 		padding: 0px;
 		margin: 0px;
 	}
 
-	.module_editor_widget__module table {
+	.block_editor_widget__block table {
 		border-collapse: collapse;
 		border: 1px solid #000;
 		background: #fff;
 		background: rgba(255, 255, 255, 0.7);
 	}
 
-	.module_editor_widget__module table td,
-	.module_editor_widget__module table th {
+	.block_editor_widget__block table td,
+	.block_editor_widget__block table th {
 		color: #000;
 		font-size: 0.8em;
 		white-space: nowrap;
 		vertical-align: top;
 	}
 
-	.module_editor_widget__module table th {
+	.block_editor_widget__block table th {
 		font-weight: normal;
 		text-align: center !important;
 		border: 1px solid #000;
@@ -106,48 +106,48 @@
 		padding: 3px 1em;
 	}
 
-		.module_editor_widget__module table th .module_editor_widget__module_id {
+		.block_editor_widget__block table th .block_editor_widget__block_id {
 			font-weight: bold;
 		}
 
-		.module_editor_widget__module table th .module_editor_widget__module_name {
+		.block_editor_widget__block table th .block_editor_widget__block_name {
 			font-style: italic;
 			font-size: 90%;
 		}
 
-	.module_editor_widget__module table td {
+	.block_editor_widget__block table td {
 		padding: 2px 0px;
 	}
-		.module_editor_widget__module table td div {
+		.block_editor_widget__block table td div {
 			padding: 0px 3px;
 		}
 
-		.module_editor_widget__module table td.module_editor_widget__in {
+		.block_editor_widget__block table td.block_editor_widget__in {
 			text-align: left !important;
 			padding-right: 1em !important;
 		}
 
-		.module_editor_widget__module table td.module_editor_widget__out {
+		.block_editor_widget__block table td.block_editor_widget__out {
 			text-align: right !important;
 			padding-left: 1em !important;
 		}
 
-	.module_editor_widget__canvas {
+	.block_editor_widget__canvas {
 		left: 60px;
 		right: 0px;
 	}
 
-		.module_editor_widget__canvas .module_editor_widget__canvas_inner {
+		.block_editor_widget__canvas .block_editor_widget__canvas_inner {
 			position: relative;
 			padding: 0px;
 			margin: 0px;
 		}
 
-		.module_editor_widget__canvas .module_editor_widget__module {
+		.block_editor_widget__canvas .block_editor_widget__block {
 			position: absolute;
 		}
 
-	.module_editor_widget__palette {
+	.block_editor_widget__palette {
 		left: 0px;
 		width: 59px;
 		border-right: 1px solid #aaa;
@@ -156,22 +156,22 @@
 		overflow: hidden;
 		z-index: 20;
 	}
-		.module_editor_widget__palette:hover,
-		.module_editor_widget__palette.active {
+		.block_editor_widget__palette:hover,
+		.block_editor_widget__palette.active {
 			width: 20em;
 		}
 
-		.module_editor_widget__palette .module_editor_widget__module {
+		.block_editor_widget__palette .block_editor_widget__block {
 			float: none;
 			margin: 2em 1em;
 		}
 
-		.module_editor_widget__palette .module_editor_widget__module table {
+		.block_editor_widget__palette .block_editor_widget__block table {
 			width: auto;
 			margin: 1em auto;
 		}
 
-		.module_editor_widget__palette_toolbar {
+		.block_editor_widget__palette_toolbar {
 			position: absolute;
 			top: 0px;
 			left: 0px;
@@ -180,11 +180,11 @@
 			white-space: nowrap;
 			text-align: left;
 		}
-			.module_editor_widget__palette_toolbar div {
+			.block_editor_widget__palette_toolbar div {
 				padding: 0.1em 1em 0.1em 3em;
 			}
 
-		.module_editor_widget__maximize {
+		.block_editor_widget__maximize {
 			position: absolute;
 			top: 0px;
 			left: 0px;
@@ -199,7 +199,7 @@
 			overflow: hidden;
 		}
 
-		.module_editor_widget__palette_modules {
+		.block_editor_widget__palette_blocks {
 			position: absolute;
 			top: 2em;
 			left: 0px;

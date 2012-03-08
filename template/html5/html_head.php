@@ -29,12 +29,13 @@
  */
 
 
-function TPL_html5__module_editor__html_head($t, $id, $d, $so)
+function TPL_html5__block_editor__html_head($t, $id, $d, $so)
 {
-	echo "\t<!-- Module Editor plugin -->\n",
-		"\t<link rel=\"stylesheet\" href=\"/plugin/module_editor/css/module_editor.css\" type=\"text/css\">\n",
-		"\t<script type=\"text/javascript\" src=\"/plugin/module_editor/js/raphael-min.js\"></script>\n",
-		"\t<script type=\"text/javascript\" src=\"/plugin/module_editor/js/module_editor.js\"></script>\n",
+	echo "\t<!-- Block Editor plugin -->\n",
+		"\t<link rel=\"stylesheet\" href=\"/plugin/block_editor/css/block_editor.css\" type=\"text/css\">\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/jquery.pack.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/raphael-min.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/block_editor.js\"></script>\n",
 		"\n";
 }
 

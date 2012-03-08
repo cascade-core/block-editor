@@ -28,13 +28,13 @@
  * SUCH DAMAGE.
  */
 
-class M_module_editor__test extends Module {
+class B_block_editor__test extends Block {
 
 	protected $inputs = array(
-		'file' => FILE_APP_CONFIG,
-		'doc_link' => '/doc/',
+		'file' => FILE_CORE_CONFIG,
+		'doc_link' => DEBUG_CASCADE_GRAPH_LINK,
 		'slot' => 'default',
-		'slot-weight' => 50,
+		'slot_weight' => 50,
 	);
 
 	protected $outputs = array(
@@ -54,15 +54,15 @@ class M_module_editor__test extends Module {
 			return;
 		}
 
-		$available_modules = $this->get_available_modules();
+		$available_blocks = $this->get_available_blocks();
 
-		$this->template_add_to_slot('head', 'html_head', 60, 'module_editor/html_head', array());
+		$this->template_add_to_slot('head', 'html_head', 60, 'block_editor/html_head', array());
 
-		$this->template_add(null, 'module_editor/test', array(
+		$this->template_add(null, 'block_editor/test', array(
 				'file' => $file,
 				'cfg' => $cfg,
 				'doc_link' => $this->in('doc_link'),
-				'available_modules' => $available_modules,
+				'available_blocks' => $available_blocks,
 			));
 
 		$this->out('file', $file);
@@ -70,23 +70,23 @@ class M_module_editor__test extends Module {
 	}
 
 
-	private function get_available_modules()
+	private function get_available_blocks()
 	{
-		$modules = M_core__devel__doc__index::get_modules();
+		$blocks = B_core__devel__doc__index::get_blocks();
 
-		$available_modules = array();
+		$available_blocks = array();
 
-		foreach ($modules as $plugin => $plugin_modules) {
-			foreach ($plugin_modules as $module) {
-				$class = get_module_class_name($module);
+		foreach ($blocks as $plugin => $plugin_blocks) {
+			foreach ($plugin_blocks as $block) {
+				$class = get_block_class_name($block);
 				if ($class !== false) {
 					$m = new $class();
-					$available_modules[$module] = $m->describe_module();
-					$available_modules[$module]['plugin'] = $plugin;
+					$available_blocks[$block] = $m->describe_block();
+					$available_blocks[$block]['plugin'] = $plugin;
 					unset($m);
 				} else {
-					$available_modules[$module] = array(
-						'module' => $module,
+					$available_blocks[$block] = array(
+						'block' => $block,
 						'plugin' => $plugin,
 						'force_exec' => TRUE,
 						'inputs' => array('*' => null),
@@ -96,14 +96,14 @@ class M_module_editor__test extends Module {
 			}
 		}
 
-		ksort($available_modules);
+		ksort($available_blocks);
 
 		/*
-		NDebug::barDump($available_modules, 'Available modules');
-		NDebug::barDump($modules, 'Module list');
+		NDebug::barDump($available_blocks, 'Available blocks');
+		NDebug::barDump($blocks, 'block list');
 		// */
 
-		return $available_modules;
+		return $available_blocks;
 	}
 }
 

@@ -29,15 +29,15 @@
  */
 
 
-function TPL_html5__module_editor__test($t, $id, $d, $so)
+function TPL_html5__block_editor__test($t, $id, $d, $so)
 {
 	extract($d);
 
-	echo "<form class=\"module_editor\" id=\"", htmlspecialchars($id), "\">\n";
+	echo "<form class=\"block_editor\" id=\"", htmlspecialchars($id), "\">\n";
 
-	echo "\t<textarea class=\"module_editor_widget\" rows=\"25\" ",
+	echo "\t<textarea class=\"block_editor_widget\" rows=\"25\" cols=\"80\" style=\"display: block; width: 99%;\"",
 			"data-doc_link=\"", htmlspecialchars($doc_link), "\" ",
-			"data-available_modules=\"", htmlspecialchars(json_encode($available_modules)), "\">",
+			"data-available_blocks=\"", htmlspecialchars(json_encode($available_blocks)), "\">",
 		htmlspecialchars(json_encode($cfg)), "</textarea>\n";
 
 	echo "</form>\n";

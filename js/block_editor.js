@@ -1,5 +1,5 @@
 /*
- * Module Editor Widget
+ * Block Editor Widget
  *
  * Copyright (c) 2011, Josef Kufner  <jk@frozen-doe.net>
  * All rights reserved.
@@ -32,34 +32,34 @@
 
 (function($) {
 
-	// Module
-	function Module(id, module, doc_link)
+	// Block
+	function Block(id, block, doc_link)
 	{
 		this.id = id;
-		this.module = module;
+		this.block = block;
 		this.inputs = {};
 		this.outputs = {};
 		this.input_divs = {};	// one div for each input
 		this.output_divs = {};	// one div for each output
-		this.connections = {};	// lines from inputs to other modules
+		this.connections = {};	// lines from inputs to other blocks
 
-		this.widget = $('<div class="module_editor_widget__module"></div>');
-		this.widget.addClass(getModuleClass(module));
+		this.widget = $('<div class="block_editor_widget__block"></div>');
+		this.widget.addClass(getBlockClass(block));
 
-		this.inputs_holder = $('<td class="module_editor_widget__in"></td>');
-		this.outputs_holder = $('<td class="module_editor_widget__out"></td>');
+		this.inputs_holder = $('<td class="block_editor_widget__in"></td>');
+		this.outputs_holder = $('<td class="block_editor_widget__out"></td>');
 
 		this.widget.append($('<table></table>')
 			.append($('<tr></tr>').append($('<th colspan="2"></th>')
-				.append($('<div class="module_editor_widget__module_id"></div>').text(id))
-				.append($('<div class="module_editor_widget__module_name"></div>')
-					.append($('<a></a>').text(module)
-						.attr('href', doc_link + module)
+				.append($('<div class="block_editor_widget__block_id"></div>').text(id))
+				.append($('<div class="block_editor_widget__block_name"></div>')
+					.append($('<a></a>').text(block)
+						.attr('href', doc_link + block)
 						.attr('target', '_blank')
 					))))
 			.append($('<tr></tr>').append(this.inputs_holder).append(this.outputs_holder))
 		);
-		// m.append($('<a href="#" class="module_editor_widget__add_input">add input</a>'));
+		// b.append($('<a href="#" class="block_editor_widget__add_input">add input</a>'));
 
 		this.addInput = function(name, value) {
 			this.inputs[name] = value;
@@ -111,7 +111,7 @@
 		this.positionOnCanvas = function(element)
 		{
 			var s = element.position();
-			element.parentsUntil('.module_editor_widget__canvas').each(function() {
+			element.parentsUntil('.block_editor_widget__canvas').each(function() {
 				$this = $(this);
 				if ($this.css('position') == 'absolute') {
 					var p = $this.position();
@@ -123,7 +123,7 @@
 		}
 
 		// Create or update all connections
-		this.connect = function(modules, raph) {
+		this.connect = function(blocks, raph) {
 			for (var i in this.inputs) {
 				var target = [this.id, i];
 				var source = this.inputs[i] && typeof(this.inputs[i]) == 'object' ? this.inputs[i][0].split(':') : null;
@@ -134,11 +134,11 @@
 					// update or create ... we need path anyway
 
 					// source
-					var s_div = modules[source[0]].output_divs[source[1]];
+					var s_div = blocks[source[0]].output_divs[source[1]];
 					if (!s_div) {
-						if ('*' in modules[source[0]].outputs) {
-							modules[source[0]].addOutput(source[1]);
-							s_div = modules[source[0]].output_divs[source[1]];
+						if ('*' in blocks[source[0]].outputs) {
+							blocks[source[0]].addOutput(source[1]);
+							s_div = blocks[source[0]].output_divs[source[1]];
 						} else {
 							continue;
 						}
@@ -207,59 +207,65 @@
 		};
 	}
 
-	// Calculate module prefix from it's name
-	function getModuleClass(module)
+	// Calculate block prefix from it's name
+	function getBlockClass(block)
 	{
-		return 'module_editor_widget__module__' + module.replace(/\/[^\/]*$/, '').replace('/', '__');
+		return 'block_editor_widget__block__' + block.replace(/\/[^\/]*$/, '').replace('/', '__');
 	}
 
 
-	$.fn.moduleEditorWidget = function() {
+	$.fn.blockEditorWidget = function() {
 		this.each(function() {
+			var canvas_width = 3000;
+			var canvas_height = 3000;
+
 			var textarea = $(this);
-			var modules = {};
+			var blocks = {};
 			var doc_link = textarea.attr('data-doc_link');
 
-			if (!textarea.hasClass('module_editor_widget') || this.tagName.toLowerCase() != 'textarea') {
+			if (!textarea.hasClass('block_editor_widget') || this.tagName.toLowerCase() != 'textarea') {
 				if (console) {
-					console.error('Cannot convert this element to Module Editor widget. It must be textarea with \'module_editor_widget\' class.');
+					console.error('Cannot convert this element to Block Editor widget. It must be textarea with \'block_editor_widget\' class.');
 				}
 				return;
 			}
 
 			// Create widget
-			var widget = $('<div class="module_editor_widget widget"></div>');
+			var widget = $('<div class="block_editor_widget widget"></div>');
 			widget.css('height', textarea.css('height'));
 			widget.disableSelection();
 			widget.insertBefore(textarea);
-			textarea.css('display', 'none !important');
+			//textarea.css('display', 'none !important');
 
-			var canvas = $('<div class="module_editor_widget__canvas"></div>');
+			var canvas = $('<div class="block_editor_widget__canvas"></div>');
 			widget.append(canvas);
 
-			var canvas_inner = $('<div class="module_editor_widget__canvas_inner"></div>').css({
-					position: 'relative'
+			var canvas_inner = $('<div class="block_editor_widget__canvas_inner"></div>').css({
+					position: 'relative',
+					width: canvas_width,
+					height: canvas_height
 				});
 			canvas.append(canvas_inner);
-			var canvas_raphael = Raphael(canvas_inner[0], 3000, 3000);	// fixme
-			canvas.scrollTo(1000 - 50, 1000 - 50);
+
+			var canvas_raphael = Raphael(canvas_inner[0], canvas_width, canvas_height);	// fixme
+			canvas.scrollTo(canvas_width / 3 - 50, canvas_height / 3 - 50);
 
 			// Create palette
-			var palette_holder = $('<div class="module_editor_widget__palette"></div>');
-			var palette_toolbar = $('<div class="module_editor_widget__palette_toolbar"></div>');
-			var palette_modules = $('<div class="module_editor_widget__palette_modules"></div>');
-			palette_holder.append(palette_toolbar).append(palette_modules);
+			var palette_holder = $('<div class="block_editor_widget__palette"></div>');
+			var palette_toolbar = $('<div class="block_editor_widget__palette_toolbar"></div>');
+			var palette_blocks = $('<div class="block_editor_widget__palette_blocks"></div>');
+			palette_holder.append(palette_toolbar).append(palette_blocks);
 			widget.append(palette_holder);
 
 			// Maximize button
-			palette_toolbar.append($('<a href="#" class="module_editor_widget__maximize" title="Maximize">&uarr;</a>').click(function() {
-				var w = $(this).parents('.module_editor_widget');
-				w.toggleClass('module_editor_widget__maximized');
-				$(this).html(w.hasClass('module_editor_widget__maximized') ? '&darr;' : '&uarr;')
+			palette_toolbar.append($('<a href="#" class="block_editor_widget__maximize" title="Maximize">&uarr;</a>').click(function() {
+				var w = $(this).parents('.block_editor_widget');
+				w.toggleClass('block_editor_widget__maximized');
+				$(this).html(w.hasClass('block_editor_widget__maximized') ? '&darr;' : '&uarr;')
 				return false;
 			}));
 
-			// Load available modules
+			// Load available blocks
 			var select = $('<select></select>');
 			select.append($('<option></option>').attr('value', '').text('*'));
 			select.blur(function() {
@@ -270,28 +276,28 @@
 			});
 			var on_filter = function() {
 				var c = $(this).val();
-				palette_modules.children().each(function() {
+				palette_blocks.children().each(function() {
 					$(this).css('display', c == '' || $(this).hasClass(c) ? 'block' : 'none');
 				});
 			};
 			select.change(on_filter).keyup(on_filter);
 			palette_toolbar.append($('<div>Filter: </div>').append(select));
-			var available_modules = eval('(' + textarea.attr('data-available_modules') + ')');
+			var available_blocks = eval('(' + textarea.attr('data-available_blocks') + ')');
 			var last_class = null;
-			for (var module in available_modules) {
-				var m = new Module(module.replace(/.*\//, ''), module, doc_link);
-				m.addInputs(available_modules[module].inputs);
-				m.addOutputs(available_modules[module].outputs);
-				palette_modules.append(m.widget);
+			for (var block in available_blocks) {
+				var b = new Block(block.replace(/.*\//, ''), block, doc_link);
+				b.addInputs(available_blocks[block].inputs);
+				b.addOutputs(available_blocks[block].outputs);
+				palette_blocks.append(b.widget);
 
-				var module_class = getModuleClass(module);
-				if (module_class != last_class) {
-					select.append($('<option></option>').attr('value', module_class).text(module.replace(/\/[^\/]*$/, '')));
-					last_class = module_class;
+				var block_class = getBlockClass(block);
+				if (block_class != last_class) {
+					select.append($('<option></option>').attr('value', block_class).text(block.replace(/\/[^\/]*$/, '')));
+					last_class = block_class;
 				}
 			}
 
-			// Add modules to widget using data in textarea
+			// Add blocks to widget using data in textarea
 			widget.updateFromTextarea = function() {
 				var d = eval('(' + textarea.val() + ')');
 				var geometry = {};
@@ -301,49 +307,50 @@
 				}
 
 				p = 0;
+				var block_re = /^block:/;
 				for (var i in d) {
-					if (i.substr(0, 7) == 'module:') {
-						var id = i.substr(7);
-						var module = d[i]['.module'];
-						var inputs = available_modules[module].inputs;
-						var outputs = available_modules[module].outputs;
+					if (block_re.test(i)) {
+						var id = i.replace(block_re, '');
+						var block = d[i]['.block'];
+						var inputs = available_blocks[block].inputs;
+						var outputs = available_blocks[block].outputs;
 
-						var m = new Module(id, module, doc_link);
-						m.addInputs(available_modules[module].inputs);
-						m.addOutputs(available_modules[module].outputs);
-						m.addInputs(d[i]);
+						var b = new Block(id, block, doc_link);
+						b.addInputs(available_blocks[block].inputs);
+						b.addOutputs(available_blocks[block].outputs);
+						b.addInputs(d[i]);
 
-						modules[id] = m;
-						m.widget.css('top', 1000 + Math.round(p / 4) * 200);
-						m.widget.css('left', 1000 + (p % 4) * 300);
+						blocks[id] = b;
+						b.widget.css('top', canvas_height / 3 + Math.round(p / 4) * 200);
+						b.widget.css('left', canvas_width / 3 + (p % 4) * 300);
 						p++;
-						canvas_inner.append(m.widget);
-						m.widget.draggable({
+						canvas_inner.append(b.widget);
+						b.widget.draggable({
 							drag: function() {
-								for (var i in modules) {
-									modules[i].connect(modules, canvas_raphael);
+								for (var i in blocks) {
+									blocks[i].connect(blocks, canvas_raphael);
 								}
 							},
 							stop: function() {
-								for (var i in modules) {
-									modules[i].connect(modules, canvas_raphael);
+								for (var i in blocks) {
+									blocks[i].connect(blocks, canvas_raphael);
 								}
 							}
 						});
 					}
 				}
 
-				for (var i in modules) {
-					modules[i].connect(modules, canvas_raphael);
+				for (var i in blocks) {
+					blocks[i].connect(blocks, canvas_raphael);
 				}
 
 				$(window).load(function() {
-					for (var i in modules) {
-						modules[i].connect(modules, canvas_raphael);
+					for (var i in blocks) {
+						blocks[i].connect(blocks, canvas_raphael);
 					}
 				});
 
-				//console.log('Modules:', modules);
+				//console.log('Blocks:', blocks);
 			};
 
 			widget.updateFromTextarea();
@@ -352,7 +359,7 @@
 	};
 
 	$(document).ready(function() {
-		$('textarea.module_editor_widget').moduleEditorWidget();
+		$('textarea.block_editor_widget').blockEditorWidget();
 	});
 
 })(jQuery);
