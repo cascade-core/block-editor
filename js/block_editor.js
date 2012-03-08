@@ -183,7 +183,7 @@
 						}
 						var s = this.positionOnCanvas(s_div);
 						var sh = Math.round(s_div.height() / 2);
-						var srcX = s.left + s_div.outerWidth();
+						var srcX = s.left + s_div.outerWidth() + 4;
 						var srcY = s.top + sh;
 
 						// destination
@@ -259,8 +259,9 @@
 		this.each(function() {
 			var canvas_width = 3000;
 			var canvas_height = 3000;
-			var spacing_vert  = 50;
-			var spacing_horiz = 80;
+			var spacing_vert  = 50;		// Vertical spacing between blocks.
+			var spacing_horiz = 80;		// Horizontal spacing between blocks.
+			var pan_speed = 2;		// Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
 
 			var textarea = $(this);
 			var blocks = {};
@@ -280,8 +281,29 @@
 			widget.insertBefore(textarea);
 			textarea.css('display', 'none !important');
 
+			// Create canvas
 			var canvas = $('<div class="block_editor_widget__canvas"></div>');
 			widget.append(canvas);
+
+			$(canvas).mousedown(function(ev) {
+				var $canvas = $(canvas);
+				var startX = (canvas_width  - pan_speed * ev.pageX) - $canvas.scrollLeft();
+				var startY = (canvas_height - pan_speed * ev.pageY) - $canvas.scrollTop();
+
+				if (ev.which == 1 && $(ev.target).parents('.block_editor_widget__block').length == 0) {
+					$(canvas).mousemove(function(ev) {
+						if (ev.which == 0) {
+							$canvas.unbind('mousemove');
+						} else {
+							$canvas.scrollLeft((canvas_width  - pan_speed * ev.pageX) - startX);
+							$canvas.scrollTop ((canvas_height - pan_speed * ev.pageY) - startY);
+						}
+					});
+				}
+			});
+			$(canvas).mouseup(function() {
+				$(canvas).unbind('mousemove');
+			});
 
 			var canvas_inner = $('<div class="block_editor_widget__canvas_inner"></div>').css({
 					position: 'relative',
@@ -344,6 +366,7 @@
 			widget.updateFromTextarea = function() {
 				var d = eval('(' + textarea.val() + ')');
 				var geometry = {};
+				var refreshRequested = false;
 
 				if ('geometry' in d) {
 					geometry = d['geometry'];
@@ -368,9 +391,15 @@
 
 						canvas_inner.append(b.widget);
 						b.widget.draggable({
-							drag: function() {
-								for (var i in blocks) {
-									blocks[i].connect(blocks, canvas_raphael);
+							drag: function(ev) {
+								if (!refreshRequested) {
+									refreshRequested = true;
+									setTimeout(function() {
+										for (var i in blocks) {
+											blocks[i].connect(blocks, canvas_raphael);
+										}
+										refreshRequested = false;
+									}, 20);
 								}
 							},
 							stop: function() {

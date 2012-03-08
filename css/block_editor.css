@@ -82,11 +82,16 @@
 		margin: 0px;
 	}
 
-	.block_editor_widget__block table {
-		border-collapse: collapse;
-		border: 1px solid #000;
+	.block_editor_widget__block {
+		border: 1px solid #fff;  /* to avoid rendering bugs */
 		background: #fff;
 		background: rgba(255, 255, 255, 0.7);
+	}
+
+	.block_editor_widget__block table {
+		position: relative;
+		border-collapse: collapse;
+		border: 1px solid #000;
 	}
 
 	.block_editor_widget__block table td,
