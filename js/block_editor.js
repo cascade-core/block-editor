@@ -37,6 +37,7 @@
 	{
 		this.id = id;
 		this.block = block;
+		this.column = 0;
 		this.inputs = {};
 		this.outputs = {};
 		this.input_divs = {};	// one div for each input
@@ -106,6 +107,24 @@
 					this.addOutput(i, list[i]);
 				}
 			}
+		};
+
+		this.updateColumn = function(serial) {
+			if (serial == this.column_serial) {
+				return this.column;
+			} else {
+				this.column_serial = serial;
+			}
+
+			max_column = 0;
+			for (var ci in this.connections) {
+				var b = this.connections[ci].block;
+				b.updateColumn(serial);
+				if (b.column >= max_column) {
+					max_column = b.column;
+				}
+			}
+			this.column = max_column + 1;
 		};
 
 		this.positionOnCanvas = function(element)
@@ -211,6 +230,7 @@
 						//console.log('Connection:', source, '->', target);
 
 						this.connections[ci] = {
+							block: blocks[source[0]],
 							arrow: raph.path(arrow_path).attr({
 								'stroke': '#000',
 								'fill': '#000'
@@ -224,6 +244,7 @@
 				}
 			}
 			raph.safari();
+			//console.log(this.connections);
 		};
 	}
 
@@ -238,6 +259,8 @@
 		this.each(function() {
 			var canvas_width = 3000;
 			var canvas_height = 3000;
+			var spacing_vert  = 50;
+			var spacing_horiz = 80;
 
 			var textarea = $(this);
 			var blocks = {};
@@ -255,7 +278,7 @@
 			widget.css('height', textarea.css('height'));
 			widget.disableSelection();
 			widget.insertBefore(textarea);
-			//textarea.css('display', 'none !important');
+			textarea.css('display', 'none !important');
 
 			var canvas = $('<div class="block_editor_widget__canvas"></div>');
 			widget.append(canvas);
@@ -326,7 +349,6 @@
 					geometry = d['geometry'];
 				}
 
-				p = 0;
 				var block_re = /^block:/;
 				for (var i in d) {
 					if (block_re.test(i)) {
@@ -341,9 +363,9 @@
 						b.addInputs(d[i]);
 
 						blocks[id] = b;
-						b.widget.css('top', canvas_height / 3 + Math.round(p / 4) * 200);
-						b.widget.css('left', canvas_width / 3 + (p % 4) * 300);
-						p++;
+						b.widget.css('top', canvas_height / 2);
+						b.widget.css('left', canvas_width / 2);
+
 						canvas_inner.append(b.widget);
 						b.widget.draggable({
 							drag: function() {
@@ -360,8 +382,48 @@
 					}
 				}
 
+				// Create connections for the first time
 				for (var i in blocks) {
 					blocks[i].connect(blocks, canvas_raphael);
+				}
+
+				// Place blocks at least somehow reasonable
+				var serial = Math.random();
+				var col_height = [];
+				var col_width = [];
+				for (var i in blocks) {
+					var b = blocks[i];
+					var row = 0;
+
+					b.updateColumn(serial);
+
+					if (!(b.column in col_width) || b.widget.width() > col_width[b.column]) {
+						col_width[b.column] = b.widget.width();
+					}
+
+					if (!(b.column in col_height)) {
+						col_height[b.column] = b.widget.height() + spacing_vert;
+					} else {
+						row = col_height[b.column];
+						col_height[b.column] += b.widget.height() + spacing_vert;
+					}
+
+					b.widget.css('top', canvas_height / 3 + row);
+					b.connect(blocks, canvas_raphael); // update arrows
+				}
+				var col_left = [];
+				for (var i in blocks) {
+					var b = blocks[i];
+					var left = 0;
+					if (!(b.column in col_left)) {
+						for (var c = b.column - 1; c in col_width; c--) {
+							left += col_width[c] + spacing_horiz;
+						}
+						col_left[b.column] = left;
+					} else {
+						left = col_left[b.column];
+					}
+					b.widget.css('left', canvas_width / 3 + left);
 				}
 
 				$(window).load(function() {
