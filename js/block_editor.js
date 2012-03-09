@@ -342,7 +342,8 @@
 					//console.log(this.connections);
 				};
 
-				this.changeId = function() {
+				// When title is dblclicked
+				this.onChangeId = function() {
 					var new_id = prompt(_('New block ID:'), this.id);
 					if (new_id == null) {
 						return;
@@ -357,26 +358,51 @@
 						this.widget.find('.block_editor_widget__block_id').text(this.id);
 						this.onChange();
 					}
+					return false;
 				}.bind(this);
 
+				// when remove button is clicked
+				this.onRemoveBlock = function () {
+					if (confirm(_('Do you wish to remove block "' + this.id + '"? There is no undo button.'))) {
+						for (var i in this.connections) {
+							this.connections[i].line.remove();
+							this.connections[i].arrow.remove();
+							delete this.connections[i];
+						}
+						this.widget.remove();
+						delete blocks[this.id];
+						this.onChange();
+						delete this;
+					}
+					return false;
+				}.bind(this);
 
-				this.widget = $('<div class="block_editor_widget__block"></div>');
-				this.widget.addClass(getBlockClass(block));
+				// Create DOM widget
+				this.createWidget = function() {
+					if (this.widget) {
+						this.widget.remove();
+					}
 
-				this.inputs_holder = $('<td class="block_editor_widget__in"></td>');
-				this.outputs_holder = $('<td class="block_editor_widget__out"></td>');
+					this.widget = $('<div class="block_editor_widget__block"></div>');
+					this.widget.addClass(getBlockClass(block));
 
-				this.widget.append($('<table></table>')
-					.append($('<tr></tr>').append($('<th colspan="2"></th>')
-						.append($('<div class="block_editor_widget__block_id"></div>').text(id).dblclick(this.changeId))
-						.append($('<div class="block_editor_widget__block_name"></div>')
-							.append($('<a></a>').text(block)
-								.attr('href', doc_link + block)
-								.attr('target', '_blank')
-							))))
-					.append($('<tr></tr>').append(this.inputs_holder).append(this.outputs_holder))
-				);
+					this.inputs_holder = $('<td class="block_editor_widget__in"></td>');
+					this.outputs_holder = $('<td class="block_editor_widget__out"></td>');
 
+					this.widget.append($('<table></table>')
+						.append($('<tr></tr>').append($('<th colspan="2"></th>')
+							.append($('<a href="#" class="block_editor_widget__block_remove">&times;</a>').click(this.onRemoveBlock))
+							.append($('<div class="block_editor_widget__block_id"></div>').text(id).dblclick(this.onChangeId))
+							.append($('<div class="block_editor_widget__block_name"></div>')
+								.append($('<a></a>').text(block)
+									.attr('href', doc_link.replace('%s', block))
+									.attr('target', '_blank')
+								))))
+						.append($('<tr></tr>').append(this.inputs_holder).append(this.outputs_holder))
+					);
+				}
+
+				this.createWidget();
 			}
 
 			// Calculate block prefix from it's name

@@ -88,6 +88,20 @@ div.block_editor_widget {
 		background: rgba(255, 255, 255, 0.7);
 	}
 
+	.block_editor_widget__block .block_editor_widget__block_remove {
+		position: absolute;
+		top: 2px;
+		right: 2px;
+		text-decoration: none;
+		display: none;
+		color: #000;
+	}
+
+		.block_editor_widget__block:hover .block_editor_widget__block_remove,
+		.block_editor_widget__block .block_editor_widget__block_remove:focus {
+			display: block;
+		}
+
 	.block_editor_widget__block table {
 		position: relative;
 		border-collapse: collapse;
