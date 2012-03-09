@@ -53,24 +53,7 @@
 				this.x = null;
 				this.y = null;
 
-				this.onChange = onChange; // callback when anything changes
-
-				this.widget = $('<div class="block_editor_widget__block"></div>');
-				this.widget.addClass(getBlockClass(block));
-
-				this.inputs_holder = $('<td class="block_editor_widget__in"></td>');
-				this.outputs_holder = $('<td class="block_editor_widget__out"></td>');
-
-				this.widget.append($('<table></table>')
-					.append($('<tr></tr>').append($('<th colspan="2"></th>')
-						.append($('<div class="block_editor_widget__block_id"></div>').text(id))
-						.append($('<div class="block_editor_widget__block_name"></div>')
-							.append($('<a></a>').text(block)
-								.attr('href', doc_link + block)
-								.attr('target', '_blank')
-							))))
-					.append($('<tr></tr>').append(this.inputs_holder).append(this.outputs_holder))
-				);
+				this.onChange = onChange ? onChange : function() {}; // callback when anything changes
 
 				this.addInput = function(name, value) {
 					this.inputs[name] = value;
@@ -274,7 +257,7 @@
 							var line_path;
 							var arrow_path;
 
-							if (!source || source[0] == '') {
+							if (!source || source[0] == '' || !(source[0] in blocks)) {
 								continue;
 							}
 
@@ -358,6 +341,42 @@
 					raph.safari();
 					//console.log(this.connections);
 				};
+
+				this.changeId = function() {
+					var new_id = prompt(_('New block ID:'), this.id);
+					if (new_id == null) {
+						return;
+					} else if (!new_id.match(/^[a-zA-Z][a-zA-Z0-9_]*$/)) {
+						alert(_('Only letters, numbers and underscore are allowed in block ID and the first character must be a letter.'));
+					} else if (new_id in blocks) {
+						alert(_('This block ID is already taken by another block.'));
+					} else {
+						blocks[new_id] = this;
+						delete blocks[this.id];
+						this.id = new_id;
+						this.widget.find('.block_editor_widget__block_id').text(this.id);
+						this.onChange();
+					}
+				}.bind(this);
+
+
+				this.widget = $('<div class="block_editor_widget__block"></div>');
+				this.widget.addClass(getBlockClass(block));
+
+				this.inputs_holder = $('<td class="block_editor_widget__in"></td>');
+				this.outputs_holder = $('<td class="block_editor_widget__out"></td>');
+
+				this.widget.append($('<table></table>')
+					.append($('<tr></tr>').append($('<th colspan="2"></th>')
+						.append($('<div class="block_editor_widget__block_id"></div>').text(id).dblclick(this.changeId))
+						.append($('<div class="block_editor_widget__block_name"></div>')
+							.append($('<a></a>').text(block)
+								.attr('href', doc_link + block)
+								.attr('target', '_blank')
+							))))
+					.append($('<tr></tr>').append(this.inputs_holder).append(this.outputs_holder))
+				);
+
 			}
 
 			// Calculate block prefix from it's name
