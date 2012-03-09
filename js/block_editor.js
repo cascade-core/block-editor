@@ -81,7 +81,7 @@
 					} else {
 						div = $('<a></a>').text(name);
 						div.attr('href', '#');
-						div.click((function (t, name) { return function() { t.editInput(name); return false; };})(this, name));
+						div.click(function() { this.editInput(name); return false; }.bind(this, name));
 						this.input_divs[name] = div;
 						this.inputs_holder.append(div);
 					}
@@ -442,7 +442,7 @@
 					});
 				}
 			});
-			$(canvas).mouseup(function() {
+			$(canvas).mouseup(function(ev) {
 				$(canvas).unbind('mousemove');
 			});
 
@@ -584,6 +584,7 @@
 
 						canvas_inner.append(b.widget);
 						b.widget.draggable({
+							cancel: 'a',
 							drag: function(ev) {
 								if (!refreshRequested) {
 									refreshRequested = true;
