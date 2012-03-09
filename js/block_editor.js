@@ -149,9 +149,9 @@
 
 					type.change(update_desc).keyup(update_desc);
 
-					console.log(this.inputs[name], typeof(this.inputs[name]));
+					//console.log('Get:', name, '=', typeof(this.inputs[name]), this.inputs[name]);
 
-					if (!(name in this.inputs) || this.inputs[name] === null) {
+					if (!(name in this.inputs) || this.inputs[name] === null || this.inputs[name] === undefined) {
 						type.val('default');
 					} else if (typeof(this.inputs[name]) == 'object') {
 						type.val('connection');
@@ -168,9 +168,40 @@
 					update_desc();
 
 					set.click(function() {
+						var v = ta.val();
+						//console.log('Set:', name, '=', type.val(), v);
+						switch(type.val()) {
+							case 'default':
+								this.inputs[name] = undefined;
+								break;
+
+							case 'connection':
+								this.inputs[name] = v.split('\n');
+								break;
+
+							case 'bool':
+								this.inputs[name] = (v == 'true') || parseInt(v) > 0;
+								break;
+
+							case 'int':
+								if (v == 'true') {
+									this.inputs[name] = 1;
+								} else if (v == 'false') {
+									this.inputs[name] = 0;
+								} else {
+									this.inputs[name] = parseInt(v);
+								}
+								break;
+
+							case 'string':
+								this.inputs[name] = ta.val();
+								break;
+						}
+						//console.log('Done:', name, '=', typeof(this.inputs[name]), this.inputs[name]);
+						this.onChange();
 						d.close();
 						return false;
-					});
+					}.bind(this));
 				};
 
 				this.setPosition = function(x, y) {
@@ -219,6 +250,8 @@
 
 				// Create or update all connections
 				this.connect = function(blocks, raph) {
+					var usage = {};
+
 					for (var i in this.inputs) {
 						var target = [this.id, i];
 						var have_input = this.inputs[i] && typeof(this.inputs[i]) == 'object';
@@ -230,6 +263,7 @@
 						console.log('Source:', this.inputs[i]);
 						console.log('Input function:', [input_fn]);
 						// */
+						
 
 						for (var ii = input_fn == null ? 0 : 1; have_input && ii < this.inputs[i].length; ii++) {
 							var source = have_input ? this.inputs[i][ii].split(':') : null;
@@ -240,71 +274,62 @@
 							var line_path;
 							var arrow_path;
 
-							if (source) {
-								// update or create ... we need path anyway
-
-								if (source[0] == '') {
-									continue;
-								}
-
-								// source
-								var s_div = blocks[source[0]].output_divs[source[1]];
-								if (!s_div) {
-									if ('*' in blocks[source[0]].outputs) {
-										blocks[source[0]].addOutput(source[1]);
-										s_div = blocks[source[0]].output_divs[source[1]];
-									} else {
-										continue;
-									}
-								}
-								var s = this.positionOnCanvas(s_div);
-								var sh = Math.round(s_div.height() / 2) + 2;
-								var srcX = s.left + s_div.outerWidth() + 4;
-								var srcY = s.top + sh;
-
-								// destination
-								var d_div = this.input_divs[i];
-								if (!d_div) {
-									continue;
-								}
-								var d = this.positionOnCanvas(d_div);
-								var dh = Math.round(d_div.height() / 2) + 2;
-								var dstX = d.left;
-								var dstY = d.top + dh;
-
-								// line path
-								var c = Math.abs(srcX - dstX) / 2;
-								line_path = [
-									'M', srcX, srcY,
-									'C', (srcX + c), srcY,  (dstX - c), dstY,  (dstX - dh), dstY,
-									'L', dstX + ' ' + dstY
-								].join(',')
-
-								// arrow path
-								arrow_path = [
-									'M', dstX, dstY,
-									'L', (dstX - dh), (dstY - (dh - 3)),
-									'L', (dstX - 0.7 * dh), dstY,
-									'L', (dstX - dh), (dstY + (dh - 3)),
-									'Z'
-								].join(',');
+							if (!source || source[0] == '') {
+								continue;
 							}
 
-							if (ci in this.connections) {
-								if (source) {
-									// update
-									this.connections[ci].line.attr('path', line_path);
-									this.connections[ci].arrow.attr('path', arrow_path);
+							// update or create ... we need path anyway
+
+							// source
+							var s_div = blocks[source[0]].output_divs[source[1]];
+							if (!s_div) {
+								if ('*' in blocks[source[0]].outputs) {
+									blocks[source[0]].addOutput(source[1]);
+									s_div = blocks[source[0]].output_divs[source[1]];
 								} else {
-									// remove
-									this.connections[ci].line.remove();
-									this.connections[ci].arrow.remove();
-									delete this.connections[ci];
+									continue;
 								}
-							} else if (source) {
+							}
+							var s = this.positionOnCanvas(s_div);
+							var sh = Math.round(s_div.height() / 2) + 2;
+							var srcX = s.left + s_div.outerWidth() + 4;
+							var srcY = s.top + sh;
+
+							// destination
+							var d_div = this.input_divs[i];
+							if (!d_div) {
+								continue;
+							}
+							var d = this.positionOnCanvas(d_div);
+							var dh = Math.round(d_div.height() / 2) + 2;
+							var dstX = d.left;
+							var dstY = d.top + dh;
+
+							// line path
+							var c = Math.abs(srcX - dstX) / 2;
+							line_path = [
+								'M', srcX, srcY,
+								'C', (srcX + c), srcY,  (dstX - c), dstY,  (dstX - dh), dstY,
+								'L', dstX + ' ' + dstY
+							].join(',')
+
+							// arrow path
+							arrow_path = [
+								'M', dstX, dstY,
+								'L', (dstX - dh), (dstY - (dh - 3)),
+								'L', (dstX - 0.7 * dh), dstY,
+								'L', (dstX - dh), (dstY + (dh - 3)),
+								'Z'
+							].join(',');
+
+							// Update/create connection
+							if (ci in this.connections) {
+								// update
+								this.connections[ci].line.attr('path', line_path);
+								this.connections[ci].arrow.attr('path', arrow_path);
+							} else {
 								// create
 								//console.log('Connection:', source, '->', target);
-
 								this.connections[ci] = {
 									block: blocks[source[0]],
 									arrow: raph.path(arrow_path).attr({
@@ -317,8 +342,19 @@
 									})
 								};
 							}
+							usage[ci] = true;
 						}
 					}
+
+					// remove unused connections
+					for (var i in this.connections) {
+						if (!(i in usage)) {
+							this.connections[i].line.remove();
+							this.connections[i].arrow.remove();
+							delete this.connections[i];
+						}
+					}
+
 					raph.safari();
 					//console.log(this.connections);
 				};
@@ -533,7 +569,12 @@
 						var inputs = available_blocks[block].inputs;
 						var outputs = available_blocks[block].outputs;
 
-						var b = new Block(id, block, doc_link, function() { textarea.val(widget.serializeBlocks(blocks, d)); });
+						var b = new Block(id, block, doc_link, function() {
+							textarea.val(widget.serializeBlocks(blocks, d));
+							for (var i in blocks) {
+								blocks[i].connect(blocks, canvas_raphael);
+							}
+						});
 						b.addInputs(available_blocks[block].inputs);
 						b.addOutputs(available_blocks[block].outputs);
 						b.addInputs(d[i]);
