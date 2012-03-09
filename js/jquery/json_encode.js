@@ -30,8 +30,10 @@ var json_encode = (JSON && JSON.stringify) ? function(arr) { return JSON.stringi
 		if (!is_list) {
 			str = '"' + json_escape(key) + '":';
 		}
-		if (typeof value == "object") {
-			if (value.toJSON) {
+		if (value == null) {
+			str += 'null';
+		} else if (typeof value == "object") {
+			if (typeof(value.toJSON) == 'function') {
 				str += value.toJSON();
 			} else {
 				str += json_encode(value);
@@ -42,8 +44,6 @@ var json_encode = (JSON && JSON.stringify) ? function(arr) { return JSON.stringi
 			str += 'false';
 		} else if (value === true) {
 			str += 'true';
-		} else if (value === null) {
-			str += 'null';
 		} else {
 			str += '"' + json_escape(value) + '"';
 		}
@@ -54,7 +54,7 @@ var json_encode = (JSON && JSON.stringify) ? function(arr) { return JSON.stringi
 	if (is_list) {
 		return '[' + json + ']';
 	} else {
-		return '{' + json + '}';
+		return '{\n' + json + '\n}';
 	}
 }
 
