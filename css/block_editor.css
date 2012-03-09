@@ -123,7 +123,9 @@ div.block_editor_widget {
 	.block_editor_widget__block table td {
 		padding: 2px 0px;
 	}
+		.block_editor_widget__block table td a,
 		.block_editor_widget__block table td div {
+			display: block;
 			padding: 0px 3px;
 		}
 
@@ -146,6 +148,7 @@ div.block_editor_widget {
 			position: relative;
 			padding: 0px;
 			margin: 0px;
+			background: url(/plugin/block_editor/css/grid.png);
 		}
 
 		.block_editor_widget__canvas .block_editor_widget__block {
@@ -164,6 +167,9 @@ div.block_editor_widget {
 		.block_editor_widget__palette:hover,
 		.block_editor_widget__palette.active {
 			width: 20em;
+			-moz-box-shadow: 0px 0px 7px #000 !important;
+			-webkit-box-shadow: 0px 0px 7px #000 !important;
+			box-shadow: 0px 0px 7px #000 !important;
 		}
 
 		.block_editor_widget__palette .block_editor_widget__block {
@@ -215,3 +221,58 @@ div.block_editor_widget {
 			border-top: 1px solid #aaa;
 		}
 
+	.block_editor_widget__dialog {
+		position: absolute;
+		top: 0px;
+		right: 15%;
+		z-index: 100;
+		margin: 0px;
+		padding: 0px;
+		width: 26em;
+		height: auto;
+		background: #fff;
+		color: #000;
+		text-align: center;
+		border-left: 1px solid #aaa;
+		border-right: 1px solid #aaa;
+		border-bottom: 1px solid #aaa;
+		-moz-box-shadow: 0px 0px 7px #000 !important;
+		-webkit-box-shadow: 0px 0px 7px #000 !important;
+		box-shadow: 0px 0px 7px #000 !important;
+	}
+
+		.block_editor_widget__dialog .block_editor_widget__dialog_title {
+			display: block;
+			width: 100%;
+			padding: 1ex 0em;
+			margin: 0em 0em 1em 0em;
+			border-bottom: 1px dotted #aaa;
+			font-weight: bold;
+			text-align: center;
+		}
+
+		.block_editor_widget__dialog .block_editor_widget__dialog_title a {
+			float: right;
+			display: block;
+			width: 2em;
+			text-decoration: none;
+			text-align: center;
+			color: #888;
+		}
+
+		.block_editor_widget__dialog div,
+		.block_editor_widget__dialog select,
+		.block_editor_widget__dialog textarea {
+			display: block;
+			width: 90%;
+			margin: 1ex auto;
+			text-align: left;
+		}
+
+		.block_editor_widget__dialog div {
+			font-size: 85%;
+		}
+
+		.block_editor_widget__dialog input {
+			margin: 1ex auto;
+		}
