@@ -148,7 +148,7 @@ div.block_editor_widget {
 			position: relative;
 			padding: 0px;
 			margin: 0px;
-			background: url(/plugin/block_editor/css/grid.png);
+			background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABGdBTUEAALGPC/xhBQAAAAZiS0dEAP8A/wD/oL2nkwAAACJJREFUGNNj/P///38GAuD9ewYGJgYiwahCvIDl/XviFAIAa2EHzpnxhQwAAAAASUVORK5CYII=); /* grid.png */
 		}
 
 		.block_editor_widget__canvas .block_editor_widget__block {

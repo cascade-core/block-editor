@@ -258,7 +258,7 @@
 									}
 								}
 								var s = this.positionOnCanvas(s_div);
-								var sh = Math.round(s_div.height() / 2);
+								var sh = Math.round(s_div.height() / 2) + 2;
 								var srcX = s.left + s_div.outerWidth() + 4;
 								var srcY = s.top + sh;
 
@@ -268,7 +268,7 @@
 									continue;
 								}
 								var d = this.positionOnCanvas(d_div);
-								var dh = Math.round(d_div.height() / 2);
+								var dh = Math.round(d_div.height() / 2) + 2;
 								var dstX = d.left;
 								var dstY = d.top + dh;
 
@@ -283,9 +283,9 @@
 								// arrow path
 								arrow_path = [
 									'M', dstX, dstY,
-									'L', (dstX - dh), (dstY - (dh - 1)),
+									'L', (dstX - dh), (dstY - (dh - 3)),
 									'L', (dstX - 0.7 * dh), dstY,
-									'L', (dstX - dh), (dstY + (dh - 1)),
+									'L', (dstX - dh), (dstY + (dh - 3)),
 									'Z'
 								].join(',');
 							}
