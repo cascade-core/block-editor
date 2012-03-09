@@ -33,7 +33,7 @@
 (function($) {
 
 	// Block
-	function Block(id, block, doc_link)
+	function Block(id, block, doc_link, onChange)
 	{
 		this.id = id;
 		this.block = block;
@@ -43,6 +43,10 @@
 		this.input_divs = {};	// one div for each input
 		this.output_divs = {};	// one div for each output
 		this.connections = {};	// lines from inputs to other blocks
+		this.x = null;
+		this.y = null;
+
+		this.onChange = onChange; // callback when anything changes
 
 		this.widget = $('<div class="block_editor_widget__block"></div>');
 		this.widget.addClass(getBlockClass(block));
@@ -74,7 +78,7 @@
 				this.inputs_holder.append(div);
 			}
 			if (value && typeof(value) == 'object') {
-				div.attr('data-connection', value[0]);
+				div.attr('data-connection', json_encode(value));
 			} else {
 				div.attr('data-value', value);
 			}
@@ -108,6 +112,18 @@
 				}
 			}
 		};
+
+		this.setPosition = function(x, y) {
+			if (x != null) {
+				this.x = Math.round(x);
+				this.widget.css('left', this.x);
+			}
+			if (y != null) {
+				this.y = Math.round(y);
+				this.widget.css('top', this.y);
+			}
+			this.onChange();
+		}
 
 		this.updateColumn = function(serial) {
 			if (serial == this.column_serial) {
@@ -257,8 +273,8 @@
 
 	$.fn.blockEditorWidget = function() {
 		this.each(function() {
-			var canvas_width = 3000;
-			var canvas_height = 3000;
+			var canvas_width = 4000;
+			var canvas_height = 4000;
 			var spacing_vert  = 50;		// Vertical spacing between blocks.
 			var spacing_horiz = 80;		// Horizontal spacing between blocks.
 			var pan_speed = 2;		// Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
@@ -279,7 +295,7 @@
 			widget.css('height', textarea.css('height'));
 			widget.disableSelection();
 			widget.insertBefore(textarea);
-			textarea.css('display', 'none !important');
+			//textarea.css('display', 'none !important');
 
 			// Create canvas
 			var canvas = $('<div class="block_editor_widget__canvas"></div>');
@@ -347,7 +363,7 @@
 			};
 			select.change(on_filter).keyup(on_filter);
 			palette_toolbar.append($('<div>Filter: </div>').append(select));
-			var available_blocks = eval('(' + textarea.attr('data-available_blocks') + ')');
+			var available_blocks = json_decode(textarea.attr('data-available_blocks'));
 			var last_class = null;
 			for (var block in available_blocks) {
 				var b = new Block(block.replace(/.*\//, ''), block, doc_link);
@@ -362,9 +378,58 @@
 				}
 			}
 
+			var block_re = /^block:/;
+
+			// Serialize all blocks to JSON, keep unknown values from original in place
+			widget.serializeBlocks = function(blocks, orig_data) {
+				var d = {};
+
+				// keep original values
+				for (var i in orig_data) {
+					if (!block_re.test(i)) {
+						d[i] = orig_data[i];
+					}
+				}
+
+				// get top left corner
+				var min_x = canvas_width;
+				var min_y = canvas_height;
+				for (var i in blocks) {
+					var b = blocks[i];
+					if (b.x < min_x) {
+						min_x = b.x;
+					}
+					if (b.y < min_y) {
+						min_y = b.y;
+					}
+				}
+
+				// serialize blocks
+				for (var i in blocks) {
+					var b = blocks[i];
+					var B = {
+						'.block': b.block,
+						'.x': b.x - min_x,
+						'.y': b.y - min_y
+					};
+					if (b.force_exec != null) {
+						B['.force_exec'] = b.force_exec;
+					}
+					for(var input in b.inputs) {
+						if (input != '*') {
+							B[input] = b.inputs[input];
+						}
+					}
+					d['block:' + b.id] = B;
+				}
+
+				return json_encode(d);
+			};
+
+
 			// Add blocks to widget using data in textarea
 			widget.updateFromTextarea = function() {
-				var d = eval('(' + textarea.val() + ')');
+				var d = json_decode(textarea.val());
 				var geometry = {};
 				var refreshRequested = false;
 
@@ -372,7 +437,6 @@
 					geometry = d['geometry'];
 				}
 
-				var block_re = /^block:/;
 				for (var i in d) {
 					if (block_re.test(i)) {
 						var id = i.replace(block_re, '');
@@ -380,14 +444,13 @@
 						var inputs = available_blocks[block].inputs;
 						var outputs = available_blocks[block].outputs;
 
-						var b = new Block(id, block, doc_link);
+						var b = new Block(id, block, doc_link, function() { textarea.val(widget.serializeBlocks(blocks, d)); });
 						b.addInputs(available_blocks[block].inputs);
 						b.addOutputs(available_blocks[block].outputs);
 						b.addInputs(d[i]);
-
+						b.setPosition('x' in d[i] ? d[i].x + canvas_width / 3 : canvas_width / 2,
+								'y' in d[i] ? d[i].y + canvas_height / 3 : canvas_height / 2);
 						blocks[id] = b;
-						b.widget.css('top', canvas_height / 2);
-						b.widget.css('left', canvas_width / 2);
 
 						canvas_inner.append(b.widget);
 						b.widget.draggable({
@@ -402,11 +465,13 @@
 									}, 20);
 								}
 							},
-							stop: function() {
+							stop: (function(b) { return  function() {
+								var pos = b.widget.position();
+								b.setPosition(pos.left, pos.top);
 								for (var i in blocks) {
 									blocks[i].connect(blocks, canvas_raphael);
 								}
-							}
+							}; })(b)
 						});
 					}
 				}
@@ -437,8 +502,7 @@
 						col_height[b.column] += b.widget.height() + spacing_vert;
 					}
 
-					b.widget.css('top', canvas_height / 3 + row);
-					b.connect(blocks, canvas_raphael); // update arrows
+					b.setPosition(null, canvas_height / 3 + row);
 				}
 				var col_left = [];
 				for (var i in blocks) {
@@ -452,7 +516,8 @@
 					} else {
 						left = col_left[b.column];
 					}
-					b.widget.css('left', canvas_width / 3 + left);
+					b.setPosition(canvas_width / 3 + left, null);
+					b.connect(blocks, canvas_raphael); // update arrows
 				}
 
 				$(window).load(function() {
