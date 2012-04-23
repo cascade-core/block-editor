@@ -136,16 +136,22 @@ div.block_editor_widget {
 
 	.block_editor_widget__block table td {
 		padding: 2px 0px;
+		white-space: pre;
 	}
-		.block_editor_widget__block table td a,
 		.block_editor_widget__block table td div {
-			display: block;
-			padding: 0px 3px;
+			margin: 0px;
+			padding: 1px 3px;
+		}
+
+		.block_editor_widget__block table td a {
+			padding: 0px;
 		}
 
 			.block_editor_widget__block table td a.block_editor_widget__default_connection,
-			.block_editor_widget__block table td div.block_editor_widget__default_connection {
-				color: #888;
+			.block_editor_widget__block table td div.block_editor_widget__default_connection,
+			.block_editor_widget__block table td a.block_editor_widget__default_connection *,
+			.block_editor_widget__block table td div.block_editor_widget__default_connection * {
+				color: #888 !important;
 			}
 
 		.block_editor_widget__block table td.block_editor_widget__in {

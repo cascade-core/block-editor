@@ -71,9 +71,10 @@
 					if (name in this.input_divs) {
 						div = this.input_divs[name];
 					} else {
-						div = $('<a></a>').text(name);
-						div.attr('href', '#');
-						div.click(function() { this.editInput(name); return false; }.bind(this, name));
+						var a = $('<a></a>').text(name);
+						div = $('<div></div>').append(a);
+						a.attr('href', '#');
+						a.click(function() { this.editInput(name); return false; }.bind(this, name));
 						this.input_divs[name] = div;
 
 						if (name == 'enable') {
@@ -329,7 +330,7 @@
 								}
 							}
 							var s = this.positionOnCanvas(s_div);
-							var sh = Math.round(s_div.height() / 2) + 2;
+							var sh = Math.round(s_div.height() / 2) + 3;
 							var srcX = s.left + s_div.outerWidth() + 4;
 							var srcY = s.top + sh;
 
@@ -339,7 +340,7 @@
 								continue;
 							}
 							var d = this.positionOnCanvas(d_div);
-							var dh = Math.round(d_div.height() / 2) + 2;
+							var dh = Math.round(d_div.height() / 2) + 4;
 							var dstX = d.left;
 							var dstY = d.top + dh;
 
@@ -354,9 +355,9 @@
 							// arrow path
 							arrow_path = [
 								'M', dstX, dstY,
-								'L', (dstX - dh), (dstY - (dh - 3)),
-								'L', (dstX - 0.7 * dh), dstY,
-								'L', (dstX - dh), (dstY + (dh - 3)),
+								'L', (dstX - dh), (dstY - (dh - 5)),
+								'L', (dstX - 0.6 * dh), dstY,
+								'L', (dstX - dh), (dstY + (dh - 5)),
 								'Z'
 							].join(',');
 
