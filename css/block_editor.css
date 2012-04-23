@@ -154,7 +154,7 @@ div.block_editor_widget {
 		}
 
 	.block_editor_widget__canvas {
-		left: 60px;
+		left: 40px;
 		right: 0px;
 	}
 
@@ -171,7 +171,7 @@ div.block_editor_widget {
 
 	.block_editor_widget__palette {
 		left: 0px;
-		width: 59px;
+		width: 39px;
 		border-right: 1px solid #aaa;
 		background: #fff;
 		text-align: center;
@@ -189,11 +189,6 @@ div.block_editor_widget {
 		.block_editor_widget__palette .block_editor_widget__block {
 			float: none;
 			margin: 2em 1em;
-		}
-
-		.block_editor_widget__palette .block_editor_widget__block table {
-			width: auto;
-			margin: 1em auto;
 		}
 
 		.block_editor_widget__palette_toolbar {

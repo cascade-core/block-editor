@@ -39,9 +39,18 @@
 			var spacing_horiz = 80;		// Horizontal spacing between blocks.
 			var pan_speed = 2;		// Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
 
+			var textarea = $(this);
+			var orig_data = json_decode(textarea.val());
+			var blocks = {};
+			var doc_link = textarea.attr('data-doc_link');
+			var current_dialog = null;
+
+
+
 			// Block
 			function Block(id, block, doc_link, onChange)
 			{
+				this.placeholder = false;
 				this.id = id;
 				this.block = block;
 				this.column = 0;
@@ -100,6 +109,9 @@
 				};
 
 				this.editInput = function(name) {
+					if (this.placeholder) {
+						return false;
+					}
 					var d = createDialog(this.widget, this.id + ":" + name);
 					var type = $('<select class="focus"></select>');
 					var ta = $('<textarea></textarea>');
@@ -237,7 +249,7 @@
 
 					for (var i in this.inputs) {
 						var target = [this.id, i];
-						var have_input = this.inputs[i] && typeof(this.inputs[i]) == 'object';
+						var have_input = this.inputs[i] && typeof(this.inputs[i]) == 'object' && this.inputs[i][0] != null;
 						var input_fn = have_input && this.inputs[i][0][0] == ':' ? this.inputs[i][0] : null;
 
 						/*
@@ -344,6 +356,9 @@
 
 				// When title is dblclicked
 				this.onChangeId = function() {
+					if (this.placeholder) {
+						return false;
+					}
 					var new_id = prompt(_('New block ID:'), this.id);
 					if (new_id == null) {
 						return;
@@ -363,6 +378,9 @@
 
 				// when remove button is clicked
 				this.onRemoveBlock = function () {
+					if (this.placeholder) {
+						return false;
+					}
 					if (confirm(_('Do you wish to remove block "' + this.id + '"? There is no undo button.'))) {
 						for (var i in this.connections) {
 							this.connections[i].line.remove();
@@ -390,16 +408,51 @@
 					this.outputs_holder = $('<td class="block_editor_widget__out"></td>');
 
 					this.widget.append($('<table></table>')
-						.append($('<tr></tr>').append($('<th colspan="2"></th>')
-							.append($('<a href="#" class="block_editor_widget__block_remove">&times;</a>').click(this.onRemoveBlock))
-							.append($('<div class="block_editor_widget__block_id"></div>').text(id).dblclick(this.onChangeId))
+						.append($('<tr></tr>')
+							.append($('<th colspan="2"></th>')
+							.append($('<a href="#" class="block_editor_widget__block_remove">&times;</a>')
+								.click(this.onRemoveBlock))
+							.append($('<div class="block_editor_widget__block_id"></div>')
+								.text(id)
+								.dblclick(this.onChangeId))
 							.append($('<div class="block_editor_widget__block_name"></div>')
 								.append($('<a></a>').text(block)
 									.attr('href', doc_link.replace('%s', block))
 									.attr('target', '_blank')
 								))))
-						.append($('<tr></tr>').append(this.inputs_holder).append(this.outputs_holder))
+						.append($('<tr></tr>')
+							.append(this.inputs_holder)
+							.append(this.outputs_holder))
 					);
+
+				}
+
+				this.addToCanvas = function() {
+					canvas_inner.append(this.widget);
+
+					var refreshRequested = false;
+
+					this.widget.draggable({
+						cancel: 'a',
+						drag: function(ev) {
+							if (!refreshRequested) {
+								refreshRequested = true;
+								setTimeout(function() {
+									for (var i in blocks) {
+										blocks[i].connect(blocks, canvas_raphael);
+									}
+									refreshRequested = false;
+								}, 20);
+							}
+						},
+						stop: (function(b) { return  function() {
+							var pos = b.widget.position();
+							b.setPosition(pos.left, pos.top);
+							for (var i in blocks) {
+								blocks[i].connect(blocks, canvas_raphael);
+							}
+						}; })(this)
+					});
 				}
 
 				this.createWidget();
@@ -411,10 +464,12 @@
 				return 'block_editor_widget__block__' + block.replace(/\/[^\/]*$/, '').replace('/', '__');
 			}
 
-			var textarea = $(this);
-			var blocks = {};
-			var doc_link = textarea.attr('data-doc_link');
-			var current_dialog = null;
+			function onBlockChange() {
+				textarea.val(widget.serializeBlocks(blocks));
+				for (var i in blocks) {
+					blocks[i].connect(blocks, canvas_raphael);
+				}
+			}
 
 			if (!textarea.hasClass('block_editor_widget') || this.tagName.toLowerCase() != 'textarea') {
 				if (console) {
@@ -537,6 +592,7 @@
 			var last_class = null;
 			for (var block in available_blocks) {
 				var b = new Block(block.replace(/.*\//, ''), block, doc_link);
+				b.placeholder = true;
 				b.addInputs(available_blocks[block].inputs);
 				b.addOutputs(available_blocks[block].outputs);
 				palette_blocks.append(b.widget);
@@ -546,12 +602,52 @@
 					select.append($('<option></option>').attr('value', block_class).text(block.replace(/\/[^\/]*$/, '')));
 					last_class = block_class;
 				}
+
+				// Make palette blocks draggable, so they can be added to canvas
+				b.widget.draggable({
+					cancel: 'a',
+					helper: 'clone',
+					opacity: 0.8,
+					appendTo: canvas,
+					zIndex: 30,
+					stop: (function(b) {
+						return function (ev, ui) {
+							var pos = ui.position; // destination
+							var q_prompt = _('ID of the new block:');
+							var q_msg = '';
+							var id = b.id;
+
+							for (;;) {
+								id = prompt(q_msg == '' ? q_prompt : q_msg + '\n\n' + q_prompt, id);
+
+								if (id == null || id == '') {
+									return;
+								} else if (!id.match(/^[A-Za-z][a-zA-Z0-9_]*$/)) {
+									q_msg = _('Only letters, numbers and underscore are allowed '
+										+ 'in block ID and the first character must be a letter.');
+								} else if (id in blocks) {
+									q_msg = _('This block ID is already taken by another block.');
+								} else {
+									// good id
+									var new_b = new Block(id, b.block, doc_link, onBlockChange);
+									new_b.addInputs(available_blocks[b.block].inputs);
+									new_b.addOutputs(available_blocks[b.block].outputs);
+									new_b.setPosition(pos.left, pos.top);
+									blocks[id] = new_b;
+									new_b.addToCanvas();
+									break;
+								}
+							}
+						};
+					})(b)
+				});
 			}
+
 
 			var block_re = /^block:/;
 
 			// Serialize all blocks to JSON, keep unknown values from original in place
-			widget.serializeBlocks = function(blocks, orig_data) {
+			widget.serializeBlocks = function(blocks) {
 				var d = {};
 
 				// keep original values
@@ -599,56 +695,21 @@
 
 			// Add blocks to widget using data in textarea
 			widget.updateFromTextarea = function() {
-				var d = json_decode(textarea.val());
-				var geometry = {};
-				var refreshRequested = false;
-
-				if ('geometry' in d) {
-					geometry = d['geometry'];
-				}
-
-				for (var i in d) {
+				for (var i in orig_data) {
 					if (block_re.test(i)) {
 						var id = i.replace(block_re, '');
-						var block = d[i]['.block'];
+						var block = orig_data[i]['.block'];
 						var inputs = available_blocks[block].inputs;
 						var outputs = available_blocks[block].outputs;
 
-						var b = new Block(id, block, doc_link, function() {
-							textarea.val(widget.serializeBlocks(blocks, d));
-							for (var i in blocks) {
-								blocks[i].connect(blocks, canvas_raphael);
-							}
-						});
+						var b = new Block(id, block, doc_link, onBlockChange);
 						b.addInputs(available_blocks[block].inputs);
 						b.addOutputs(available_blocks[block].outputs);
-						b.addInputs(d[i]);
-						b.setPosition('x' in d[i] ? d[i].x + canvas_width / 3 : canvas_width / 2,
-								'y' in d[i] ? d[i].y + canvas_height / 3 : canvas_height / 2);
+						b.addInputs(orig_data[i]);
+						b.setPosition('x' in orig_data[i] ? orig_data[i].x + canvas_width / 3 : canvas_width / 2,
+								'y' in orig_data[i] ? orig_data[i].y + canvas_height / 3 : canvas_height / 2);
 						blocks[id] = b;
-
-						canvas_inner.append(b.widget);
-						b.widget.draggable({
-							cancel: 'a',
-							drag: function(ev) {
-								if (!refreshRequested) {
-									refreshRequested = true;
-									setTimeout(function() {
-										for (var i in blocks) {
-											blocks[i].connect(blocks, canvas_raphael);
-										}
-										refreshRequested = false;
-									}, 20);
-								}
-							},
-							stop: (function(b) { return  function() {
-								var pos = b.widget.position();
-								b.setPosition(pos.left, pos.top);
-								for (var i in blocks) {
-									blocks[i].connect(blocks, canvas_raphael);
-								}
-							}; })(b)
-						});
+						b.addToCanvas();
 					}
 				}
 
