@@ -65,6 +65,11 @@
 				this.onChange = onChange ? onChange : function() {}; // callback when anything changes
 
 				this.addInput = function(name, value) {
+					if (name in this.inputs) {
+						this.inputs[name] = value;
+						return;
+					}
+
 					this.inputs[name] = value;
 
 					var div;
@@ -75,7 +80,18 @@
 						div.attr('href', '#');
 						div.click(function() { this.editInput(name); return false; }.bind(this, name));
 						this.input_divs[name] = div;
-						this.inputs_holder.append(div);
+
+						if (name == 'enable') {
+							div.addClass('block_editor_widget__enable_input');
+							this.inputs_holder.append(div);
+						} else {
+							var enable_input = this.inputs_holder.children('.block_editor_widget__enable_input');
+							if (enable_input.length > 0) {
+								div.insertBefore(enable_input);
+							} else {
+								this.inputs_holder.append(div);
+							}
+						}
 					}
 				};
 
@@ -480,6 +496,9 @@
 				}
 
 				this.createWidget();
+
+				// Every block has 'enable' input.
+				this.addInput('enable', null);
 			}
 
 			// Calculate block prefix from it's name
