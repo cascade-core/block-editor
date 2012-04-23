@@ -112,6 +112,30 @@
 					if (this.placeholder) {
 						return false;
 					}
+
+					// Ask forn input name if '*' clicked
+					if (name == '*') {
+						var q_prompt = _('Name of the new input:');
+						var q_msg = '';
+						var name = '';
+
+						for (;;) {
+							name = prompt(q_msg == '' ? q_prompt : q_msg + '\n\n' + q_prompt, name);
+
+							if (name == null || name == '') {
+								return;
+							} else if (!name.match(/^[a-zA-Z0-9_]*$/)) {
+								q_msg = _('Only letters, numbers and underscore are allowed in the input name.');
+							} else if (name in this.inputs) {
+								q_msg = _('This input already exists.');
+							} else {
+								break;
+							}
+						}
+
+						this.addInput(name, null);
+					}
+
 					var d = createDialog(this.widget, this.id + ":" + name);
 					var type = $('<select class="focus"></select>');
 					var ta = $('<textarea></textarea>');
