@@ -10,6 +10,7 @@ enable[]	= "editor:done"
 
 [block:editor]
 .block = block_editor/test
+block[] = router:path_tail
 
 ; vim:filetype=dosini:
 

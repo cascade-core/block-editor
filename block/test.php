@@ -31,7 +31,8 @@
 class B_block_editor__test extends Block {
 
 	protected $inputs = array(
-		'file' => FILE_CORE_CONFIG,
+		'file' => false,
+		'block' => false,
 		'doc_link' => DEBUG_CASCADE_GRAPH_LINK,
 		'slot' => 'default',
 		'slot_weight' => 50,
@@ -47,7 +48,17 @@ class B_block_editor__test extends Block {
 
 	public function main()
 	{
-		$file = $this->in('file');
+		$block = $this->in('block');
+		if ($block !== false) {
+			if (is_array($block)) {
+				$block = join('/', $block);
+			}
+			$file = get_block_filename($block, '.ini.php');
+		} else {
+			$file = $this->in('file');
+		}
+		debug_msg('Loading file: %s', $file);
+
 		$cfg = parse_ini_file($file, TRUE);
 
 		if ($cfg === FALSE) {

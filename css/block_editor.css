@@ -143,6 +143,11 @@ div.block_editor_widget {
 			padding: 0px 3px;
 		}
 
+			.block_editor_widget__block table td a.block_editor_widget__default_connection,
+			.block_editor_widget__block table td div.block_editor_widget__default_connection {
+				color: #888;
+			}
+
 		.block_editor_widget__block table td.block_editor_widget__in {
 			text-align: left !important;
 			padding-right: 1em !important;

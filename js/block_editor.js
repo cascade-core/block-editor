@@ -65,11 +65,6 @@
 				this.onChange = onChange ? onChange : function() {}; // callback when anything changes
 
 				this.addInput = function(name, value) {
-					if (name in this.inputs) {
-						this.inputs[name] = value;
-						return;
-					}
-
 					this.inputs[name] = value;
 
 					var div;
@@ -92,6 +87,12 @@
 								this.inputs_holder.append(div);
 							}
 						}
+					}
+
+					if (value == null || value == undefined) {
+						div.addClass('block_editor_widget__default_connection');
+					} else {
+						div.removeClass('block_editor_widget__default_connection');
 					}
 				};
 
@@ -205,9 +206,11 @@
 					set.click(function() {
 						var v = ta.val();
 						//console.log('Set:', name, '=', type.val(), v);
+						this.input_divs[name].removeClass('block_editor_widget__default_connection');
 						switch(type.val()) {
 							case 'default':
 								this.inputs[name] = undefined;
+								this.input_divs[name].addClass('block_editor_widget__default_connection');
 								break;
 
 							case 'connection':
@@ -498,7 +501,7 @@
 				this.createWidget();
 
 				// Every block has 'enable' input.
-				this.addInput('enable', null);
+				this.addInput('enable', undefined);
 			}
 
 			// Calculate block prefix from it's name
