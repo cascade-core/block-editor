@@ -28,12 +28,15 @@
  * SUCH DAMAGE.
  */
 
+/**
+ * Test WYSIWYG block editor. INI file is loaded and editor form is displayed.
+ */
 class B_block_editor__test extends Block {
 
 	protected $inputs = array(
-		'file' => false,
-		'block' => false,
-		'doc_link' => DEBUG_CASCADE_GRAPH_LINK,
+		'file' => false,		// Filename to load (if block is not specified).
+		'block' => false,		// Block to edit.
+		'doc_link' => DEBUG_CASCADE_GRAPH_LINK,	// Link to documentation.
 		'slot' => 'default',
 		'slot_weight' => 50,
 	);
