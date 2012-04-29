@@ -97,10 +97,10 @@
 					}
 				};
 
-				this.addInputs = function(list) {
+				this.addInputs = function(list, set_all_to_default) {
 					for (var i in list) {
 						if (i[0] != '.') {
-							this.addInput(i, list[i]);
+							this.addInput(i, set_all_to_default ? undefined : list[i]);
 						}
 					}
 				}
@@ -677,7 +677,7 @@
 								} else {
 									// good id
 									var new_b = new Block(id, b.block, doc_link, onBlockChange);
-									new_b.addInputs(available_blocks[b.block].inputs);
+									new_b.addInputs(available_blocks[b.block].inputs, true);
 									new_b.addOutputs(available_blocks[b.block].outputs);
 									new_b.setPosition(pos.left, pos.top);
 									blocks[id] = new_b;

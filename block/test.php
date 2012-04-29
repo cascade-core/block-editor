@@ -86,18 +86,17 @@ class B_block_editor__test extends Block {
 
 	private function get_available_blocks()
 	{
-		$blocks = B_core__devel__doc__index::get_blocks();
+		$cc = $this->get_cascade_controller();
+		$blocks = $cc->get_known_blocks();
 
 		$available_blocks = array();
 
 		foreach ($blocks as $plugin => $plugin_blocks) {
 			foreach ($plugin_blocks as $block) {
-				$class = get_block_class_name($block);
-				if ($class !== false) {
-					$m = new $class();
-					$available_blocks[$block] = $m->describe_block();
+				$desc = $cc->describe_block($block);
+				if ($desc !== false) {
+					$available_blocks[$block] = $desc;
 					$available_blocks[$block]['plugin'] = $plugin;
-					unset($m);
 				} else {
 					$available_blocks[$block] = array(
 						'block' => $block,
