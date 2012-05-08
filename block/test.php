@@ -34,7 +34,6 @@
 class B_block_editor__test extends Block {
 
 	protected $inputs = array(
-		'file' => false,		// Filename to load (if block is not specified).
 		'block' => false,		// Block to edit.
 		'doc_link' => DEBUG_CASCADE_GRAPH_LINK,	// Link to documentation.
 		'slot' => 'default',
@@ -42,7 +41,10 @@ class B_block_editor__test extends Block {
 	);
 
 	protected $outputs = array(
-		'file' => true,
+		'saved' => true,		// True, if block has been saved.
+		'block' => true,		// Name of saved block.
+		'error' => true,		// Error message about saving the block.
+		'submitted' => true,		// Form was submited.
 		'done' => true,
 	);
 
@@ -51,35 +53,80 @@ class B_block_editor__test extends Block {
 
 	public function main()
 	{
+		$error = false;
+		$saved = false;
+		$dst_block = null;
+
+		// get inputs
 		$block = $this->in('block');
-		if ($block !== false) {
-			if (is_array($block)) {
-				$block = join('/', $block);
-			}
-			$file = get_block_filename($block, '.ini.php');
-		} else {
-			$file = $this->in('file');
+		if (is_array($block)) {
+			$block = join('/', $block);
 		}
+		$file = get_block_filename($block, '.ini.php');
+
 		debug_msg('Loading file: %s', $file);
+		$mtime = filemtime($file);
 
-		$cfg = parse_ini_file($file, TRUE);
+		// get form data
+		$submitted = !empty($_POST['submit']) && $_POST['src_block'] == $block;
+		$this->out('submitted', $submitted);
 
-		if ($cfg === FALSE) {
-			return;
+		if ($submitted) {
+			$dst_block = $_POST['dst_block'];
+			$src_mtime = $_POST['src_mtime'];
+
+			if ($src_mtime != $mtime) {
+				$this->out('error', _('Block was modified by someone else in meantime.'));
+				error_msg('Failed to store block "%s", becouse it was modified by someone else (%s != %s).', $dst_block, $src_mtime, $mtime);
+				return;
+			}
+
+			$new_cfg = json_decode($_POST['cfg'], TRUE);
+
+			if ($new_cfg === null) {
+				$this->out('error', _('Received block description is invalid.'));
+				error_msg('Failed to decode configuration of block "%s".', $dst_block);
+				return;
+			}
+
+			$dst_file = get_block_filename($dst_block, '.ini.php');
+			$saved = write_ini_file($dst_file, $new_cfg, TRUE);
+
+			if (!$saved) {
+				$this->out('error', _('Cannot write block configuration.'));
+				error_msg('Failed to write INI file "%s".', $dst_file);
+				return;
+			}
+
+			/*
+			echo "<pre>", $dst_file, "<br>\n";
+			print_r($new_cfg);
+			echo "</pre>\n";
+			echo "<b>", $saved ? 'ok':'failed', "</b>\n";
+			// */
+		} else {
+			// Load block description
+			$cfg = parse_ini_file($file, TRUE);
+			if ($cfg === FALSE) {
+				$this->out('error', _('Failed to load block configuration.'));
+				return;
+			}
+
+			$available_blocks = $this->get_available_blocks();
+
+			$this->template_add_to_slot('head', 'html_head', 60, 'block_editor/html_head', array());
+
+			$this->template_add(null, 'block_editor/test', array(
+					'block' => $block,
+					'mtime' => $mtime,
+					'cfg' => $cfg,
+					'doc_link' => $this->in('doc_link'),
+					'available_blocks' => $available_blocks,
+				));
 		}
 
-		$available_blocks = $this->get_available_blocks();
-
-		$this->template_add_to_slot('head', 'html_head', 60, 'block_editor/html_head', array());
-
-		$this->template_add(null, 'block_editor/test', array(
-				'file' => $file,
-				'cfg' => $cfg,
-				'doc_link' => $this->in('doc_link'),
-				'available_blocks' => $available_blocks,
-			));
-
-		$this->out('file', $file);
+		$this->out('saved', $saved);
+		$this->out('block', $dst_block);
 		$this->out('done', true);
 	}
 

@@ -33,9 +33,18 @@ function TPL_html5__block_editor__test($t, $id, $d, $so)
 {
 	extract($d);
 
-	echo "<form class=\"block_editor\" id=\"", htmlspecialchars($id), "\">\n";
+	echo "<form class=\"block_editor\" id=\"", htmlspecialchars($id), "\" method=\"post\">\n";
 
-	echo "\t<textarea class=\"block_editor_widget\" rows=\"25\" cols=\"80\" style=\"display: block; width: 99%;\"",
+	echo	"<div>",
+		_('Block:'), "\n",
+		"<input type=\"text\" name=\"dst_block\" value=\"", htmlspecialchars($block), "\" size=\"30\">\n",
+		"<input type=\"submit\" name=\"submit\" value=\"", _('Save'), "\">\n",
+		"<input type=\"hidden\" name=\"src_block\" value=\"", htmlspecialchars($block), "\">\n",
+		"<input type=\"hidden\" name=\"src_mtime\" value=\"", htmlspecialchars($mtime), "\">\n",
+		"</div>";
+
+
+	echo "\t<textarea name=\"cfg\" class=\"block_editor_widget\" rows=\"25\" cols=\"80\" style=\"display: block; width: 99%;\"",
 			"data-doc_link=\"", htmlspecialchars($doc_link), "\" ",
 			"data-available_blocks=\"", htmlspecialchars(json_encode($available_blocks)), "\">",
 		htmlspecialchars(json_encode($cfg)), "</textarea>\n";

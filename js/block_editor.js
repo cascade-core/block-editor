@@ -59,7 +59,9 @@
 				this.input_divs = {};	// one div for each input
 				this.output_divs = {};	// one div for each output
 				this.connections = {};	// lines from inputs to other blocks
-				this.x = null;
+				this.origX = null;	// original position from received configuration (relative to bounding box)
+				this.origY = null;
+				this.x = null;		// current position on canvas (relative to canvas)
 				this.y = null;
 
 				this.onChange = onChange ? onChange : function() {}; // callback when anything changes
@@ -90,7 +92,7 @@
 						}
 					}
 
-					if (value == null || value == undefined) {
+					if (value === undefined) {
 						div.addClass('block_editor_widget__default_connection');
 					} else {
 						div.removeClass('block_editor_widget__default_connection');
@@ -497,6 +499,8 @@
 							}
 						}; })(this)
 					});
+
+					this.onChange();
 				}
 
 				this.createWidget();
@@ -530,7 +534,7 @@
 			widget.css('height', textarea.css('height'));
 			widget.disableSelection();
 			widget.insertBefore(textarea);
-			//textarea.css('display', 'none !important');
+			textarea.css('display', 'none');
 
 			// Canvas dialog factory
 			function createDialog(holder, title)
@@ -657,6 +661,9 @@
 					opacity: 0.8,
 					appendTo: canvas,
 					zIndex: 30,
+					start: (function() {
+						palette_toolbar.find('*').blur();
+					}),
 					stop: (function(b) {
 						return function (ev, ui) {
 							var pos = ui.position; // destination
@@ -729,7 +736,7 @@
 						B['.force_exec'] = b.force_exec;
 					}
 					for(var input in b.inputs) {
-						if (input != '*') {
+						if (input != '*' && b.inputs[input] !== undefined) {
 							B[input] = b.inputs[input];
 						}
 					}
@@ -746,17 +753,16 @@
 					if (block_re.test(i)) {
 						var id = i.replace(block_re, '');
 						var block = orig_data[i]['.block'];
-						var inputs = available_blocks[block].inputs;
-						var outputs = available_blocks[block].outputs;
 
 						var b = new Block(id, block, doc_link, onBlockChange);
-						b.addInputs(available_blocks[block].inputs);
+						b.addInputs(available_blocks[block].inputs, true);
 						b.addOutputs(available_blocks[block].outputs);
 						b.addInputs(orig_data[i]);
-						b.setPosition('x' in orig_data[i] ? orig_data[i].x + canvas_width / 3 : canvas_width / 2,
-								'y' in orig_data[i] ? orig_data[i].y + canvas_height / 3 : canvas_height / 2);
+						b.origX = '.x' in orig_data[i] ? parseInt(orig_data[i]['.x']) : null;
+						b.origY = '.y' in orig_data[i] ? parseInt(orig_data[i]['.y']) : null;
 						blocks[id] = b;
 						b.addToCanvas();
+						//console.log('New block', id, ':', b);
 					}
 				}
 
@@ -801,6 +807,14 @@
 						left = col_left[b.column];
 					}
 					b.setPosition(canvas_width / 3 + left, null);
+				}
+
+				// restore original position (if set) and update arrows
+				for (var i in blocks) {
+					var b = blocks[i];
+					if (b.origX != null && b.origY != null) {
+						b.setPosition(b.origX + canvas_width / 3, b.origY + canvas_height / 3);
+					}
 					b.connect(blocks, canvas_raphael); // update arrows
 				}
 
