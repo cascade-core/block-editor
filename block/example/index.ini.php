@@ -11,6 +11,7 @@ text = "Block Editor"
 .block = core/devel/doc/index
 link = "/block_editor/%s"
 regexp = "/\.ini\.php$/"
+heading_level = 3
 
 ; vim:filetype=dosini:
 
