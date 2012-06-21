@@ -18,7 +18,7 @@ slot_weight = "10"
 .x = 0
 .y = 123
 block[] = "router:path_tail"
-doc_link = "/documentation/block/%s"
+doc_link = "/documentation/block/{block}"
 slot = "default"
 slot_weight = "50"
 
