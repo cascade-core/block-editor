@@ -35,7 +35,7 @@ class B_block_editor__test extends Block {
 
 	protected $inputs = array(
 		'block' => false,		// Block to edit.
-		'doc_link' => DEBUG_CASCADE_GRAPH_LINK,	// Link to documentation.
+		'doc_link' => DEBUG_CASCADE_GRAPH_DOC_LINK, // Link to documentation.
 		'slot' => 'default',
 		'slot_weight' => 50,
 	);
@@ -56,57 +56,38 @@ class B_block_editor__test extends Block {
 		$error = false;
 		$saved = false;
 		$dst_block = null;
+		$storages = $this->get_cascade_controller()->get_block_storages();
 
 		// get inputs
 		$block = $this->in('block');
 		if (is_array($block)) {
 			$block = join('/', $block);
 		}
-		$file = get_block_filename($block, '.ini.php');
 
-		debug_msg('Loading file: %s', $file);
-		$mtime = filemtime($file);
+		// load block
+		foreach ($storages as $src_storage) {
+			$mtime = $src_storage->block_mtime($block);
+			if ($mtime) {
+				break;
+			}
+		}
+		if (!isset($mtime)) {
+			return;
+		}
+		debug_msg('Loading block: %s', $block);
 
 		// get form data
 		$submitted = !empty($_POST['submit']) && $_POST['src_block'] == $block;
 		$this->out('submitted', $submitted);
 
 		if ($submitted) {
-			$dst_block = $_POST['dst_block'];
-			$src_mtime = $_POST['src_mtime'];
+			$saved = $this->store($storages, $mtime, $_POST['dst_block'], $_POST['src_mtime'], $_POST['cfg']);
+		}
 
-			if ($src_mtime != $mtime) {
-				$this->out('error', _('Block was modified by someone else in meantime.'));
-				error_msg('Failed to store block "%s", becouse it was modified by someone else (%s != %s).', $dst_block, $src_mtime, $mtime);
-				return;
-			}
-
-			$new_cfg = json_decode($_POST['cfg'], TRUE);
-
-			if ($new_cfg === null) {
-				$this->out('error', _('Received block description is invalid.'));
-				error_msg('Failed to decode configuration of block "%s".', $dst_block);
-				return;
-			}
-
-			$dst_file = get_block_filename($dst_block, '.ini.php');
-			$saved = write_ini_file($dst_file, $new_cfg, TRUE);
-
-			if (!$saved) {
-				$this->out('error', _('Cannot write block configuration.'));
-				error_msg('Failed to write INI file "%s".', $dst_file);
-				return;
-			}
-
-			/*
-			echo "<pre>", $dst_file, "<br>\n";
-			print_r($new_cfg);
-			echo "</pre>\n";
-			echo "<b>", $saved ? 'ok':'failed', "</b>\n";
-			// */
-		} else {
+		if (!$saved) {
 			// Load block description
-			$cfg = parse_ini_file($file, TRUE);
+			$cfg = $src_storage->load_block($block);
+
 			if ($cfg === FALSE) {
 				$this->out('error', _('Failed to load block configuration.'));
 				return;
@@ -128,6 +109,51 @@ class B_block_editor__test extends Block {
 		$this->out('saved', $saved);
 		$this->out('block', $dst_block);
 		$this->out('done', true);
+	}
+
+
+	private function store($storages, $orig_mtime, $dst_block, $src_mtime, $cfg)
+	{
+		$saved = false;
+
+		if ($src_mtime != $orig_mtime) {
+			$this->out('error', _('Block was modified by someone else in meantime.'));
+			error_msg('Failed to store block "%s", becouse it was modified by someone else (%s != %s).', $dst_block, $src_mtime, $orig_mtime);
+			return false;
+		}
+
+		$new_cfg = json_decode($cfg, TRUE);
+
+		if ($new_cfg === null) {
+			$this->out('error', _('Received block description is invalid.'));
+			error_msg('Failed to decode configuration of block "%s".', $dst_block);
+			return false;
+		}
+
+		// store block in first storage that allows it
+		foreach ($storages as $dst_storage_id => $dst_storage) {
+			debug_msg("Storing %s in %s ...", $dst_block, $dst_storage_id);
+			if (!$dst_storage->is_read_only() && $dst_storage->store_block($dst_block, $new_cfg)) {
+				$saved = true;
+				debug_msg("Storing %s in %s ... Success!", $dst_block, $dst_storage_id);
+				break;
+			}
+		}
+
+		if (!$saved) {
+			$this->out('error', _('Cannot write block configuration.'));
+			error_msg('Failed to write block "%s" to %s.', $dst_block, $dst_storage_id);
+			return false;
+		}
+
+		/*
+		echo "<pre>", $dst_file, "<br>\n";
+		print_r($new_cfg);
+		echo "</pre>\n";
+		echo "<b>", $saved ? 'ok':'failed', "</b>\n";
+		// */
+		
+		return true;
 	}
 
 

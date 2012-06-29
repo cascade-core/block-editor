@@ -9,8 +9,8 @@ text = "Block Editor"
 
 [block:index]
 .block = core/devel/doc/index
-link = "/block_editor/%s"
-regexp = "/\.ini\.php$/"
+writable_only = true
+link = "/block_editor/{block}"
 heading_level = 3
 
 ; vim:filetype=dosini:
