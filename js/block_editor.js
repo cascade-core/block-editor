@@ -532,7 +532,6 @@
 			// Create widget
 			var widget = $('<div class="block_editor_widget widget"></div>');
 			widget.css('height', textarea.css('height'));
-			widget.disableSelection();
 			widget.insertBefore(textarea);
 			textarea.css('display', 'none');
 
