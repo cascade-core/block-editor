@@ -52,6 +52,10 @@ function TPL_html5__block_editor__test($t, $id, $d, $so)
 			"data-available_blocks=\"", htmlspecialchars(json_encode($available_blocks)), "\">",
 		htmlspecialchars(json_encode($cfg)), "</textarea>\n";
 
+	echo "<p>";
+	printf('Stored in <tt>%s</tt>, last modified at %s.', $storage_id, strftime('%Y-%m-%d %H:%M:%S', $mtime));
+	echo "</p>\n";
+
 	echo "</form>\n";
 
 }

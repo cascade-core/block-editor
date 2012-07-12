@@ -63,7 +63,7 @@ class B_block_editor__test extends Block {
 		}
 
 		// load block
-		foreach ($storages as $src_storage) {
+		foreach ($storages as $storage_id => $src_storage) {
 			$mtime = $src_storage->block_mtime($block);
 			if ($mtime) {
 				break;
@@ -106,6 +106,7 @@ class B_block_editor__test extends Block {
 					'block' => $block,
 					'mtime' => $mtime,
 					'cfg' => $cfg,
+					'storage_id' => $storage_id,
 					'doc_link' => $this->in('doc_link'),
 					'available_blocks' => $available_blocks,
 				));
