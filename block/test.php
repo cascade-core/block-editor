@@ -41,11 +41,10 @@ class B_block_editor__test extends Block {
 	);
 
 	protected $outputs = array(
-		'saved' => true,		// True, if block has been saved.
 		'block' => true,		// Name of saved block.
-		'error' => true,		// Error message about saving the block.
+		'message' => true,		// Success or error message.
 		'submitted' => true,		// Form was submited.
-		'done' => true,
+		'done' => true,			// Block has been saved/deleted.
 	);
 
 	const force_exec = TRUE;
@@ -53,7 +52,6 @@ class B_block_editor__test extends Block {
 
 	public function main()
 	{
-		$error = false;
 		$saved = false;
 		$dst_block = null;
 		$storages = $this->get_cascade_controller()->get_block_storages();
@@ -78,18 +76,25 @@ class B_block_editor__test extends Block {
 
 		// get form data
 		$submitted = !empty($_POST['submit']) && $_POST['src_block'] == $block;
-		$this->out('submitted', $submitted);
+		$submit_delete = !empty($_POST['delete']) && $_POST['src_block'] == $block && $_POST['dst_block'] == $block;
+		$this->out('submitted', $submitted || $submit_delete);
 
 		if ($submitted) {
-			$saved = $this->store($storages, $mtime, $_POST['dst_block'], $_POST['src_mtime'], $_POST['cfg']);
+			$saved = $this->store_block($storages, $mtime, $_POST['dst_block'], $_POST['src_mtime'], $_POST['cfg']);
+		} else if ($submit_delete) {
+			$deleted = $this->delete_block($storages, $mtime, $block, $_POST['src_mtime']);
 		}
 
-		if (!$saved) {
+		if ($saved) {
+			$this->out('message', sprintf(_('Block "%s" has been saved.'), $_POST['dst_block']));
+		} else if ($deleted) {
+			$this->out('message', sprintf(_('Block "%s" has been deleted.'), $block));
+		} else {
 			// Load block description
 			$cfg = $src_storage->load_block($block);
 
 			if ($cfg === FALSE) {
-				$this->out('error', _('Failed to load block configuration.'));
+				$this->out('message', _('Failed to load block configuration.'));
 				return;
 			}
 
@@ -106,18 +111,17 @@ class B_block_editor__test extends Block {
 				));
 		}
 
-		$this->out('saved', $saved);
-		$this->out('block', $dst_block);
-		$this->out('done', true);
+		$this->out('block', $saved ? $dst_block : $block);
+		$this->out('done', $saved || $deleted);
 	}
 
 
-	private function store($storages, $orig_mtime, $dst_block, $src_mtime, $cfg)
+	private function store_block($storages, $orig_mtime, $dst_block, $src_mtime, $cfg)
 	{
 		$saved = false;
 
 		if ($src_mtime != $orig_mtime) {
-			$this->out('error', _('Block was modified by someone else in meantime.'));
+			$this->out('message', _('Block was modified by someone else in meantime.'));
 			error_msg('Failed to store block "%s", becouse it was modified by someone else (%s != %s).', $dst_block, $src_mtime, $orig_mtime);
 			return false;
 		}
@@ -125,7 +129,7 @@ class B_block_editor__test extends Block {
 		$new_cfg = json_decode($cfg, TRUE);
 
 		if ($new_cfg === null) {
-			$this->out('error', _('Received block description is invalid.'));
+			$this->out('message', _('Received block description is invalid.'));
 			error_msg('Failed to decode configuration of block "%s".', $dst_block);
 			return false;
 		}
@@ -141,7 +145,7 @@ class B_block_editor__test extends Block {
 		}
 
 		if (!$saved) {
-			$this->out('error', _('Cannot write block configuration.'));
+			$this->out('message', _('Cannot write block configuration.'));
 			error_msg('Failed to write block "%s" to %s.', $dst_block, $dst_storage_id);
 			return false;
 		}
@@ -153,6 +157,41 @@ class B_block_editor__test extends Block {
 		echo "<b>", $saved ? 'ok':'failed', "</b>\n";
 		// */
 		
+		return true;
+	}
+
+
+	private function delete_block($storages, $orig_mtime, $dst_block, $src_mtime)
+	{
+		$deleted = false;
+
+		if ($src_mtime != $orig_mtime) {
+			$this->out('message', _('Block was modified by someone else in meantime.'));
+			error_msg('Failed to delete block "%s", becouse it was modified by someone else (%s != %s).', $dst_block, $src_mtime, $orig_mtime);
+			return false;
+		}
+
+		// delete block from all storages that allows it
+		foreach ($storages as $dst_storage_id => $dst_storage) {
+			debug_msg("Deleting %s from %s ...", $dst_block, $dst_storage_id);
+			if (!$dst_storage->is_read_only() && $dst_storage->delete_block($dst_block)) {
+				$deleted = true;
+				debug_msg("Delete %s from %s ... Success!", $dst_block, $dst_storage_id);
+			}
+		}
+
+		if (!$deleted) {
+			$this->out('message', _('Cannot delete block.'));
+			error_msg('Failed to delete block "%s" from %s.', $dst_block, $dst_storage_id);
+			return false;
+		}
+
+		/*
+		echo "<p>Delete: ", $dst_file, "\n";
+		echo "<b>", $deleted ? 'ok':'failed', "</b>\n";
+		echo "</p>\n";
+		// */
+
 		return true;
 	}
 

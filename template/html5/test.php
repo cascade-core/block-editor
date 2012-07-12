@@ -37,8 +37,11 @@ function TPL_html5__block_editor__test($t, $id, $d, $so)
 
 	echo	"<div>",
 		_('Block:'), "\n",
-		"<input type=\"text\" name=\"dst_block\" value=\"", htmlspecialchars($block), "\" size=\"30\">\n",
+		"<input type=\"text\" name=\"dst_block\" value=\"", htmlspecialchars($block), "\" size=\"30\"
+				onchange=\"this.form['delete'].disabled = true;\">\n",
 		"<input type=\"submit\" name=\"submit\" value=\"", _('Save'), "\">\n",
+		"<input type=\"submit\" name=\"delete\" value=\"", _('Delete'), "\" onclick=\"return confirm('",
+				_('Do you really want to delete this entire block?'), "')\">\n",
 		"<input type=\"hidden\" name=\"src_block\" value=\"", htmlspecialchars($block), "\">\n",
 		"<input type=\"hidden\" name=\"src_mtime\" value=\"", htmlspecialchars($mtime), "\">\n",
 		"</div>";
