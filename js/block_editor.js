@@ -76,7 +76,7 @@
 						var a = $('<a></a>').text(name);
 						div = $('<div></div>').append(a);
 						a.attr('href', '#');
-						a.click(function() { this.editInput(name); return false; }.bind(this, name));
+						a.click((function (t, name) { return function() { t.editInput(name); return false; }; })(this, name));
 						this.input_divs[name] = div;
 
 						if (name == 'enable') {
@@ -206,7 +206,7 @@
 					ta.autogrow();
 					update_desc();
 
-					set.click(function() {
+					set.click($.proxy(function() {
 						var v = ta.val();
 						//console.log('Set:', name, '=', type.val(), v);
 						this.input_divs[name].removeClass('block_editor_widget__default_connection');
@@ -242,7 +242,7 @@
 						this.onChange();
 						d.close();
 						return false;
-					}.bind(this));
+					}, this));
 				};
 
 				this.setPosition = function(x, y) {
@@ -401,7 +401,7 @@
 				};
 
 				// When title is dblclicked
-				this.onChangeId = function() {
+				this.onChangeId = $.proxy(function() {
 					if (this.placeholder) {
 						return false;
 					}
@@ -420,10 +420,10 @@
 						this.onChange();
 					}
 					return false;
-				}.bind(this);
+				}, this);
 
 				// when remove button is clicked
-				this.onRemoveBlock = function () {
+				this.onRemoveBlock = $.proxy(function () {
 					if (this.placeholder) {
 						return false;
 					}
@@ -439,7 +439,7 @@
 						delete this;
 					}
 					return false;
-				}.bind(this);
+				}, this);
 
 				// Create DOM widget
 				this.createWidget = function() {
