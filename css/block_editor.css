@@ -103,6 +103,8 @@ div.block_editor_widget {
 		}
 
 	.block_editor_widget__block table {
+		margin: 0px;
+		padding: 0px;
 		position: relative;
 		border-collapse: collapse;
 		border: 1px solid #000;
@@ -114,6 +116,9 @@ div.block_editor_widget {
 		font-size: 0.8em;
 		white-space: nowrap;
 		vertical-align: top;
+		border: none;
+		padding: 0px;
+		margin: 0px;
 	}
 
 	.block_editor_widget__block table th {
