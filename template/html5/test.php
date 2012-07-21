@@ -35,8 +35,11 @@ function TPL_html5__block_editor__test($t, $id, $d, $so)
 
 	echo "<form class=\"block_editor\" id=\"", htmlspecialchars($id), "\" method=\"post\">\n";
 
-	echo	"<div>",
-		_('Block:'), "\n",
+	echo	"<div>";
+	if (!empty($back_link)) {
+		echo "<a href=\"", htmlspecialchars($back_link), "\">", _('« List'), "</a> | ";
+	}
+	echo	_('Block:'), "\n",
 		"<input type=\"text\" name=\"dst_block\" value=\"", htmlspecialchars($block), "\" size=\"30\"
 				onchange=\"this.form['delete'].disabled = true;\">\n",
 		"<input type=\"submit\" name=\"submit\" value=\"", _('Save'), "\">\n",

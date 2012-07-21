@@ -19,6 +19,7 @@ slot_weight = "10"
 .y = 166
 block[] = "router:path_tail"
 doc_link = "/documentation/block/{block}"
+back_link = "/block_editor"
 slot = "default"
 slot_weight = "50"
 

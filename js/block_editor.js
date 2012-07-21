@@ -602,6 +602,7 @@
 					height: canvas_height
 				});
 			canvas.append(canvas_inner);
+			canvas_inner.disableSelection();
 
 			var canvas_raphael = Raphael(canvas_inner[0], canvas_width, canvas_height);	// fixme
 			canvas.scrollTo(canvas_width / 3 - 50, canvas_height / 3 - 50);

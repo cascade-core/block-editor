@@ -36,6 +36,7 @@ class B_block_editor__test extends Block {
 	protected $inputs = array(
 		'block' => false,		// Block to edit.
 		'doc_link' => DEBUG_CASCADE_GRAPH_DOC_LINK, // Link to documentation.
+		'back_link' => null,
 		'slot' => 'default',
 		'slot_weight' => 50,
 	);
@@ -108,6 +109,7 @@ class B_block_editor__test extends Block {
 					'cfg' => $cfg,
 					'storage_id' => $storage_id,
 					'doc_link' => $this->in('doc_link'),
+					'back_link' => $this->in('back_link'),
 					'available_blocks' => $available_blocks,
 				));
 		}
