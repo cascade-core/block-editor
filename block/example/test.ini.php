@@ -24,7 +24,6 @@ slot = "default"
 slot_weight = "50"
 
 [block:message]
-1[] = "editor:block"
 .block = "core/out/message"
 .x = 248
 .y = 14
@@ -35,6 +34,7 @@ text[] = "editor:message"
 error_title = "Sorry."
 success_title = "Ok."
 redirect_url = "/block_editor/%s"
+1[] = editor:block
 slot = "default"
 slot_weight = "20"
 

@@ -170,7 +170,7 @@ div.block_editor_widget {
 		}
 
 	.block_editor_widget__canvas {
-		left: 40px;
+		left: 60px;
 		right: 0px;
 	}
 
@@ -187,7 +187,7 @@ div.block_editor_widget {
 
 	.block_editor_widget__palette {
 		left: 0px;
-		width: 39px;
+		width: 59px;
 		border-right: 1px solid #aaa;
 		background: #fff;
 		text-align: center;
@@ -196,7 +196,7 @@ div.block_editor_widget {
 	}
 		.block_editor_widget__palette:hover,
 		.block_editor_widget__palette.active {
-			width: 20em;
+			width: 23em;
 			-moz-box-shadow: 0px 0px 7px #000 !important;
 			-webkit-box-shadow: 0px 0px 7px #000 !important;
 			box-shadow: 0px 0px 7px #000 !important;
@@ -217,10 +217,11 @@ div.block_editor_widget {
 			text-align: left;
 		}
 			.block_editor_widget__palette_toolbar div {
-				padding: 0.1em 1em 0.1em 3em;
+				padding: 0.1em 1em 0.1em 5em;
 			}
 
-		.block_editor_widget__maximize {
+		.block_editor_widget__maximize,
+		.block_editor_widget__edit_properties {
 			position: absolute;
 			top: 0px;
 			left: 0px;
@@ -233,6 +234,12 @@ div.block_editor_widget {
 			border-right: 1px solid #aaa;
 			background: #fff;
 			overflow: hidden;
+			z-index: 2;
+		}
+
+		.block_editor_widget__edit_properties {
+			left: 2em;
+			z-index: 1;
 		}
 
 		.block_editor_widget__palette_blocks {

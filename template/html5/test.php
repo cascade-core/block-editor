@@ -47,13 +47,12 @@ function TPL_html5__block_editor__test($t, $id, $d, $so)
 				_('Do you really want to delete this entire block?'), "')\">\n",
 		"<input type=\"hidden\" name=\"src_block\" value=\"", htmlspecialchars($block), "\">\n",
 		"<input type=\"hidden\" name=\"src_mtime\" value=\"", htmlspecialchars($mtime), "\">\n",
-		"</div>";
-
+		"</div>\n";
 
 	echo "\t<textarea name=\"cfg\" class=\"block_editor_widget\" rows=\"25\" cols=\"80\" style=\"display: block; width: 99%;\"",
 			"data-doc_link=\"", htmlspecialchars($doc_link), "\" ",
-			"data-available_blocks=\"", htmlspecialchars(json_encode($available_blocks)), "\">",
-		htmlspecialchars(json_encode($cfg)), "</textarea>\n";
+			"data-available_blocks='", json_encode($available_blocks, JSON_HEX_APOS | JSON_HEX_AMP), "'>",
+		json_encode($cfg, JSON_HEX_TAG | JSON_HEX_AMP), "</textarea>\n";
 
 	echo "<p>";
 	printf('Stored in <tt>%s</tt>, last modified at %s.', $storage_id, strftime('%Y-%m-%d %H:%M:%S', $mtime));

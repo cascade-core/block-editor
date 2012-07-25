@@ -32,6 +32,61 @@
 
 (function($) {
 	$.fn.blockEditorWidget = function() {
+	
+		/**
+		 * Converts the given data structure to a JSON string.
+		 * Based on http://www.openjs.com/scripts/data/json_encode.php
+		 */
+		var json_escape = function(str)
+		{
+			return str.replace(/'"\//g, "\\$&");
+		}
+
+		var json_encode = (JSON && JSON.stringify) ? function (arr) { return JSON.stringify(arr, null, '  '); } : function(arr)
+		{
+			var parts = [];
+			var is_list = (Object.prototype.toString.apply(arr) === '[object Array]');
+
+			for (var key in arr) {
+				var value = arr[key];
+				var str = "";
+				if (!is_list) {
+					str = '"' + json_escape(key) + '":';
+				}
+				if (typeof value == "object") {
+					str += json_encode(value);
+				} else if (typeof value == "number") {
+					str += value;
+				} else if (value === false) {
+					str += 'false';
+				} else if (value === true) {
+					str += 'true';
+				} else if (value === null) {
+					str += 'null';
+				} else {
+					str += '"' + json_escape(value) + '"';
+				}
+				parts.push(str);
+			}
+			var json = parts.join(",\n");
+
+			if (is_list) {
+				return '[' + json + ']';
+			} else {
+				return '{' + json + '}';
+			}
+		}
+
+		var json_decode = function(json)
+		{
+			try {
+				return (JSON && JSON.parse) ? JSON.parse(json) : eval('(' + json + ')');
+			}
+			catch (e) {
+				return null;
+			}
+		}
+
 		this.each(function() {
 			var canvas_width = 4000;
 			var canvas_height = 4000;
@@ -44,7 +99,7 @@
 			var blocks = {};
 			var doc_link = textarea.attr('data-doc_link');
 			var current_dialog = null;
-
+			var block_re = /^block:/;
 
 
 			// Block
@@ -156,7 +211,7 @@
 						this.addInput(name, null);
 					}
 
-					var d = createDialog(this.widget, this.id + ":" + name);
+					var d = createDialog(this.id + ":" + name);
 					var type = $('<select class="focus"></select>');
 					var ta = $('<textarea></textarea>');
 					var desc = $('<div></div>');
@@ -536,7 +591,7 @@
 			textarea.css('display', 'none');
 
 			// Canvas dialog factory
-			function createDialog(holder, title)
+			function createDialog(title)
 			{
 				if (current_dialog) {
 					current_dialog.remove();
@@ -571,6 +626,7 @@
 
 				return current_dialog;
 			};
+
 
 			// Create canvas
 			var canvas = $('<div class="block_editor_widget__canvas"></div>');
@@ -619,6 +675,82 @@
 				var w = $(this).parents('.block_editor_widget');
 				w.toggleClass('block_editor_widget__maximized');
 				$(this).html(w.hasClass('block_editor_widget__maximized') ? '&darr;' : '&uarr;')
+				return false;
+			}));
+
+			// Edit properties button
+			palette_toolbar.append($('<a href="#" class="block_editor_widget__edit_properties" title="Edit parent block properties">P</a>').click(function() {
+				var d = createDialog("Parent block properties");
+				var snippets = $('<small></small>');
+				var ta = $('<textarea class="focus" width="100%" rows="15"></textarea>');
+				var set = $('<input>').val(_('Set properties')).attr('type', 'submit');
+				var err = $('<p style="text-align: center; margin: 1ex; padding:0"><small>'
+					+ _('Entered text is not valid <a href="http://json.org/">JSON</a> object.') + '</small></p>').hide();
+
+				d.append($('<div>' + _('Add:') + " </div>").append(snippets));
+				d.append(ta);
+				d.append(set);
+				d.append(err);
+
+				var val = {};
+
+				for (var i in orig_data) {
+					if (!block_re.test(i)) {
+						val[i] = orig_data[i];
+					}
+				}
+
+				ta.val(json_encode(val).replace(/\n(\t+)/g, function(all, indent) {
+					return '\n' + Array(indent.length).join('  ');
+				}));
+
+				var add_snippet = function(label, key, s) {
+					if (snippets.children().length > 0) {
+						snippets.append(' | ');
+					}
+					snippets.append($('<a href="#"></a>').text(label).click(function() {
+						var x = json_decode(ta.val());
+						if (typeof(x) == 'object' && !(key in x)) {
+							x[key] = s;
+						}
+						ta.val(json_encode(x));
+						ta.focus();
+					}));
+				};
+				add_snippet('outputs', 'outputs', {
+					'title': 'Some title',
+					'done': ['id_of_most_important_block:done']
+				});
+				add_snippet('route', 'route:/some/path/$id', {
+					'x': 'value',
+					'y': 'value',
+				});
+
+				var check = function() {
+					var x = json_decode(ta.val());
+					if (x != null) {
+						set.removeAttr('disabled');
+						err.hide();
+					} else {
+						set.attr('disabled', 'disabled');
+						err.show();
+					}
+				};
+				ta.keydown(check).keyup(check).change(check);
+
+				set.click(function() {
+					var new_orig_data = json_decode(ta.val());
+					if (typeof(new_orig_data) == 'object') {
+						orig_data = new_orig_data;
+						d.close();
+					} else {
+						set.attr('disabled', 'disabled');
+						err.show();
+					}
+					onBlockChange();
+					return false;
+				});
+
 				return false;
 			}));
 
@@ -697,8 +829,6 @@
 				});
 			}
 
-
-			var block_re = /^block:/;
 
 			// Serialize all blocks to JSON, keep unknown values from original in place
 			widget.serializeBlocks = function(blocks) {

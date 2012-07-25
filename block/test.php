@@ -45,7 +45,7 @@ class B_block_editor__test extends Block {
 		'block' => true,		// Name of saved block.
 		'message' => true,		// Success or error message.
 		'submitted' => true,		// Form was submited.
-		'done' => true,			// Block has been saved/deleted.
+		'done' => true,			// Block has been saved or deleted.
 	);
 
 	const force_exec = TRUE;
@@ -73,7 +73,7 @@ class B_block_editor__test extends Block {
 		if (!isset($mtime)) {
 			return;
 		}
-		debug_msg('Loading block: %s', $block);
+		debug_msg('Edit block: %s', $block);
 
 		// get form data
 		$submitted = !empty($_POST['submit']) && $_POST['src_block'] == $block;
@@ -86,11 +86,13 @@ class B_block_editor__test extends Block {
 			$deleted = $this->delete_block($storages, $mtime, $block, $_POST['src_mtime']);
 		}
 
-		if ($saved) {
-			$this->out('message', sprintf(_('Block "%s" has been saved.'), $_POST['dst_block']));
-		} else if ($deleted) {
+		if ($deleted) {
 			$this->out('message', sprintf(_('Block "%s" has been deleted.'), $block));
 		} else {
+			if ($saved) {
+				$this->out('message', sprintf(_('Block "%s" has been saved.'), $_POST['dst_block']));
+			}
+
 			// Load block description
 			$cfg = $src_storage->load_block($block);
 
@@ -114,7 +116,7 @@ class B_block_editor__test extends Block {
 				));
 		}
 
-		$this->out('block', $saved ? $dst_block : $block);
+		$this->out('block', $saved ? $_POST['dst_block'] : null);
 		$this->out('done', $saved || $deleted);
 	}
 
@@ -123,7 +125,7 @@ class B_block_editor__test extends Block {
 	{
 		$saved = false;
 
-		if ($src_mtime != $orig_mtime) {
+		if ($orig_mtime > 0 && $src_mtime != $orig_mtime) {
 			$this->out('message', _('Block was modified by someone else in meantime.'));
 			error_msg('Failed to store block "%s", becouse it was modified by someone else (%s != %s).', $dst_block, $src_mtime, $orig_mtime);
 			return false;
