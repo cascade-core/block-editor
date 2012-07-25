@@ -54,6 +54,7 @@ class B_block_editor__test extends Block {
 	public function main()
 	{
 		$saved = false;
+		$deleted = false;
 		$dst_block = null;
 		$storages = $this->get_cascade_controller()->get_block_storages();
 
@@ -94,7 +95,7 @@ class B_block_editor__test extends Block {
 			}
 
 			// Load block description
-			$cfg = $src_storage->load_block($block);
+			$cfg = $submitted ? json_decode($_POST['cfg']) : $src_storage->load_block($block);
 
 			if ($cfg === FALSE) {
 				$this->out('message', _('Failed to load block configuration.'));
