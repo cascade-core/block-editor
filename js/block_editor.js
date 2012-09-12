@@ -715,6 +715,7 @@
 						}
 						ta.val(json_encode(x));
 						ta.focus();
+						return false;
 					}));
 				};
 				add_snippet('outputs', 'outputs', {
@@ -724,6 +725,11 @@
 				add_snippet('route', 'route:/some/path/$id', {
 					'x': 'value',
 					'y': 'value',
+				});
+				add_snippet('policy', 'policy', {
+					'require_block': 'important/block',
+					'skip_if_denied': 'optional/output/block',
+					'dummy_if_denied': 'optional/data-source/block'
 				});
 
 				var check = function() {
