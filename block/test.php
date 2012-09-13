@@ -230,8 +230,8 @@ class B_block_editor__test extends Block {
 		ksort($available_blocks);
 
 		/*
-		NDebug::barDump($available_blocks, 'Available blocks');
-		NDebug::barDump($blocks, 'block list');
+		NDebugger::barDump($available_blocks, 'Available blocks');
+		NDebugger::barDump($blocks, 'block list');
 		// */
 
 		return $available_blocks;
