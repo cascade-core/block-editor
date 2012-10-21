@@ -64,6 +64,9 @@ class B_block_editor__test extends Block {
 			$block = join('/', $block);
 		}
 
+		// Replace dashes with underscores, since no dash is allowed in block name
+		$block = str_replace('-', '_', $block);
+
 		// load block
 		foreach ($storages as $storage_id => $src_storage) {
 			$mtime = $src_storage->block_mtime($block);
