@@ -891,8 +891,13 @@
 						var block = orig_data[i]['.block'];
 
 						var b = new Block(id, block, doc_link, onBlockChange);
-						b.addInputs(available_blocks[block].inputs, true);
-						b.addOutputs(available_blocks[block].outputs);
+						if (block in available_blocks) {
+							b.addInputs(available_blocks[block].inputs, true);
+							b.addOutputs(available_blocks[block].outputs);
+						} else {
+							b.addInput('*', null);
+							b.addOutput('*', null);
+						}
 						b.addInputs(orig_data[i]);
 						b.origX = '.x' in orig_data[i] ? parseInt(orig_data[i]['.x']) : null;
 						b.origY = '.y' in orig_data[i] ? parseInt(orig_data[i]['.y']) : null;
