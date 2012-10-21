@@ -518,7 +518,7 @@
 								.dblclick(this.onChangeId))
 							.append($('<div class="block_editor_widget__block_name"></div>')
 								.append($('<a></a>').text(block)
-									.attr('href', doc_link.replace('%s', block))
+									.attr('href', doc_link.replace('{block}', block))
 									.attr('target', '_blank')
 								))))
 						.append($('<tr></tr>')
