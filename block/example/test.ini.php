@@ -19,7 +19,7 @@ slot_weight = "10"
 .y = 166
 block[] = "router:path_tail"
 doc_link = "/documentation/block/{block}"
-back_link = "/block_editor"
+back_link = "/block-editor"
 slot = "default"
 slot_weight = "50"
 
@@ -34,7 +34,7 @@ is_success[] = "editor:done"
 text[] = "editor:message"
 error_title = "Sorry."
 success_title = "Ok."
-redirect_url = "/block_editor/%s"
+redirect_url = "/block-editor/%s"
 slot = "default"
 slot_weight = "20"
 

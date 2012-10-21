@@ -2,10 +2,10 @@
 
 [/block_editor]
 title = Block Editor
-content = block_editor/example/index
+content = block-editor/example/index
 
 [/block_editor/**]
 title = Block Editor
-content = block_editor/example/test
+content = block-editor/example/test
 
 ; vim:filetype=dosini:

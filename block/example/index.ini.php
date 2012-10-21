@@ -15,7 +15,7 @@ slot_weight = "10"
 .block = "core/devel/doc/index"
 .x = 0
 .y = 354
-link = "/block_editor/{block}"
+link = "/block-editor/{block}"
 writable_only = "1"
 heading_level = "3"
 slot_weight = "40"
@@ -36,7 +36,7 @@ slot_weight = "20"
 config = "app/routes.ini.php"
 flat_list = "1"
 title_fmt = "{ROUTE}"
-link_fmt = "/block_editor/{BLOCK}"
+link_fmt = "/block-editor/{BLOCK}"
 enable_key = "BLOCK"
 
 [block:routes_menu]
