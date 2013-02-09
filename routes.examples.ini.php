@@ -1,11 +1,11 @@
 ; <?php exit(); __halt_compiler(); ?>
 
-[/block_editor]
+[/block-editor]
 title = Block Editor
-content = block-editor/example/index
+content = block_editor/example/index
 
-[/block_editor/**]
+[/block-editor/**]
 title = Block Editor
-content = block-editor/example/test
+content = block_editor/example/test
 
 ; vim:filetype=dosini:
