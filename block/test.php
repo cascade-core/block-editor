@@ -56,7 +56,7 @@ class B_block_editor__test extends Block {
 		$saved = false;
 		$deleted = false;
 		$dst_block = null;
-		$storages = $this->get_cascade_controller()->get_block_storages();
+		$storages = $this->getCascadeController()->getBlockStorages();
 
 		// get inputs
 		$block = $this->in('block');
@@ -69,7 +69,7 @@ class B_block_editor__test extends Block {
 
 		// load block
 		foreach ($storages as $storage_id => $src_storage) {
-			$mtime = $src_storage->block_mtime($block);
+			$mtime = $src_storage->blockMTime($block);
 			if ($mtime) {
 				break;
 			}
@@ -85,9 +85,9 @@ class B_block_editor__test extends Block {
 		$this->out('submitted', $submitted || $submit_delete);
 
 		if ($submitted) {
-			$saved = $this->store_block($storages, $mtime, $_POST['dst_block'], $_POST['src_mtime'], $_POST['cfg']);
+			$saved = $this->storeBlock($storages, $mtime, $_POST['dst_block'], $_POST['src_mtime'], $_POST['cfg']);
 		} else if ($submit_delete) {
-			$deleted = $this->delete_block($storages, $mtime, $block, $_POST['src_mtime']);
+			$deleted = $this->deleteBlock($storages, $mtime, $block, $_POST['src_mtime']);
 		}
 
 		if ($deleted) {
@@ -98,18 +98,18 @@ class B_block_editor__test extends Block {
 			}
 
 			// Load block description
-			$cfg = $submitted ? json_decode($_POST['cfg']) : $src_storage->load_block($block);
+			$cfg = $submitted ? json_decode($_POST['cfg']) : $src_storage->loadBlock($block);
 
 			if ($cfg === FALSE) {
 				$this->out('message', _('Failed to load block configuration.'));
 				return;
 			}
 
-			$available_blocks = $this->get_available_blocks();
+			$available_blocks = $this->getAvailableBlocks();
 
-			$this->template_add_to_slot('head', 'html_head', 60, 'block_editor/html_head', array());
+			$this->templateAddToSlot('head', 'html_head', 60, 'block_editor/html_head', array());
 
-			$this->template_add(null, 'block_editor/test', array(
+			$this->templateAdd(null, 'block_editor/test', array(
 					'block' => $block,
 					'mtime' => $mtime,
 					'cfg' => $cfg,
@@ -125,7 +125,7 @@ class B_block_editor__test extends Block {
 	}
 
 
-	private function store_block($storages, $orig_mtime, $dst_block, $src_mtime, $cfg)
+	private function storeBlock($storages, $orig_mtime, $dst_block, $src_mtime, $cfg)
 	{
 		$saved = false;
 
@@ -146,7 +146,7 @@ class B_block_editor__test extends Block {
 		// store block in first storage that allows it
 		foreach ($storages as $dst_storage_id => $dst_storage) {
 			debug_msg("Storing %s in %s ...", $dst_block, $dst_storage_id);
-			if (!$dst_storage->is_read_only() && $dst_storage->store_block($dst_block, $new_cfg)) {
+			if (!$dst_storage->isReadOnly() && $dst_storage->storeBlock($dst_block, $new_cfg)) {
 				$saved = true;
 				debug_msg("Storing %s in %s ... Success!", $dst_block, $dst_storage_id);
 				break;
@@ -170,7 +170,7 @@ class B_block_editor__test extends Block {
 	}
 
 
-	private function delete_block($storages, $orig_mtime, $dst_block, $src_mtime)
+	private function deleteBlock($storages, $orig_mtime, $dst_block, $src_mtime)
 	{
 		$deleted = false;
 
@@ -183,7 +183,7 @@ class B_block_editor__test extends Block {
 		// delete block from all storages that allows it
 		foreach ($storages as $dst_storage_id => $dst_storage) {
 			debug_msg("Deleting %s from %s ...", $dst_block, $dst_storage_id);
-			if (!$dst_storage->is_read_only() && $dst_storage->delete_block($dst_block)) {
+			if (!$dst_storage->isReadOnly() && $dst_storage->deleteBlock($dst_block)) {
 				$deleted = true;
 				debug_msg("Delete %s from %s ... Success!", $dst_block, $dst_storage_id);
 			}
@@ -205,16 +205,16 @@ class B_block_editor__test extends Block {
 	}
 
 
-	private function get_available_blocks()
+	private function getAvailableBlocks()
 	{
-		$cc = $this->get_cascade_controller();
-		$blocks = $cc->get_known_blocks();
+		$cc = $this->getCascadeController();
+		$blocks = $cc->getKnownBlocks();
 
 		$available_blocks = array();
 
 		foreach ($blocks as $plugin => $plugin_blocks) {
 			foreach ($plugin_blocks as $block) {
-				$desc = $cc->describe_block($block);
+				$desc = $cc->describeBlock($block);
 				if ($desc !== false) {
 					$available_blocks[$block] = $desc;
 					$available_blocks[$block]['plugin'] = $plugin;
