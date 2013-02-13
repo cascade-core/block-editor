@@ -672,11 +672,39 @@
 
 			// Maximize button
 			palette_toolbar.append($('<a href="#" class="block_editor_widget__maximize" title="Maximize">&uarr;</a>').click(function() {
-				var w = $(this).parents('.block_editor_widget');
-				w.toggleClass('block_editor_widget__maximized');
-				$(this).html(w.hasClass('block_editor_widget__maximized') ? '&darr;' : '&uarr;')
+				var $this = $(this);
+				var w = $this.parents('.block_editor_widget');
+
+				if (w.fullScreen != undefined) {
+					w.fullScreen(true);
+				} else {
+					w.addClass('block_editor_widget__maximized');
+				}
 				return false;
 			}));
+
+			// Restore button
+			palette_toolbar.append($('<a href="#" class="block_editor_widget__restore" title="Restore">&darr;</a>').click(function() {
+				var $this = $(this);
+				var w = $this.parents('.block_editor_widget');
+
+				if (w.fullScreen != undefined) {
+					w.fullScreen(false);
+				} else {
+					w.removeClass('block_editor_widget__maximized');
+				}
+				return false;
+			}));
+
+			// Add/remove class on fullscreen event
+			$(document).bind('fullscreenchange', function() {
+				if (widget.fullScreen()) {
+					widget.addClass("block_editor_widget__fullscreen");
+				} else {
+					widget.removeClass('block_editor_widget__fullscreen');
+				}
+			});
+
 
 			// Edit properties button
 			palette_toolbar.append($('<a href="#" class="block_editor_widget__edit_properties" title="Edit parent block properties">P</a>').click(function() {
