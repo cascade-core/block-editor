@@ -17,9 +17,9 @@ slot_weight = "10"
 .block = "block_editor/test"
 .x = 0
 .y = 166
-block[] = "router:path_tail"
-doc_link = "/documentation/block/{block}"
-back_link = "/block-editor"
+block[] = "admin:path_tail"
+doc_link = "/admin/devel/doc/block/{block}"
+back_link = "/admin/block-editor"
 slot = "default"
 slot_weight = "50"
 
@@ -34,14 +34,14 @@ is_success[] = "editor:done"
 text[] = "editor:message"
 error_title = "Sorry."
 success_title = "Ok."
-redirect_url = "/block-editor/%s"
+redirect_url = "/admin/block-editor/%s"
 slot = "default"
 slot_weight = "20"
 
 [block:router_invalidate_cache]
 .block = "core/ini/router_invalidate_cache"
-.x = 244
-.y = 436
+.x = 245
+.y = 466
 enable[] = "editor:done"
 
 
