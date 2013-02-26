@@ -31,16 +31,6 @@ text = "Routes"
 slot[] = "slot_left:name"
 slot_weight = "40"
 
-[block:routes]
-.block = "core/ini/router_links"
-.x = 2
-.y = 311
-config = "app/routes.ini.php"
-flat_list = "1"
-title_fmt = "{ROUTE}"
-link_fmt = "/admin/block-editor/{BLOCK}"
-enable_key = "BLOCK"
-
 [block:routes_menu]
 .block = "core/out/menu"
 .x = 305
@@ -54,7 +44,7 @@ slot_weight = "45"
 .block = "core/out/slot"
 .x = 0
 .y = 172
-slot_weight = 60
+slot_weight = "60"
 extra_class = "left_column"
 
 [block:slot_right]
@@ -63,6 +53,16 @@ extra_class = "left_column"
 .y = 526
 slot_weight = "65"
 extra_class = "right_column"
+
+[block:routes]
+.block = "core/router_links"
+.x = 1
+.y = 314
+config[] = "config:routes"
+flat_list = "1"
+title_fmt = "{route}"
+link_fmt = "/admin/block-editor/{block}"
+enable_key = "block"
 
 
 ; vim:filetype=dosini:
