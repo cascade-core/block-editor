@@ -2,7 +2,7 @@
 	"name": "cascade/block_editor",
 	"type": "cascade-plugin",
 	"description": "Visual block editor",
-	"license": "BSD-3-Clause",
+	"license": "Apache-2.0",
 	"authors": [
 		{
 			"name": "Josef Kufner",
