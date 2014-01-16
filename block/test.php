@@ -19,7 +19,7 @@
 /**
  * Test WYSIWYG block editor. INI file is loaded and editor form is displayed.
  */
-class B_block_editor__test extends Block {
+class B_block_editor__test extends \Cascade\Core\Block {
 
 	protected $inputs = array(
 		'block' => false,		// Block to edit.
