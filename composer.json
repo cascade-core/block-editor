@@ -13,7 +13,7 @@
 		"plugin": "block_editor"
 	},
 	"require": {
-		"cascade/composer-plugin": "dev-master",
+		"cascade/composer-plugin": ">=1.1",
 		"cascade/admin": "dev-master"
 	}
 }
