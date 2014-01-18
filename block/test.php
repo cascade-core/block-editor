@@ -134,9 +134,14 @@ class B_block_editor__test extends \Cascade\Core\Block {
 		// store block in first storage that allows it
 		foreach ($storages as $dst_storage_id => $dst_storage) {
 			debug_msg("Storing %s in %s ...", $dst_block, $dst_storage_id);
-			if (!$dst_storage->isReadOnly() && $dst_storage->storeBlock($dst_block, $new_cfg)) {
-				$saved = true;
-				debug_msg("Storing %s in %s ... Success!", $dst_block, $dst_storage_id);
+			if (!$dst_storage->isReadOnly()) {
+				if ($dst_storage->storeBlock($dst_block, $new_cfg)) {
+					$saved = true;
+					debug_msg("Storing %s in %s ... Success!", $dst_block, $dst_storage_id);
+				} else {
+					$saved = false;
+					debug_msg("Storing %s in %s ... Failed.", $dst_block, $dst_storage_id);
+				}
 				break;
 			}
 		}
