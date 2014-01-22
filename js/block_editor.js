@@ -99,8 +99,10 @@
 			var blocks = {};
 			var doc_link = textarea.attr('data-doc_link');
 			var current_dialog = null;
-			var block_re = /^block:/;
 
+			if (!('blocks' in orig_data)) {
+				orig_data.blocks = {};
+			}
 
 			// Block
 			function Block(id, block, doc_link, onChange)
@@ -122,6 +124,19 @@
 				this.onChange = onChange ? onChange : function() {}; // callback when anything changes
 
 				this.addInput = function(name, value) {
+					if (value instanceof Array) {
+						if (value.length == 2) {
+							value = [value.join(':')];
+						} else {
+							var new_val = [value.shift()];
+							while (value.length > 0) {
+								var b = value.shift();
+								var o = value.shift();
+								new_val.push(b+':'+o);
+							}
+							value = new_val;
+						}
+					}
 					this.inputs[name] = value;
 
 					var div;
@@ -154,10 +169,15 @@
 					}
 				};
 
-				this.addInputs = function(list, set_all_to_default) {
-					for (var i in list) {
-						if (i[0] != '.') {
-							this.addInput(i, set_all_to_default ? undefined : list[i]);
+				this.addInputs = function(inputs, connections, set_all_to_default) {
+					for (var i in inputs) {
+						if (connections == undefined || !(i in connections)) {
+							this.addInput(i, set_all_to_default ? undefined : inputs[i]);
+						}
+					}
+					if (connections != undefined && !set_all_to_default) {
+						for (var i in connections) {
+							this.addInput(i, connections[i]);
 						}
 					}
 				}
@@ -177,9 +197,7 @@
 
 				this.addOutputs = function(list) {
 					for (var i in list) {
-						if (i[0] != '.') {
-							this.addOutput(i, list[i]);
-						}
+						this.addOutput(i, list[i]);
 					}
 				};
 
@@ -722,10 +740,8 @@
 
 				var val = {};
 
-				for (var i in orig_data) {
-					if (!block_re.test(i)) {
-						val[i] = orig_data[i];
-					}
+				for (var i in orig_data.blocks) {
+					val[i] = orig_data[i];
 				}
 
 				ta.val(json_encode(val).replace(/\n(\t+)/g, function(all, indent) {
@@ -810,7 +826,7 @@
 			for (var block in available_blocks) {
 				var b = new Block(block.replace(/.*\//, ''), block, doc_link);
 				b.placeholder = true;
-				b.addInputs(available_blocks[block].inputs);
+				b.addInputs(available_blocks[block].inputs, available_blocks[block].connections);
 				b.addOutputs(available_blocks[block].outputs);
 				palette_blocks.append(b.widget);
 
@@ -850,7 +866,7 @@
 								} else {
 									// good id
 									var new_b = new Block(id, b.block, doc_link, onBlockChange);
-									new_b.addInputs(available_blocks[b.block].inputs, true);
+									new_b.addInputs(available_blocks[b.block].inputs, available_blocks[b.block].connections, true);
 									new_b.addOutputs(available_blocks[b.block].outputs);
 									new_b.setPosition(pos.left, pos.top);
 									blocks[id] = new_b;
@@ -870,10 +886,10 @@
 
 				// keep original values
 				for (var i in orig_data) {
-					if (!block_re.test(i)) {
-						d[i] = orig_data[i];
-					}
+					d[i] = orig_data[i];
 				}
+
+				d.blocks = {};
 
 				// get top left corner
 				var min_x = canvas_width;
@@ -892,19 +908,31 @@
 				for (var i in blocks) {
 					var b = blocks[i];
 					var B = {
-						'.block': b.block,
-						'.x': b.x - min_x,
-						'.y': b.y - min_y
+						'block': b.block,
+						'x': b.x - min_x,
+						'y': b.y - min_y
 					};
 					if (b.force_exec != null) {
-						B['.force_exec'] = b.force_exec;
+						B['force_exec'] = b.force_exec;
 					}
 					for(var input in b.inputs) {
 						if (input != '*' && b.inputs[input] !== undefined) {
-							B[input] = b.inputs[input];
+							if (b.inputs[input] instanceof Array) {
+								if (!('in_con' in B)) {
+									B.in_con = {};
+								}
+								B.in_con[input] = b.inputs[input]
+									.map(function (x) {return x[0] == ':' ? [x] : x.split(':');})
+									.reduce(function (a, b) {return a.concat(b);});
+							} else {
+								if (!('in_val' in B)) {
+									B.in_val = {};
+								}
+								B.in_val[input] = b.inputs[input];
+							}
 						}
 					}
-					d['block:' + b.id] = B;
+					d.blocks[b.id] = B;
 				}
 
 				return json_encode(d);
@@ -913,26 +941,24 @@
 
 			// Add blocks to widget using data in textarea
 			widget.updateFromTextarea = function() {
-				for (var i in orig_data) {
-					if (block_re.test(i)) {
-						var id = i.replace(block_re, '');
-						var block = orig_data[i]['.block'];
+				//console.log('Original blocks:', orig_data.blocks);
+				for (var id in orig_data.blocks) {
+					var block = orig_data.blocks[id]['block'];
 
-						var b = new Block(id, block, doc_link, onBlockChange);
-						if (block in available_blocks) {
-							b.addInputs(available_blocks[block].inputs, true);
-							b.addOutputs(available_blocks[block].outputs);
-						} else {
-							b.addInput('*', null);
-							b.addOutput('*', null);
-						}
-						b.addInputs(orig_data[i]);
-						b.origX = '.x' in orig_data[i] ? parseInt(orig_data[i]['.x']) : null;
-						b.origY = '.y' in orig_data[i] ? parseInt(orig_data[i]['.y']) : null;
-						blocks[id] = b;
-						b.addToCanvas();
-						//console.log('New block', id, ':', b);
+					var b = new Block(id, block, doc_link, onBlockChange);
+					if (block in available_blocks) {
+						b.addInputs(available_blocks[block].inputs, available_blocks[block].connections, true);
+						b.addOutputs(available_blocks[block].outputs);
+					} else {
+						b.addInput('*', null);
+						b.addOutput('*', null);
 					}
+					b.addInputs(orig_data.blocks[id].in_val, orig_data.blocks[id].in_con);
+					b.origX = 'x' in orig_data.blocks[id] ? parseInt(orig_data.blocks[id].x) : null;
+					b.origY = 'y' in orig_data.blocks[id] ? parseInt(orig_data.blocks[id].y) : null;
+					blocks[id] = b;
+					b.addToCanvas();
+					//console.log('New block', id, ':', b);
 				}
 
 				// Create connections for the first time
