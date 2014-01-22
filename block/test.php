@@ -23,8 +23,8 @@ class B_block_editor__test extends \Cascade\Core\Block {
 
 	protected $inputs = array(
 		'block' => false,		// Block to edit.
-		'doc_link' => DEBUG_CASCADE_GRAPH_DOC_LINK, // Link to documentation.
-		'back_link' => null,
+		'doc_link' => '/admin/doc/block/{block}',	// Link to documentation.
+		'back_link' => '/admin/block-editor',		// The "Back to list" link on top of editor
 		'slot' => 'default',
 		'slot_weight' => 50,
 	);

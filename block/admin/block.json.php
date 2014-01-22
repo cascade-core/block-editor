@@ -28,7 +28,7 @@
                 ]
             },
             "in_val": {
-                "doc_link": "/admin/devel/doc/block/{block}",
+                "doc_link": "/admin/doc/block/{block}",
                 "back_link": "/admin/block-editor",
                 "slot": "default",
                 "slot_weight": 50
