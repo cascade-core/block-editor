@@ -648,26 +648,33 @@
 
 			// Create canvas
 			var canvas = $('<div class="block_editor_widget__canvas"></div>');
+			var canvas_moved = null;
 			widget.append(canvas);
 
-			$(canvas).mousedown(function(ev) {
-				var $canvas = $(canvas);
-				var startX = (canvas_width  - pan_speed * ev.pageX) - $canvas.scrollLeft();
-				var startY = (canvas_height - pan_speed * ev.pageY) - $canvas.scrollTop();
+			canvas.mousedown(function(ev) {
+				var startX = (canvas_width  - pan_speed * ev.pageX) - canvas.scrollLeft();
+				var startY = (canvas_height - pan_speed * ev.pageY) - canvas.scrollTop();
+				canvas_moved = false;
 
 				if (ev.which == 1 && $(ev.target).parents('.block_editor_widget__block').length == 0) {
-					$(canvas).mousemove(function(ev) {
+					canvas.mousemove(function(ev) {
+						canvas_moved = true;
 						if (ev.which == 0) {
-							$canvas.unbind('mousemove');
+							canvas.unbind('mousemove');
 						} else {
-							$canvas.scrollLeft((canvas_width  - pan_speed * ev.pageX) - startX);
-							$canvas.scrollTop ((canvas_height - pan_speed * ev.pageY) - startY);
+							canvas.scrollLeft((canvas_width  - pan_speed * ev.pageX) - startX);
+							canvas.scrollTop ((canvas_height - pan_speed * ev.pageY) - startY);
 						}
 					});
 				}
 			});
-			$(canvas).mouseup(function(ev) {
-				$(canvas).unbind('mousemove');
+
+			canvas.mouseup(function(ev) {
+				canvas.unbind('mousemove');
+
+				if (!canvas_moved && current_dialog) {
+					current_dialog.close();
+				}
 			});
 
 			var canvas_inner = $('<div class="block_editor_widget__canvas_inner"></div>').css({
