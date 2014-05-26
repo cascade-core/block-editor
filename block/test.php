@@ -207,7 +207,7 @@ class B_block_editor__test extends \Cascade\Core\Block {
 
 		foreach ($blocks as $plugin => $plugin_blocks) {
 			foreach ($plugin_blocks as $block) {
-				$desc = $cc->describeBlock($block);
+				$desc = $cc->describeBlock($block, $this->context);
 				if ($desc !== false) {
 					$available_blocks[$block] = $desc;
 					$available_blocks[$block]['plugin'] = $plugin;
