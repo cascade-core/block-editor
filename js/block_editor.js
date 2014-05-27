@@ -700,11 +700,11 @@
 				var $this = $(this);
 				var w = $this.parents('.block_editor_widget');
 
-				if (w.fullScreen != undefined) {
-					w.fullScreen(true);
-				} else {
+				//if (w.fullScreen != undefined) {
+				//	w.fullScreen(true);
+				//} else {
 					w.addClass('block_editor_widget__maximized');
-				}
+				//}
 				return false;
 			}));
 
@@ -713,11 +713,11 @@
 				var $this = $(this);
 				var w = $this.parents('.block_editor_widget');
 
-				if (w.fullScreen != undefined) {
-					w.fullScreen(false);
-				} else {
+				//if (w.fullScreen != undefined) {
+				//	w.fullScreen(false);
+				//} else {
 					w.removeClass('block_editor_widget__maximized');
-				}
+				//}
 				return false;
 			}));
 
