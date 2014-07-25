@@ -134,14 +134,20 @@ class B_block_editor__test extends \Cascade\Core\Block {
 		// store block in first storage that allows it
 		foreach ($storages as $dst_storage_id => $dst_storage) {
 			debug_msg("Storing %s in %s ...", $dst_block, $dst_storage_id);
-			if (!$dst_storage->isReadOnly()) {
-				if ($dst_storage->storeBlock($dst_block, $new_cfg)) {
-					$saved = true;
-					debug_msg("Storing %s in %s ... Success!", $dst_block, $dst_storage_id);
-				} else {
-					$saved = false;
-					debug_msg("Storing %s in %s ... Failed.", $dst_block, $dst_storage_id);
+			try {
+				if (!$dst_storage->isReadOnly()) {
+					$saved = !! $dst_storage->storeBlock($dst_block, $new_cfg);
+					if ($saved) {
+						debug_msg("Storing %s in %s ... Success!", $dst_block, $dst_storage_id);
+					} else {
+						debug_msg("Storing %s in %s ... Failed.", $dst_block, $dst_storage_id);
+					}
+					break;
 				}
+			}
+			catch (\Exception $ex) {
+				debug_msg("Storing %s in %s ... Failed badly: %s", $dst_block, $dst_storage_id, $ex->getMessage());
+				$saved = false;
 				break;
 			}
 		}
@@ -176,9 +182,17 @@ class B_block_editor__test extends \Cascade\Core\Block {
 		// delete block from all storages that allows it
 		foreach ($storages as $dst_storage_id => $dst_storage) {
 			debug_msg("Deleting %s from %s ...", $dst_block, $dst_storage_id);
-			if (!$dst_storage->isReadOnly() && $dst_storage->deleteBlock($dst_block)) {
-				$deleted = true;
-				debug_msg("Delete %s from %s ... Success!", $dst_block, $dst_storage_id);
+			try {
+				if (!$dst_storage->isReadOnly() && $dst_storage->deleteBlock($dst_block)) {
+					$deleted = true;
+					debug_msg("Delete %s from %s ... Success!", $dst_block, $dst_storage_id);
+					break;
+				}
+			}
+			catch (\Exception $ex) {
+				debug_msg("Delete %s from %s ... Failed badly: %s", $dst_block, $dst_storage_id, $ex->getMessage());
+				$deleted = false;
+				break;
 			}
 		}
 
