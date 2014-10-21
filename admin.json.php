@@ -19,6 +19,10 @@
         "/block-editor/**": {
             "title": "Block editor",
             "block": "block_editor/admin/block"
+        },
+        "/block-editor-palette.json": {
+            "title": "Block editor: Palette",
+            "block": "block_editor/admin/palette"
         }
     }
 }
