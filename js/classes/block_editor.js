@@ -9,6 +9,7 @@ var BlockEditor = function(el, options) {
 
 	// default options
 	this.defaults = {
+		paletteData: '/admin/block-editor-palette.json',
 		canvasOffset: 500, // px start rendering blocks from top left corner + canvasOffset
 		canvasPadding: 20, // px
 		canvasWidth: 2000,
@@ -36,16 +37,17 @@ BlockEditor._namespace = 'block-editor';
 
 BlockEditor.prototype.init = function() {
 	this.canvas = new Canvas(this); // create canvas
-	// todo get palette data via ajax
-	this.palette = new Palette(this.canvas,
-							   this.$el.data('available_blocks'),
-							   this.$el.data('doc_link')); // create blocks palette
-	this._processData(); // load and process data from textarea
-	this.render();
 //	this._bind();
+
+	var self = this;
+	$.get(this.options.paletteData).done(function(data) {
+		self.palette = new Palette(self.canvas, data, self.$el.data('doc_link')); // create blocks palette
+		self.processData(); // load and process data from textarea
+		self.render();
+	});
 };
 
-BlockEditor.prototype._processData = function() {
+BlockEditor.prototype.processData = function() {
 	this.data = JSON.parse(this.$el.val());
 	this.blocks = {};
 	if (this.data.blocks) {
