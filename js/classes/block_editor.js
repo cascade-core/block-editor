@@ -14,6 +14,7 @@ var BlockEditor = function(el, options) {
 		canvasPadding: 20, // px
 		canvasWidth: 2000,
 		canvasHeight: 2000,
+		canvasSpeed: 2, // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
 		canvasBackgroundColor: '#fff',
 		canvasBackgroundLineColor: '#eeeeff',
 		canvasBackgroundLineStep: 10 // px
@@ -69,8 +70,8 @@ BlockEditor.prototype.render = function() {
 	}
 
 	// scroll to relative zero
-	this.canvas.$container.scrollTop(this.canvas.options.canvasOffset - 45);
-	this.canvas.$container.scrollLeft(this.canvas.options.canvasOffset - 45);
+	this.canvas.$container.scrollTop(this.options.canvasOffset - 45);
+	this.canvas.$container.scrollLeft(this.options.canvasOffset - 45);
 };
 
 // todo

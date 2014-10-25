@@ -60,8 +60,35 @@ Canvas.prototype._create = function() {
 		width: this.editor.$el.width(),
 		height: this.editor.$el.height()
 	});
+	this.$container.on({
+		mousedown: this._onMouseDown.bind(this),
+		mouseup: this._onMouseUp.bind(this),
+		mousemove: this._onMouseMove.bind(this)
+	});
 	this.$container.append(this.canvas);
 	this.editor.$el.after(this.$container).hide();
+};
+
+Canvas.prototype._onMouseDown = function(e) {
+	var speed = this.options.canvasSpeed;
+	this._moving = true;
+	this._cursor = {
+		x: (this.canvas.width - speed * e.pageX) - this.$container.scrollLeft(),
+		y: (this.canvas.height - speed * e.pageY) - this.$container.scrollTop()
+	};
+	this.$container.disableSelection();
+};
+
+Canvas.prototype._onMouseMove = function(e) {
+	if (this._moving) {
+		var speed = this.options.canvasSpeed;
+		this.$container.scrollLeft((this.canvas.width - speed * e.pageX) - this._cursor.x);
+		this.$container.scrollTop((this.canvas.height - speed * e.pageY) - this._cursor.y);
+	}
+};
+
+Canvas.prototype._onMouseUp = function(e) {
+	this._moving = false;
 };
 
 Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY) {
@@ -114,8 +141,8 @@ Canvas.prototype._drawArrow = function(x, y) {
 	this.context.restore();
 };
 
-//Canvas.prototype._draw = function() {
-//	requestAnimationFrame(this._draw.bind(this));
+//Canvas.prototype._redraw = function() {
+//	requestAnimationFrame(this._redraw.bind(this));
 //	this.context.clearRect(0, 0, this.width, this.height);
 //	this._createLayout();
 //};
