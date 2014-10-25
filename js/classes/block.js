@@ -42,11 +42,12 @@ Block.prototype._create = function() {
 	// header with block id and block type
 	var $id = $('<div class="' + BlockEditor._namespace + '-block-id">');
 	var $type = $('<div class="' + BlockEditor._namespace + '-block-type">');
-	$type.html('<a href="' + this.palette.docLink.replace('{block}', this.type) + '">' + this.type + '</a>');
+	$type.text(this.type);
 	var $header = $('<th colspan="2" class="' + BlockEditor._namespace + '-block-header" />');
 	$header.append($id.text(this.id));
 	$header.append($type);
 	$header.append('<a href="#remove" class="' + BlockEditor._namespace + '-block-remove">×</a>');
+	$header.append('<a href="' + this.palette.docLink.replace('{block}', this.type) + '" class="' + BlockEditor._namespace + '-block-doc">o</a>');
 
 	// inputs
 	var $inputs = $('<td class="' + BlockEditor._namespace + '-block-inputs" />');
