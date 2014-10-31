@@ -70,13 +70,16 @@ Canvas.prototype._create = function() {
 };
 
 Canvas.prototype._onMouseDown = function(e) {
-	var speed = this.options.canvasSpeed;
-	this._moving = true;
-	this._cursor = {
-		x: (this.canvas.width - speed * e.pageX) - this.$container.scrollLeft(),
-		y: (this.canvas.height - speed * e.pageY) - this.$container.scrollTop()
-	};
-	this.$container.disableSelection();
+	var block = $(e.target).closest('table.' + BlockEditor._namespace + '-block')[0];
+	if (!block) {
+		var speed = this.options.canvasSpeed;
+		this._moving = true;
+		this._cursor = {
+			x: (this.canvas.width - speed * e.pageX) - this.$container.scrollLeft(),
+			y: (this.canvas.height - speed * e.pageY) - this.$container.scrollTop()
+		};
+		this.$container.disableSelection();
+	}
 };
 
 Canvas.prototype._onMouseMove = function(e) {

@@ -55,9 +55,41 @@ Block.prototype.redraw = function() {
 	this.canvas.redraw();
 };
 
+Block.prototype._onDragStart = function(e) {
+	this._dragging = true;
+	this._cursor = {
+		x: e.clientX - this.position().left,
+		y: e.clientY - this.position().top
+	};
+	this.$container.disableSelection();
+};
+
+Block.prototype._onDragOver = function(e) {
+	if (this._dragging) {
+		var left = e.clientX - this._cursor.x;
+		var top = e.clientY - this._cursor.y;
+		this.$container.css({
+			left: left < 0 ? 0 : left,
+			top: top < 0 ? 0 : top,
+		});
+		this.canvas.redraw();
+	}
+};
+
+Block.prototype._onDragEnd = function(e) {
+	this._dragging = false;
+};
+
 Block.prototype._create = function() {
 	// create table container
 	this.$container = $('<table class="' + BlockEditor._namespace + '-block">');
+
+	// make it draggable
+	this.$container.on('mousedown', this._onDragStart.bind(this));
+	$('body').on({
+		mousemove: this._onDragOver.bind(this),
+		mouseup: this._onDragEnd.bind(this)
+	});
 
 	// header with block id and block type
 	var $id = $('<div class="' + BlockEditor._namespace + '-block-id">');
