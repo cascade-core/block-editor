@@ -141,8 +141,11 @@ Canvas.prototype._drawArrow = function(x, y) {
 	this.context.restore();
 };
 
-//Canvas.prototype._redraw = function() {
-//	requestAnimationFrame(this._redraw.bind(this));
-//	this.context.clearRect(0, 0, this.width, this.height);
-//	this._createLayout();
-//};
+Canvas.prototype.redraw = function() {
+//	requestAnimationFrame(this.redraw.bind(this));
+	this.context.clearRect(0, 0, this.width, this.height);
+	this._drawBackground();
+	for (var id in this.editor.blocks) {
+		this.editor.blocks[id].renderConnections();
+	}
+};
