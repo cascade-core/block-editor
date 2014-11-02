@@ -6,7 +6,6 @@
 var Canvas = function(editor) {
 	this.editor = editor;
 	this.options = this.editor.options;
-	this.padding = this.options.canvasPadding;
 	this.width = this.options.canvasWidth;
 	this.height = this.options.canvasHeight;
 	this.controls = {};
@@ -55,7 +54,7 @@ Canvas.prototype._create = function() {
 
 	// create scroll container
 	this.$container = $('<div>');
-	this.$container.attr('class', BlockEditor._namespace);
+	this.$container.attr('class', BlockEditor._namespace + '-container');
 	this.$container.css({
 		width: this.editor.$el.width(),
 		height: this.editor.$el.height()
@@ -66,7 +65,7 @@ Canvas.prototype._create = function() {
 		mousemove: this._onMouseMove.bind(this)
 	});
 	this.$container.append(this.canvas);
-	this.editor.$el.after(this.$container).hide();
+	this.editor.$container.append(this.$container);
 };
 
 Canvas.prototype._onMouseDown = function(e) {

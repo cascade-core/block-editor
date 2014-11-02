@@ -11,7 +11,6 @@ var BlockEditor = function(el, options) {
 	this.defaults = {
 		paletteData: '/admin/block-editor-palette.json',
 		canvasOffset: 500, // px start rendering blocks from top left corner + canvasOffset
-		canvasPadding: 20, // px
 		canvasWidth: 2000,
 		canvasHeight: 2000,
 		canvasSpeed: 2, // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
@@ -37,12 +36,18 @@ var BlockEditor = function(el, options) {
 BlockEditor._namespace = 'block-editor';
 
 BlockEditor.prototype.init = function() {
+	// create container
+	this.$container = $('<div>');
+	this.$container.attr('class', BlockEditor._namespace);
+	this.$el.after(this.$container).hide();
+
 	this.canvas = new Canvas(this); // create canvas
 //	this._bind();
 
 	var self = this;
 	$.get(this.options.paletteData).done(function(data) {
-		self.palette = new Palette(self.canvas, data, self.$el.data('doc_link')); // create blocks palette
+		self.palette = new Palette(self, data, self.$el.data('doc_link')); // create blocks palette
+		self.palette.render();
 		self.processData(); // load and process data from textarea
 		self.render();
 	});
@@ -73,21 +78,6 @@ BlockEditor.prototype.render = function() {
 	this.canvas.$container.scrollTop(this.options.canvasOffset - 45);
 	this.canvas.$container.scrollLeft(this.options.canvasOffset - 45);
 };
-
-// todo
-//BlockEditor.prototype._bind = function() {
-//	var self = this;
-//
-//	this.$header.on('click.' + this._namespace, '.title', function(e) {
-//		e.preventDefault();
-//		...
-//	});
-//
-//	this.$header.on('change.' + this._namespace, 'select', function(e) {
-//		e.preventDefault();
-//		...
-//	});
-//};
 
 // todo
 //BlockEditor.prototype.destroy = function() {

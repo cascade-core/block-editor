@@ -18,8 +18,32 @@
 
 .block-editor {
 	position: relative;
-	overflow: scroll;
 	border: 1px solid #aaa;
+}
+
+.block-editor-container {
+	position: relative;
+	overflow: scroll;
+}
+
+.block-editor-palette {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 25px;
+	height: 25px;
+	background: #fff;
+	overflow: hidden;
+	overflow-y: scroll;
+	z-index: 100;
+	border-right: 1px solid #aaa;
+	border-bottom: 1px solid #aaa;
+}
+
+.block-editor-palette:hover {
+	width: 250px;
+	height: 100%;
+	border-bottom: 0;
 }
 
 .block-editor-block {
@@ -37,6 +61,11 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+}
+
+.block-editor-palette .block-editor-block {
+	position: static;
+	margin: 10px;
 }
 
 .block-editor-block:hover {

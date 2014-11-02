@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
  */
-var Block = function(id, data, editor) {
+var Block = function(id, data, editor, placeholder) {
 	this.id = id;
 	this.editor = editor;
 	this.palette = editor.palette;
@@ -15,10 +15,17 @@ var Block = function(id, data, editor) {
 //	this.inputs = {};
 //	this.outputs = {};
 //	this.variables = {};
-	this.x = data.x;
-	this.y = data.y;
 
-	this.defaults = this.palette.blocks[data.block];
+	if (placeholder) {
+		this.defaults = data;
+		this.type = id;
+		var s = id.split('/');
+		this.id = s[s.length - 1];
+	} else {
+		this.x = data.x;
+		this.y = data.y;
+		this.defaults = this.palette.blocks[data.block];
+	}
 	this.defaults.inputs.enable = {}; // todo
 };
 
