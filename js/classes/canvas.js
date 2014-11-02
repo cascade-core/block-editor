@@ -56,8 +56,8 @@ Canvas.prototype._create = function() {
 	this.$container = $('<div>');
 	this.$container.attr('class', BlockEditor._namespace + '-container');
 	this.$container.css({
-		width: this.editor.$el.width(),
-		height: this.editor.$el.height()
+		width: this.editor.$container.width(),
+		height: this.editor.$container.height()
 	});
 	this.$container.on({
 		mousedown: this._onMouseDown.bind(this),

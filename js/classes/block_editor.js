@@ -39,6 +39,10 @@ BlockEditor.prototype.init = function() {
 	// create container
 	this.$container = $('<div>');
 	this.$container.attr('class', BlockEditor._namespace);
+	this.$container.css({
+		width: this.$el.width(),
+		height: this.$el.height()
+	});
 	this.$el.after(this.$container).hide();
 
 	this.canvas = new Canvas(this); // create canvas
