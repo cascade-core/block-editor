@@ -25,6 +25,7 @@ function TPL_html5__block_editor__html_head($t, $id, $d, $so)
 		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/jquery.pack.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/raphael-min.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/classes/block.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/classes/placeholder.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/classes/block_editor.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/classes/canvas.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/classes/palette.js\"></script>\n",

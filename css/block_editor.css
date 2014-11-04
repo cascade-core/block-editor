@@ -29,23 +29,48 @@
 }
 
 .block-editor-palette {
+	display: none;
 	position: absolute;
-	top: 0;
+	top: 25px;
 	left: 0;
-	width: 25px;
-	height: 25px;
+	bottom: 0;
+	width: 250px;
 	background: #fff;
 	overflow: hidden;
 	overflow-y: scroll;
 	z-index: 100;
 	border-right: 1px solid #aaa;
 	border-bottom: 1px solid #aaa;
+
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
+.block-editor-toolbar:hover + .block-editor-palette,
 .block-editor-palette:hover {
-	width: 250px;
-	height: 100%;
+	display: block;
 	border-bottom: 0;
+}
+
+.block-editor-toolbar {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: #fff;
+	border-bottom: 1px solid #aaa;
+	border-right: 1px solid #aaa;
+	width: 250px;
+	height: 25px;
+	text-align: left;
+	z-index: 150;
+}
+
+.block-editor-toolbar a {
+	text-align: center;
 }
 
 .block-editor-block {
@@ -63,6 +88,19 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+}
+
+.block-editor-block.block-editor-active,
+.block-editor-block.block-editor-active:hover {
+	background: #efe;
+}
+
+.block-editor-block.block-editor-active .block-editor-block-header {
+	background: #bfb;
+}
+
+.block-editor-clone {
+	z-index: 150;
 }
 
 .block-editor-palette .block-editor-block {
@@ -94,21 +132,23 @@
 .block-editor-block-doc,
 .block-editor-block-remove {
 	position: absolute;
-	top: 0px;
-	right: -12px;
+	top: 5px;
+	right: -20px;
 	background: rgba(238, 238, 238, 0.7);
 	border: 1px solid #333;
 	text-decoration: none;
 	display: none;
 	color: #000;
-	font-size: 8px;
-	width: 12px;
-	height: 12px;
+	font-size: 10px;
+	line-height: 17px;
+	width: 20px;
+	height: 20px;
 	text-align: center;
 }
 
 .block-editor-block-doc {
-	top: 11px;
+	left: -19px;
+	right: auto;
 }
 
 .block-editor-block:hover .block-editor-block-doc,
@@ -149,7 +189,7 @@
 	box-sizing: border-box;
 }
 
-.block-editor-fullscreen-toggle {
+.block-editor-toolbar a {
 	display: inline-block;
 	width: 20px;
 	height: 20px;
@@ -166,4 +206,17 @@
 	width: auto !important;
 	height: auto !important;
 	z-index: 1000;
+}
+
+.block-editor-fullscreen .block-editor-toolbar {
+	width: 100%;
+}
+
+.block-editor-fullscreen .block-editor-palette {
+	display: block;
+	width: 125px;
+}
+
+.block-editor-fullscreen .block-editor-palette:hover {
+	width: 250px;
 }

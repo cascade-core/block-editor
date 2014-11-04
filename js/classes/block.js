@@ -3,36 +3,31 @@
  *
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
  */
-var Block = function(id, data, editor, placeholder) {
+var Block = function(id, data, editor) {
 	this.id = id;
 	this.editor = editor;
 	this.palette = editor.palette;
 	this.canvas = editor.canvas;
 	this.values = data.in_val;
 	this.connections = data.in_con;
-	this.placeholder = false;
 	this.type = data.block;
 //	this.inputs = {};
 //	this.outputs = {};
 //	this.variables = {};
 
-	if (placeholder) {
-		this.defaults = data;
-		this.type = id;
-		var s = id.split('/');
-		this.id = s[s.length - 1];
-	} else {
-		this.x = data.x;
-		this.y = data.y;
-		this.defaults = this.palette.blocks[data.block];
+	this.x = data.x;
+	this.y = data.y;
+	this.defaults = this.palette.blocks[data.block];
+	if (this.defaults) {
+		this.defaults.inputs.enable = {}; // todo
 	}
-	this.defaults.inputs.enable = {}; // todo
 };
 
 Block.prototype.render = function() {
 	// create DOM if not exists
 	if (!this.$container) {
 		this._create();
+		this.canvas.$container.append(this.$container);
 	}
 
 	// update position
@@ -64,6 +59,7 @@ Block.prototype.redraw = function() {
 
 Block.prototype._onDragStart = function(e) {
 	this._dragging = true;
+	this._moved = false;
 	this._cursor = {
 		x: e.clientX - this.position().left,
 		y: e.clientY - this.position().top
@@ -75,9 +71,11 @@ Block.prototype._onDragOver = function(e) {
 	if (this._dragging) {
 		var left = e.clientX - this._cursor.x;
 		var top = e.clientY - this._cursor.y;
+
+		this._moved = this.position().left !== left || this.position().top !== top;
 		this.$container.css({
 			left: left < 0 ? 0 : left,
-			top: top < 0 ? 0 : top,
+			top: top < 0 ? 0 : top
 		});
 		this.canvas.redraw();
 	}
@@ -87,11 +85,20 @@ Block.prototype._onDragEnd = function(e) {
 	this._dragging = false;
 };
 
+Block.prototype._onClick = function(e) {
+	if (!this._moved) {
+		var className = BlockEditor._namespace + '-active';
+		this.$container.toggleClass(className);
+		this._active = this.$container.hasClass(className);
+	}
+};
+
 Block.prototype._create = function() {
 	// create table container
 	this.$container = $('<table class="' + BlockEditor._namespace + '-block">');
 
 	// make it draggable
+	this.$container.on('click', this._onClick.bind(this));
 	this.$container.on('mousedown', this._onDragStart.bind(this));
 	$('body').on({
 		mousemove: this._onDragOver.bind(this),
@@ -106,9 +113,11 @@ Block.prototype._create = function() {
 	$type.on('dblclick', this._changeType.bind(this));
 
 	var $removeButton = $('<a href="#remove" class="' + BlockEditor._namespace + '-block-remove">×</a>');
-	$removeButton.on('dblclick', this._remove.bind(this));
+	$removeButton.on('click', this._remove.bind(this));
+	$removeButton.attr('title', 'Remove block');
 	var $docButton = $('<a class="' + BlockEditor._namespace + '-block-doc">o</a>');
 	$docButton.attr('href', this.palette.docLink.replace('{block}', this.type));
+	$docButton.attr('title', 'Block documentation');
 
 	var $header = $('<th colspan="2" class="' + BlockEditor._namespace + '-block-header" />');
 	$header.append($id.text(this.id));
@@ -136,7 +145,6 @@ Block.prototype._create = function() {
 	}
 	this.$container.append($('<tr />').append($header));
 	this.$container.append($('<tr />').append($inputs).append($outputs));
-	this.canvas.$container.append(this.$container);
 };
 
 Block.prototype._changeId = function() {
@@ -177,14 +185,11 @@ Block.prototype._changeType = function() {
 Block.prototype._remove = function() {
 	if (confirm(_('Do you wish to remove block "' + this.id + '"? There is no undo button.'))) {
 		for (var i in this.connections) {
-			this.connections[i].line.remove();
-			this.connections[i].arrow.remove();
 			delete this.connections[i];
 		}
-		this.widget.remove();
-		delete blocks[this.id];
-		this.onChange();
-		delete this;
+		this.$container.remove();
+		delete this.editor.blocks[this.id];
+		this.canvas.redraw();
 	}
 
 	return false;
