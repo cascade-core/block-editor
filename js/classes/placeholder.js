@@ -20,29 +20,40 @@ Placeholder.prototype.constructor = Placeholder;
 
 Placeholder.prototype._create = function(e) {
 	Block.prototype._create.call(this);
+	this.$container.off('click');
 };
 
 Placeholder.prototype._onDragStart = function(e) {
-	this.$clone = this.$container.clone().addClass(BlockEditor._namespace + '-clone');
-	this.$clone.css({
-		position: 'absolute',
-		left: this.canvas.$container.scrollLeft() + 'px',
-		top: this.canvas.$container.scrollTop() + 'px'
-	});
-	this.canvas.$container.append(this.$clone);
-
 	this._dragging = true;
+	this._moved = false;
 	this._cursor = {
-		x: e.clientX - this.$container.position().left,
-		y: e.clientY - this.$container.position().top
+		x: e.pageX
+			- this.position().left
+			- this.$container.parent()[0].offsetLeft
+			+ this.$container.parent()[0].scrollLeft,
+		y: e.pageY
+			- this.position().top
+			- this.$container.parent()[0].offsetTop
+			+ this.$container.parent()[0].scrollTop
 	};
 	this.$container.disableSelection();
+
+	$('body').on({
+		'mousemove.block-editor': this._onDragOver.bind(this),
+		'mouseup.block-editor': this._onDragEnd.bind(this)
+	});
 };
 
 Placeholder.prototype._onDragOver = function(e) {
 	if (this._dragging) {
-		var left = e.clientX - this._cursor.x + this.canvas.$container.scrollLeft() + 'px';
-		var top = e.clientY - this._cursor.y + this.canvas.$container.scrollTop();
+		if (!this.$clone) {
+			this.$clone = this.$container.clone().addClass(BlockEditor._namespace + '-clone');
+			this.canvas.$container.append(this.$clone);
+		}
+
+		var left = e.pageX - this._cursor.x + this.canvas.$container.scrollLeft();
+		var top = e.pageY - this._cursor.y + this.canvas.$container.scrollTop();
+		this._moved = this.position().left !== left || this.position().top !== top;
 		this.$clone.css({
 			left: left < 0 ? 0 : left,
 			top: top < 0 ? 0 : top
@@ -52,9 +63,21 @@ Placeholder.prototype._onDragOver = function(e) {
 };
 
 Placeholder.prototype._onDragEnd = function(e) {
-	if (this.$clone) {
-		this.$clone.removeClass(BlockEditor._namespace + '-clone');
-		// todo replace with new block registered in editor, destroy $clone
-		this._dragging = false;
+	if (this.$clone && this._moved) {
+		var id = this.getNewId();
+		if (id) {
+			var data = {
+				block: this.type,
+				in_con: {},
+				in_val: {},
+				x: this.$clone[0].offsetLeft - this.editor.options.canvasOffset,
+				y: this.$clone[0].offsetTop - this.editor.options.canvasOffset
+			};
+			this.editor.addBlock(id, data);
+		}
+		this.$clone.remove();
+		delete this.$clone;
 	}
+	this._dragging = false;
+	$('body').off('mousemove.block-editor mouseup.block-editor');
 };

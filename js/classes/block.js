@@ -65,6 +65,11 @@ Block.prototype._onDragStart = function(e) {
 		y: e.clientY - this.position().top
 	};
 	this.$container.disableSelection();
+
+	$('body').on({
+		'mousemove.block-editor': this._onDragOver.bind(this),
+		'mouseup.block-editor': this._onDragEnd.bind(this)
+	});
 };
 
 Block.prototype._onDragOver = function(e) {
@@ -83,10 +88,11 @@ Block.prototype._onDragOver = function(e) {
 
 Block.prototype._onDragEnd = function(e) {
 	this._dragging = false;
+	$('body').off('mousemove.block-editor mouseup.block-editor');
 };
 
 Block.prototype._onClick = function(e) {
-	if (!this._moved) {
+	if (!this._moved && !$(e.target).is('a')) {
 		var className = BlockEditor._namespace + '-active';
 		this.$container.toggleClass(className);
 		this._active = this.$container.hasClass(className);
@@ -100,10 +106,6 @@ Block.prototype._create = function() {
 	// make it draggable
 	this.$container.on('click', this._onClick.bind(this));
 	this.$container.on('mousedown', this._onDragStart.bind(this));
-	$('body').on({
-		mousemove: this._onDragOver.bind(this),
-		mouseup: this._onDragEnd.bind(this)
-	});
 
 	// header with block id and block type
 	var $id = $('<div class="' + BlockEditor._namespace + '-block-id">');
@@ -117,6 +119,7 @@ Block.prototype._create = function() {
 	$removeButton.attr('title', 'Remove block');
 	var $docButton = $('<a class="' + BlockEditor._namespace + '-block-doc">o</a>');
 	$docButton.attr('href', this.palette.docLink.replace('{block}', this.type));
+	$docButton.attr('target', '_blank');
 	$docButton.attr('title', 'Block documentation');
 
 	var $header = $('<th colspan="2" class="' + BlockEditor._namespace + '-block-header" />');
@@ -147,7 +150,7 @@ Block.prototype._create = function() {
 	this.$container.append($('<tr />').append($inputs).append($outputs));
 };
 
-Block.prototype._changeId = function() {
+Block.prototype.getNewId = function() {
 	var id = window.prompt(_('New block ID:'), this.id);
 
 	if (id === null) {
@@ -156,6 +159,18 @@ Block.prototype._changeId = function() {
 		alert(_('Only letters, numbers and underscore are allowed in block ID and the first character must be a letter.'));
 	} else if (id in this.editor.blocks) {
 		alert(_('This block ID is already taken by another block.'));
+	} else {
+		return id;
+	}
+
+	return null;
+};
+
+Block.prototype._changeId = function() {
+	var id = this.getNewId();
+
+	if (id === null) {
+		return;
 	} else {
 		this.id = id;
 		this.redraw();

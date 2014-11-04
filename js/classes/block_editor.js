@@ -83,6 +83,12 @@ BlockEditor.prototype.render = function() {
 	this.canvas.$container.scrollLeft(this.options.canvasOffset - 45);
 };
 
+BlockEditor.prototype.addBlock = function(id, data) {
+	this.data.blocks[id] = data;
+	this.blocks[id] = new Block(id, data, this);
+	this.blocks[id].render();
+};
+
 // todo
 //BlockEditor.prototype.destroy = function() {
 //	this.$el.off('.' + this._namespace);
