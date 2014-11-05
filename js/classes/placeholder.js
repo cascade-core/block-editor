@@ -7,11 +7,12 @@ var Placeholder = function(id, data, editor) {
 	// extends Block
 	Block.apply(this, arguments);
 
-	this.defaults = data;
 	this.type = id;
 	var s = id.split('/');
 	this.id = s[s.length - 1];
-	this.defaults.inputs.enable = {}; // todo
+
+	this.defaults = data;
+	this.defaults.inputs.enable = null; // todo
 };
 
 // extends Block

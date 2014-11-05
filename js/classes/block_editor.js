@@ -46,7 +46,6 @@ BlockEditor.prototype.init = function() {
 	this.$el.after(this.$container).hide();
 
 	this.canvas = new Canvas(this); // create canvas
-//	this._bind();
 
 	var self = this;
 	$.get(this.options.paletteData).done(function(data) {
@@ -60,6 +59,8 @@ BlockEditor.prototype.init = function() {
 BlockEditor.prototype.processData = function() {
 	this.data = JSON.parse(this.$el.val());
 	this.blocks = {};
+	this._security = this.data._;
+	this.outputs = this.data.outputs;
 	if (this.data.blocks) {
 		for (var id in this.data.blocks) {
 			this.blocks[id] = new Block(id, this.data.blocks[id], this);
@@ -84,9 +85,55 @@ BlockEditor.prototype.render = function() {
 };
 
 BlockEditor.prototype.addBlock = function(id, data) {
-	this.data.blocks[id] = data;
 	this.blocks[id] = new Block(id, data, this);
 	this.blocks[id].render();
+	this.onChange();
+};
+
+BlockEditor.prototype.onChange = function() {
+	this.$el.val(this.serialize());
+};
+
+BlockEditor.prototype.serialize = function() {
+	var ret = {};
+	ret._ = this._security;
+	ret.outputs = this.outputs;
+	ret.blocks = {};
+
+	for (var i in this.blocks) {
+		var b = this.blocks[i];
+		var B = {
+			block: b.type,
+			x: b.x,
+			y: b.y
+		};
+		if (b.force_exec !== null) {
+			B.force_exec = b.force_exec;
+		}
+		for (var input in b.connections) {
+			if (input !== '*' && b.connections[input] !== undefined) {
+				if (b.connections[input] instanceof Array) {
+					if (!('in_con' in B)) {
+						B.in_con = {};
+					}
+					B.in_con[input] = b.connections[input]
+						.map(function (x) {return x[0] === ':' ? [x] : x.split(':');})
+						.reduce(function (a, b) {return a.concat(b);});
+				}
+			}
+		}
+		for (var input in b.values) {
+			if (input !== '*' && b.values[input] !== undefined) {
+				if (!('in_val' in B)) {
+					B.in_val = {};
+				}
+				B.in_val[input] = b.values[input];
+			}
+		}
+		ret.blocks[b.id] = B;
+	}
+
+	return JSON.stringify(ret);
 };
 
 // todo

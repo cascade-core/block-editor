@@ -19,7 +19,7 @@ var Block = function(id, data, editor) {
 	this.y = data.y;
 	this.defaults = this.palette.blocks[data.block];
 	if (this.defaults) {
-		this.defaults.inputs.enable = {}; // todo
+		this.defaults.inputs.enable = null; // todo
 	}
 };
 
@@ -89,6 +89,11 @@ Block.prototype._onDragOver = function(e) {
 Block.prototype._onDragEnd = function(e) {
 	this._dragging = false;
 	$('body').off('mousemove.block-editor mouseup.block-editor');
+
+	// update coordinates
+	this.y = this.position().top - this.canvas.options.canvasOffset;
+	this.x = this.position().left - this.canvas.options.canvasOffset;
+	this.editor.onChange();
 };
 
 Block.prototype._onClick = function(e) {
@@ -174,6 +179,7 @@ Block.prototype._changeId = function() {
 	} else {
 		this.id = id;
 		this.redraw();
+		this.editor.onChange();
 	}
 
 	return false;
@@ -192,6 +198,7 @@ Block.prototype._changeType = function() {
 	} else {
 		this.type = type;
 		this.redraw();
+		this.editor.onChange();
 	}
 
 	return false;
@@ -205,6 +212,7 @@ Block.prototype._remove = function() {
 		this.$container.remove();
 		delete this.editor.blocks[this.id];
 		this.canvas.redraw();
+		this.editor.onChange();
 	}
 
 	return false;
