@@ -10,6 +10,26 @@ var Palette = function(editor, blocks, docLink) {
 	this.docLink = docLink;
 };
 
+Palette.prototype._createFilter = function() {
+	this.$filter = $('<select>');
+
+	var opts = {'*': '*'};
+	for (var type in this.blocks) {
+		var t = type.replace(/\/[^\/]*$/, '').replace(/\//g, '-');
+		opts[t] = type.replace(/\/[^\/]*$/, '');
+	}
+	for (var t in opts) {
+		var $option = $('<option>').text(opts[t]);
+		$option.val(t);
+		this.$filter.append($option);
+	}
+
+	className = BlockEditor._namespace + '-filter';
+	this.$filter.addClass(className);
+	$(document).on('change', 'select.' + className, this._filter.bind(this));
+	return this.$filter;
+};
+
 Palette.prototype.render = function() {
 	this.$container = $('<div>');
 	this.$container.addClass(BlockEditor._namespace + '-palette');
@@ -67,6 +87,10 @@ Palette.prototype.render = function() {
 	$paste.addClass(className);
 	$(document).on('click', 'a.' + className, this._paste.bind(this));
 	this.$toolbar.append($paste);
+
+	// filter
+	var $filter = this._createFilter();
+	this.$toolbar.append($filter);
 
 	// blocks
 	for (var id in this.blocks) {
@@ -137,6 +161,19 @@ Palette.prototype._cut = function() {
 
 Palette.prototype._paste = function() {
 	// todo
+
+	return false;
+};
+
+Palette.prototype._filter = function(e) {
+	if ($(e.target).val() === '*') {
+		var className = BlockEditor._namespace + '-block';
+	} else {
+		var className = BlockEditor._namespace + '-filter-' + $(e.target).val();
+	}
+
+	this.$container.find('.' + BlockEditor._namespace + '-block').hide();
+	this.$container.find('.' + className).show();
 
 	return false;
 };

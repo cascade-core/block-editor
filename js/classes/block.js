@@ -139,7 +139,10 @@ Block.prototype._create = function() {
 		var $input = $('<div class="' + BlockEditor._namespace + '-block-input" />');
 		$input.html('<a href="#settings">' + variable + '</a>');
 		$input.addClass(BlockEditor._namespace + '-invar-' + variable);
-		$input.addClass('default');
+		if ((!this.values || !this.values[variable]) && (!this.connections || !this.connections[variable])) {
+			$input.addClass('default');
+		}
+		$input.on('click', this._toggleInputEditor.bind(this))
 		$inputs.append($input);
 	}
 
@@ -151,8 +154,16 @@ Block.prototype._create = function() {
 		$output.addClass(BlockEditor._namespace + '-outvar-' + variable);
 		$outputs.append($output);
 	}
+	// todo asterisks
+
 	this.$container.append($('<tr />').append($header));
 	this.$container.append($('<tr />').append($inputs).append($outputs));
+};
+
+Block.prototype._toggleInputEditor = function() {
+	// todo
+
+	return false;
 };
 
 Block.prototype.getNewId = function() {

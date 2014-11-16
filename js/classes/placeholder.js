@@ -21,6 +21,8 @@ Placeholder.prototype.constructor = Placeholder;
 
 Placeholder.prototype._create = function(e) {
 	Block.prototype._create.call(this);
+	var t = this.type.replace(/\/[^\/]*$/, '').replace(/\//g, '-');
+	this.$container.addClass(BlockEditor._namespace + '-filter-' + t);
 	this.$container.off('click');
 };
 
