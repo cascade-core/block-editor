@@ -110,29 +110,25 @@ Block.prototype._create = function() {
 	var $header = this._createHeader();
 
 	// inputs
-	var $inputs = $('<td class="' + BlockEditor._namespace + '-block-inputs" />');
+	this.$inputs = $('<td class="' + BlockEditor._namespace + '-block-inputs" />');
 	for (var variable in this.defaults.inputs) {
-		var $input = this._createInput(variable);
-		$inputs.append($input);
+		this.addInput(variable);
 	}
 	for (var variable in this.values) {
 		if (!(variable in this.defaults.inputs)) {
-			var $input = this._createInput(variable);
-			$inputs.append($input);
+			this.addInput(variable);
 		}
 	}
-	var $input = this._createInput('enable');
-	$inputs.append($input);
+	this.addInput('enable');
 
 	// outputs
-	var $outputs = $('<td class="' + BlockEditor._namespace + '-block-outputs" />');
+	this.$outputs = $('<td class="' + BlockEditor._namespace + '-block-outputs" />');
 	for (var variable in this.defaults.outputs) {
-		var $output = this._createOutput(variable);
-		$outputs.append($output);
+		this.addOutput(variable);
 	}
 
 	this.$container.append($('<tr />').append($header));
-	this.$container.append($('<tr />').append($inputs).append($outputs));
+	this.$container.append($('<tr />').append(this.$inputs).append(this.$outputs));
 };
 
 Block.prototype._createHeader = function() {
@@ -159,7 +155,7 @@ Block.prototype._createHeader = function() {
 	return $header;
 }
 
-Block.prototype._createInput = function(variable) {
+Block.prototype.addInput = function(variable) {
 	var $input = $('<div class="' + BlockEditor._namespace + '-block-input" />');
 	$input.attr('data-variable', variable);
 	var $link = $('<a href="#settings">' + variable + '</a>');
@@ -169,14 +165,14 @@ Block.prototype._createInput = function(variable) {
 	if ((!this.values || !this.values[variable]) && (!this.connections[variable])) {
 		$input.addClass('default');
 	}
-	return $input;
+	this.$inputs.append($input);
 };
 
-Block.prototype._createOutput = function (variable) {
+Block.prototype.addOutput = function (variable) {
 	var $output = $('<div class="' + BlockEditor._namespace + '-block-output" />');
 	$output.text(variable);
 	$output.addClass(BlockEditor._namespace + '-outvar-' + variable);
-	return $output;
+	this.$outputs.append($output);
 }
 
 Block.prototype._toggleInputEditor = function(e) {
@@ -272,6 +268,17 @@ Block.prototype._renderConnection = function(id, source, x2, y2) {
 			var yy2 = y2 + 36; // block header height + center of row
 		}
 		query = '.' + BlockEditor._namespace + '-outvar-' + source[1];
+
+		if (block.$container.find(query).length === 0) {
+			if ('*' in block.defaults.outputs) {
+				block.addOutput(source[1]);
+				this.canvas.redraw();
+			} else {
+				alert(_('Source block does not have output with given name or wildcard output!'));
+			}
+			return false;
+		}
+
 		var offset = block.position();
 		var x1 = offset.left // from left of block container
 			+ 1			 // offset
