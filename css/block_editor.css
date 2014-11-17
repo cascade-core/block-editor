@@ -223,3 +223,62 @@
 .block-editor-fullscreen .block-editor-palette:hover {
 	width: 250px;
 }
+
+.block-editor-variable-editor {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-top: -150px;
+	margin-left: -200px;
+	background: #fff;
+	width: 400px;
+	max-height: 300px;
+	z-index: 150;
+	border: 1px solid #999;
+	padding: 0;
+	text-align: center;
+}
+
+.block-editor-variable-editor-title {
+	text-align: center;
+	padding: 4px 0;
+	border-bottom: 1px solid #999;
+}
+
+.block-editor-variable-editor-close {
+	float: right;
+	border-left: 1px solid #999;
+	text-decoration: none;
+	padding-top: 4px;
+	width: 25px;
+	height: 24px;
+	text-align: center;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.block-editor-variable-editor-close:hover {
+	background: #ccc;
+}
+
+.block-editor-variable-editor input[type="submit"] {
+	margin: 10px;
+}
+
+.block-editor-variable-editor-desc {
+	text-align: left;
+	font-size: 12px;
+	margin: 10px;
+}
+
+.block-editor-variable-editor select {
+	margin: 9px 10px 10px;
+	float: right;
+}
+
+.block-editor-variable-editor textarea {
+	width: 380px;
+	height: 170px !important;
+	margin: 0 9px;
+}

@@ -8,19 +8,14 @@ var Block = function(id, data, editor) {
 	this.editor = editor;
 	this.palette = editor.palette;
 	this.canvas = editor.canvas;
-	this.values = data.in_val;
-	this.connections = data.in_con;
+	this.values = data.in_val || {};
+	this.connections = data.in_con || {};
 	this.type = data.block;
-//	this.inputs = {};
-//	this.outputs = {};
-//	this.variables = {};
 
 	this.x = data.x;
 	this.y = data.y;
-	this.defaults = this.palette.blocks[data.block];
-	if (this.defaults) {
-		this.defaults.inputs.enable = null; // todo
-	}
+
+	this.defaults = this.palette.blocks[data.block] || {};
 };
 
 Block.prototype.render = function() {
@@ -52,7 +47,6 @@ Block.prototype.redraw = function() {
 	this.$container.remove();
 	delete this.$container;
 	this.defaults = this.palette.blocks[this.type];
-	this.defaults.inputs.enable = {}; // todo
 	this.render();
 	this.canvas.redraw();
 };
@@ -113,6 +107,35 @@ Block.prototype._create = function() {
 	this.$container.on('mousedown', this._onDragStart.bind(this));
 
 	// header with block id and block type
+	var $header = this._createHeader();
+
+	// inputs
+	var $inputs = $('<td class="' + BlockEditor._namespace + '-block-inputs" />');
+	for (var variable in this.defaults.inputs) {
+		var $input = this._createInput(variable);
+		$inputs.append($input);
+	}
+	for (var variable in this.values) {
+		if (!(variable in this.defaults.inputs)) {
+			var $input = this._createInput(variable);
+			$inputs.append($input);
+		}
+	}
+	var $input = this._createInput('enable');
+	$inputs.append($input);
+
+	// outputs
+	var $outputs = $('<td class="' + BlockEditor._namespace + '-block-outputs" />');
+	for (var variable in this.defaults.outputs) {
+		var $output = this._createOutput(variable);
+		$outputs.append($output);
+	}
+
+	this.$container.append($('<tr />').append($header));
+	this.$container.append($('<tr />').append($inputs).append($outputs));
+};
+
+Block.prototype._createHeader = function() {
 	var $id = $('<div class="' + BlockEditor._namespace + '-block-id">');
 	$id.on('dblclick', this._changeId.bind(this));
 	var $type = $('<div class="' + BlockEditor._namespace + '-block-type">');
@@ -133,35 +156,32 @@ Block.prototype._create = function() {
 	$header.append($removeButton);
 	$header.append($docButton);
 
-	// inputs
-	var $inputs = $('<td class="' + BlockEditor._namespace + '-block-inputs" />');
-	for (var variable in this.defaults.inputs) {
-		var $input = $('<div class="' + BlockEditor._namespace + '-block-input" />');
-		$input.html('<a href="#settings">' + variable + '</a>');
-		$input.addClass(BlockEditor._namespace + '-invar-' + variable);
-		if ((!this.values || !this.values[variable]) && (!this.connections || !this.connections[variable])) {
-			$input.addClass('default');
-		}
-		$input.on('click', this._toggleInputEditor.bind(this))
-		$inputs.append($input);
-	}
+	return $header;
+}
 
-	// outputs
-	var $outputs = $('<td class="' + BlockEditor._namespace + '-block-outputs" />');
-	for (var variable in this.defaults.outputs) {
-		var $output = $('<div class="' + BlockEditor._namespace + '-block-output" />');
-		$output.text(variable);
-		$output.addClass(BlockEditor._namespace + '-outvar-' + variable);
-		$outputs.append($output);
+Block.prototype._createInput = function(variable) {
+	var $input = $('<div class="' + BlockEditor._namespace + '-block-input" />');
+	$input.attr('data-variable', variable);
+	var $link = $('<a href="#settings">' + variable + '</a>');
+	$link.on('click', this._toggleInputEditor.bind(this))
+	$input.append($link);
+	$input.addClass(BlockEditor._namespace + '-invar-' + variable);
+	if ((!this.values || !this.values[variable]) && (!this.connections[variable])) {
+		$input.addClass('default');
 	}
-	// todo asterisks
-
-	this.$container.append($('<tr />').append($header));
-	this.$container.append($('<tr />').append($inputs).append($outputs));
+	return $input;
 };
 
-Block.prototype._toggleInputEditor = function() {
-	// todo
+Block.prototype._createOutput = function (variable) {
+	var $output = $('<div class="' + BlockEditor._namespace + '-block-output" />');
+	$output.text(variable);
+	$output.addClass(BlockEditor._namespace + '-outvar-' + variable);
+	return $output;
+}
+
+Block.prototype._toggleInputEditor = function(e) {
+	var editor = new Editor(this, this.editor, $(e.target).text());
+	editor.render();
 
 	return false;
 };
@@ -233,26 +253,32 @@ Block.prototype.renderConnections = function() {
 	var x2 = this.position().left - 3;
 	var y2 = this.position().top;
 	for (var id in this.connections) {
-		var source = this.connections[id];
-		var block = this.editor.blocks[source[0]];
+		var sources = this.connections[id];
+		for (var i = 0; i < sources.length; i = i + 2) {
+			this._renderConnection(id, sources.slice(i, i + 2), x2, y2);
+		}
+	}
+};
+
+Block.prototype._renderConnection = function(id, source, x2, y2) {
+	var block = this.editor.blocks[source[0]];
+	if (block) {
 		var query = '.' + BlockEditor._namespace + '-invar-' + id;
 		if (this.$container.find(query).length) {
 			var yy2 = y2 // from top of block container
-				    + 6	 // center of row
-				    + this.$container.find(query).position().top; // add position of variable
+				+ 7	 // center of row
+				+ this.$container.find(query).position().top; // add position of variable
 		} else {
 			var yy2 = y2 + 36; // block header height + center of row
 		}
-		if (block) {
-			var query = '.' + BlockEditor._namespace + '-outvar-' + source[1];
-			var offset = block.position();
-			var x1 = offset.left // from left of block container
-				   + 1			 // offset
-				   + block.$container.outerWidth(); // add container width
-			var y1 = offset.top // from top of block container
-				   + 7			// center of row
-				   + block.$container.find(query).position().top; // add position of variable
-			this.canvas._drawConnection(x1, y1, x2, yy2);
-		}
+		query = '.' + BlockEditor._namespace + '-outvar-' + source[1];
+		var offset = block.position();
+		var x1 = offset.left // from left of block container
+			+ 1			 // offset
+			+ block.$container.outerWidth(); // add container width
+		var y1 = offset.top // from top of block container
+			+ 7			// center of row
+			+ block.$container.find(query).position().top; // add position of variable
+		this.canvas._drawConnection(x1, y1, x2, yy2);
 	}
 };

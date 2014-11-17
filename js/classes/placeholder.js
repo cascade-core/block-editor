@@ -12,7 +12,6 @@ var Placeholder = function(id, data, editor) {
 	this.id = s[s.length - 1];
 
 	this.defaults = data;
-	this.defaults.inputs.enable = null; // todo
 };
 
 // extends Block
