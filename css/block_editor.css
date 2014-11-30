@@ -282,3 +282,28 @@
 	height: 170px !important;
 	margin: 0 9px;
 }
+
+i.fa {
+	display: inline-block;
+}
+
+i.fa::before {
+	font-style: normal;
+}
+
+.fa-copy::before {
+	content: 'C';
+}
+
+.fa-arrows-alt::before {
+	content: 'F';
+}
+
+.fa-paste::before,
+.fa-cogs::before {
+	content: 'P';
+}
+
+.fa-cut::before {
+	content: 'X';
+}

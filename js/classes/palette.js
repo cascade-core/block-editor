@@ -5,7 +5,6 @@
  *
  * @todo autocomplete filter vedle selectu
  * @todo novy block / infinite loop na nove jmeno / neztracet hodnotu
- * @todo font awesome podminene ikonky
  * @todo dummy block bez typy na zacatek palety - zvyraznit pokud ma neexistujici typ
  */
 var Palette = function(editor, blocks, docLink) {
@@ -46,7 +45,7 @@ Palette.prototype.render = function() {
 	// fullscreen button
 	var $fullscreen = $('<a>');
 	var className = BlockEditor._namespace + '-fullscreen-toggle';
-	$fullscreen.text('F');
+	$fullscreen.html('<i class="fa fa-arrows-alt"></i>');
 	$fullscreen.attr('title', 'Toggle fullscreen');
 	$fullscreen.attr('href', '#fullscreen');
 	$fullscreen.addClass(className);
@@ -56,7 +55,7 @@ Palette.prototype.render = function() {
 	// parent block properties button
 	var $parent = $('<a>');
 	className = BlockEditor._namespace + '-parent-properties-toggle';
-	$parent.text('P');
+	$parent.html('<i class="fa fa-cogs"></i>');
 	$parent.attr('title', 'Edit parent block properties');
 	$parent.attr('href', '#parent-properties');
 	$parent.addClass(className);
@@ -66,7 +65,7 @@ Palette.prototype.render = function() {
 	// copy button
 	var $copy = $('<a>');
 	className = BlockEditor._namespace + '-copy';
-	$copy.text('C');
+	$copy.html('<i class="fa fa-copy"></i>');
 	$copy.attr('title', 'Copy active block');
 	$copy.attr('href', '#copy');
 	$copy.addClass(className);
@@ -76,7 +75,7 @@ Palette.prototype.render = function() {
 	// cut button
 	var $cut = $('<a>');
 	className = BlockEditor._namespace + '-cut';
-	$cut.text('X');
+	$cut.html('<i class="fa fa-cut"></i>');
 	$cut.attr('title', 'Cut active block');
 	$cut.attr('href', '#cut');
 	$cut.addClass(className);
@@ -86,7 +85,7 @@ Palette.prototype.render = function() {
 	// paste button
 	var $paste = $('<a>');
 	className = BlockEditor._namespace + '-paste';
-	$paste.text('P');
+	$paste.html('<i class="fa fa-paste"></i>');
 	$paste.attr('title', 'Paste block');
 	$paste.attr('href', '#paste');
 	$paste.addClass(className);
@@ -182,7 +181,8 @@ Palette.prototype._toggleFullScreen = function() {
 };
 
 Palette.prototype._toggleParentProperties = function() {
-	// todo
+	var editor = new Editor(this, this.editor, $(e.target).text());
+	editor.render();
 
 	return false;
 };
