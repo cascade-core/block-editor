@@ -121,6 +121,12 @@ Palette.prototype._disableSelection = function(e) {
 };
 
 Palette.prototype._keydown = function(e) {
+	// ignore key binding when variable editor opened
+	var editorClass = BlockEditor._namespace + '-variable-editor';
+	if (this.editor.$container.find('.' + editorClass).length) {
+		return true;
+	}
+
 	var code = e.keyCode ? e.keyCode : e.which;
 	if (e.metaKey && code === 67) { // ctrl + c => copy
 		this._copy();

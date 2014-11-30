@@ -101,12 +101,13 @@ Canvas.prototype._onMouseUp = function(e) {
 	this._moving = false;
 };
 
-Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY) {
+Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
 	// line style
+	color = color || '#000';
 	this.context.save();
 	this.context.beginPath();
-	this.context.fillStyle = '#000';
-	this.context.strokeStyle = '#000';
+	this.context.fillStyle = color;
+	this.context.strokeStyle = color;
 	this.context.lineWidth = 1.4;
 
 	// control points based on x-diff
@@ -123,7 +124,7 @@ Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY) {
 	this.context.closePath();
 
 	// draw arrow in the end point
-	this._drawArrow(toX, toY);
+	this._drawArrow(toX, toY, color);
 };
 
 Canvas.prototype._dist = function(fromX, fromY, toX, toY) {
@@ -135,8 +136,6 @@ Canvas.prototype._dist = function(fromX, fromY, toX, toY) {
 Canvas.prototype._drawArrow = function(x, y) {
 	this.context.save();
 	this.context.beginPath();
-	this.context.fillStyle = '#000';
-	this.context.strokeStyle = '#000';
 	this.context.lineWidth = 2;
 
 	this.context.moveTo(x, y);
@@ -148,6 +147,15 @@ Canvas.prototype._drawArrow = function(x, y) {
 	this.context.closePath();
 	this.context.fill();
 	this.context.stroke();
+	this.context.restore();
+};
+
+Canvas.prototype._writeText = function(text, x, y) {
+	this.context.save();
+	this.context.fillStyle = "#690299";
+	this.context.font = "11px Arial";
+	this.context.textAlign = 'right';
+	this.context.fillText(text, x, y);
 	this.context.restore();
 };
 

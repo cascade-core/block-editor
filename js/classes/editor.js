@@ -148,7 +148,7 @@ Editor.prototype._save = function() {
 
 			var connections = [];
 			for	(var i in rows) {
-				if (rows[i].indexOf(':') > 0) {
+				if (rows[i].indexOf(':') >= 0) { // id:name or aggregation (:and, :or, :...)
 					connections.push.apply(connections, rows[i].split(':'));
 				}
 			}

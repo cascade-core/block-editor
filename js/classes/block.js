@@ -290,6 +290,16 @@ Block.prototype.renderConnections = function() {
 };
 
 Block.prototype._renderConnection = function(id, source, x2, y2) {
+	console.log(id, source, x2, y2);
+	// aggregation (:and, :or, ...)
+	if (source[0] === '') {
+		var query = '.' + BlockEditor._namespace + '-invar-' + id;
+		var yy2 = y2 // from top of block container
+			+ this.$container.find(query).position().top; // add position of variable
+		this.canvas._writeText(source[1], x2 - 15, yy2);
+		return;
+	}
+
 	var block = this.editor.blocks[source[0]];
 	if (block) {
 		var query = '.' + BlockEditor._namespace + '-invar-' + id;
