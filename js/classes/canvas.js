@@ -2,6 +2,14 @@
  * canvas class
  *
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ *
+ *     @todo oznaceni vice bloku najednou pomoci tazeni mysi ( + ctrl)
+ *     		- zleva doprava bere jen cele bloky
+ *     		- zprava doleva bere i casti bloku
+ *     		- klikem na canvas odznacit vse
+ *     		- jinak pridavat do oznaceni
+ *       	- schranka s historii
+ *      	- vyuziti systemovy schranky (copy z wordu napr)
  */
 var Canvas = function(editor) {
 	this.editor = editor;

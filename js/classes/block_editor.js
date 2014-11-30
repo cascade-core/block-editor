@@ -102,35 +102,7 @@ BlockEditor.prototype.serialize = function() {
 
 	for (var i in this.blocks) {
 		var b = this.blocks[i];
-		var B = {
-			block: b.type,
-			x: b.x,
-			y: b.y
-		};
-		if (b.force_exec !== null) {
-			B.force_exec = b.force_exec;
-		}
-		for (var input in b.connections) {
-			if (input !== '*' && b.connections[input] !== undefined) {
-				if (b.connections[input] instanceof Array) {
-					if (!('in_con' in B)) {
-						B.in_con = {};
-					}
-					B.in_con[input] = b.connections[input]
-						.map(function (x) {return x[0] === ':' ? [x] : x.split(':');})
-						.reduce(function (a, b) {return a.concat(b);});
-				}
-			}
-		}
-		for (var input in b.values) {
-			if (input !== '*' && b.values[input] !== undefined) {
-				if (!('in_val' in B)) {
-					B.in_val = {};
-				}
-				B.in_val[input] = b.values[input];
-			}
-		}
-		ret.blocks[b.id] = B;
+		ret.blocks[b.id] = b.serialize();
 	}
 
 	return JSON.stringify(ret);

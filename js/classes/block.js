@@ -43,6 +43,12 @@ Block.prototype.position = function() {
 	};
 };
 
+Block.prototype.remove = function() {
+	this.$container.remove();
+	delete this.$container;
+	return this.serialize();
+};
+
 Block.prototype.redraw = function() {
 	this.$container.remove();
 	delete this.$container;
@@ -314,4 +320,36 @@ Block.prototype._renderConnection = function(id, source, x2, y2) {
 			+ block.$container.find(query).position().top; // add position of variable
 		this.canvas._drawConnection(x1, y1, x2, yy2);
 	}
+};
+
+Block.prototype.serialize = function() {
+	var B = {
+		block: this.type,
+		x: this.x,
+		y: this.y
+	};
+	if (this.force_exec !== null) {
+		B.force_exec = this.force_exec;
+	}
+	for (var input in this.connections) {
+		if (input !== '*' && this.connections[input] !== undefined) {
+			if (this.connections[input] instanceof Array) {
+				if (!('in_con' in B)) {
+					B.in_con = {};
+				}
+				B.in_con[input] = this.connections[input]
+					.map(function (x) {return x[0] === ':' ? [x] : x.split(':');})
+					.reduce(function (a, b) {return a.concat(b);});
+			}
+		}
+	}
+	for (var input in this.values) {
+		if (input !== '*' && this.values[input] !== undefined) {
+			if (!('in_val' in B)) {
+				B.in_val = {};
+			}
+			B.in_val[input] = this.values[input];
+		}
+	}
+	return B;
 };

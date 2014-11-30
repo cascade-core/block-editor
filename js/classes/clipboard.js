@@ -188,44 +188,30 @@ Palette.prototype._copy = function() {
 			ret[b.id] = b.serialize();
 		}
 	}
-	localStorage.clipboard = JSON.stringify(ret);
+	ret = JSON.stringify(ret);
+
+	if(window.clipboardData) {
+		// use just 'Text' or 'Url' as a first param otherwise strange exception is thrown
+		window.clipboardData.setData('Text', 'Text that will be copied to CB');
+	} else if(ev.originalEvent.clipboardData) {
+		ev.originalEvent.clipboardData.setData('text/plain', 'Text that will be copied to CB');
+	} else {
+		alert('Clipboard Data are not supported in this browser. Sorry.');
+	}
 
 	return false;
 };
 
 Palette.prototype._cut = function() {
-	var ret = this._copy();
-	var ret = {};
-	for (var i in this.editor.blocks) {
-		var b = this.editor.blocks[i];
-		if (b.isActive()) {
-			ret[b.id] = b.remove();
-			delete this.editor.blocks[i];
-		}
-	}
-	localStorage.clipboard = JSON.stringify(ret);
-	this.canvas.redraw();
+	// todo
+	console.log('cut');
 
 	return false;
 };
 
 Palette.prototype._paste = function() {
-	if (localStorage.clipboard) {
-		var blocks = JSON.parse(localStorage.clipboard);
-		for (var id in blocks) {
-			var b = blocks[id];
-			if (id in this.editor.blocks) {
-				id = this.editor.blocks[id].getNewId();
-				if (!id) {
-					continue;
-				}
-			}
-			var block = new Block(id, b, this.editor);
-			this.editor.blocks[id] = block;
-			block.render();
-		}
-		this.canvas.redraw();
-	}
+	// todo
+	console.log('paste');
 
 	return false;
 };
