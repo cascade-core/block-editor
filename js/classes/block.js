@@ -72,21 +72,37 @@ Block.prototype._onDragOver = function(e) {
 		var top = e.clientY - this._cursor.y;
 
 		this._moved = this.position().left !== left || this.position().top !== top;
-		this.$container.css({
-			left: left < 0 ? 0 : left,
-			top: top < 0 ? 0 : top
-		});
-		this.canvas.redraw();
+		if (this._moved) {
+			var dx = this.position().left - left;
+			var dy = this.position().top - top;
+			this.$container.css({
+				left: left < 0 ? 0 : left,
+				top: top < 0 ? 0 : top
+			});
+			this.y = this.position().top - this.canvas.options.canvasOffset;
+			this.x = this.position().left - this.canvas.options.canvasOffset;
+			for (var id in this.editor.blocks) {
+				if (this !== this.editor.blocks[id] && this.editor.blocks[id].isActive()) {
+					this.editor.blocks[id].updatePosition(dx, dy);
+				}
+			}
+			this.canvas.redraw();
+		}
 	}
+};
+
+Block.prototype.updatePosition = function(dx, dy) {
+	this.$container.css({
+		left: parseInt(this.$container.css('left')) - dx,
+		top: parseInt(this.$container.css('top')) - dy
+	});
+	this.x = this.x - dx;
+	this.y = this.y - dy;
 };
 
 Block.prototype._onDragEnd = function(e) {
 	this._dragging = false;
 	$('body').off('mousemove.block-editor mouseup.block-editor');
-
-	// update coordinates
-	this.y = this.position().top - this.canvas.options.canvasOffset;
-	this.x = this.position().left - this.canvas.options.canvasOffset;
 	this.editor.onChange();
 };
 
@@ -96,6 +112,16 @@ Block.prototype._onClick = function(e) {
 		this.$container.toggleClass(className);
 		this._active = this.$container.hasClass(className);
 	}
+};
+
+Block.prototype.isActive = function() {
+	return this._active;
+};
+
+Block.prototype.deactivate = function() {
+	this._active = false;
+	var className = BlockEditor._namespace + '-active';
+	this.$container.removeClass(className);
 };
 
 Block.prototype._create = function() {

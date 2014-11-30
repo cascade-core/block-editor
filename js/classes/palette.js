@@ -2,6 +2,11 @@
  * palette class
  *
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ *
+ * @todo autocomplete filter vedle selectu
+ * @todo novy block / infinite loop na nove jmeno / neztracet hodnotu
+ * @todo font awesome podminene ikonky
+ * @todo dummy block bez typy na zacatek palety - zvyraznit pokud ma neexistujici typ
  */
 var Palette = function(editor, blocks, docLink) {
 	this.editor = editor;
@@ -26,7 +31,7 @@ Palette.prototype._createFilter = function() {
 
 	className = BlockEditor._namespace + '-filter';
 	this.$filter.addClass(className);
-	$(document).on('change', 'select.' + className, this._filter.bind(this));
+	$(document).off('change.palette').on('change.palette', 'select.' + className, this._filter.bind(this));
 	return this.$filter;
 };
 
@@ -92,6 +97,12 @@ Palette.prototype.render = function() {
 	var $filter = this._createFilter();
 	this.$toolbar.append($filter);
 
+	// key bindings
+	//$(document).off('keyup.palette').on('keyup.palette', this._keyup.bind(this));
+
+	// disable selection
+	$(document).off('click.disable-selection', this.canvas).on('click.disable-selection', this._disableSelection.bind(this));
+
 	// blocks
 	for (var id in this.blocks) {
 		var b = new Placeholder(id, this.blocks[id], this.editor);
@@ -101,6 +112,14 @@ Palette.prototype.render = function() {
 
 	this.editor.$container.append(this.$toolbar);
 	this.editor.$container.append(this.$container);
+};
+
+Palette.prototype._disableSelection = function(e) {
+	if ($(e.target).is('canvas')) {
+		for (var id in this.editor.blocks) {
+			this.editor.blocks[id].deactivate();
+		}
+	}
 };
 
 Palette.prototype._toggleFullScreen = function() {
@@ -149,18 +168,21 @@ Palette.prototype._toggleParentProperties = function() {
 
 Palette.prototype._copy = function() {
 	// todo
+	console.log('copy');
 
 	return false;
 };
 
 Palette.prototype._cut = function() {
 	// todo
+	console.log('cut');
 
 	return false;
 };
 
 Palette.prototype._paste = function() {
 	// todo
+	console.log('paste');
 
 	return false;
 };
