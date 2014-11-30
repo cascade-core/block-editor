@@ -181,7 +181,7 @@ Palette.prototype._toggleFullScreen = function() {
 };
 
 Palette.prototype._toggleParentProperties = function() {
-	var editor = new Editor(this, this.editor, $(e.target).text());
+	var editor = new ParentEditor(this.editor);
 	editor.render();
 
 	return false;

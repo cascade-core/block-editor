@@ -59,8 +59,11 @@ BlockEditor.prototype.init = function() {
 BlockEditor.prototype.processData = function() {
 	this.data = JSON.parse(this.$el.val());
 	this.blocks = {};
-	this._security = this.data._;
-	this.outputs = this.data.outputs;
+	this['_security'] = this.data['_'];
+	this['policy'] = this.data['policy'];
+	this['copy-inputs'] = this.data['copy-inputs'];
+	this['outputs'] = this.data['outputs'];
+	this['forward-outputs'] = this.data['forward-outputs'];
 	if (this.data.blocks) {
 		for (var id in this.data.blocks) {
 			this.blocks[id] = new Block(id, this.data.blocks[id], this);
@@ -95,10 +98,14 @@ BlockEditor.prototype.onChange = function() {
 };
 
 BlockEditor.prototype.serialize = function() {
-	var ret = {};
-	ret._ = this._security;
-	ret.outputs = this.outputs;
-	ret.blocks = {};
+	var ret = {
+		'_': 				this['_security'],
+		'policy': 			this['policy'],
+		'copy-inputs': 		this['copy-inputs'],
+		'outputs': 			this['outputs'],
+		'forward-outputs': 	this['forward-outputs'],
+		'blocks': {}
+	};
 
 	for (var i in this.blocks) {
 		var b = this.blocks[i];
