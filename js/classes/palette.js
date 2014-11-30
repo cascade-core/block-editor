@@ -129,6 +129,13 @@ Palette.prototype._keydown = function(e) {
 		this._paste();
 	} else if (e.metaKey && code === 88) { // ctrl + x => cut
 		this._cut();
+	} else if (e.metaKey && $.inArray(code, [8, 46]) !== -1) { // ctrl + esc => disable selection
+		for (var id in this.editor.blocks) {
+			if (this.editor.blocks[id].isActive()) {
+				this.editor.blocks[id].remove();
+			}
+		}
+		this.canvas.redraw();
 	} else if (code === 27) { // esc => disable selection
 		for (var id in this.editor.blocks) {
 			this.editor.blocks[id].deactivate();
@@ -196,11 +203,10 @@ Palette.prototype._copy = function() {
 Palette.prototype._cut = function() {
 	var ret = this._copy();
 	var ret = {};
-	for (var i in this.editor.blocks) {
-		var b = this.editor.blocks[i];
+	for (var id in this.editor.blocks) {
+		var b = this.editor.blocks[id];
 		if (b.isActive()) {
 			ret[b.id] = b.remove();
-			delete this.editor.blocks[i];
 		}
 	}
 	localStorage.clipboard = JSON.stringify(ret);

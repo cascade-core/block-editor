@@ -46,6 +46,7 @@ Block.prototype.position = function() {
 Block.prototype.remove = function() {
 	this.$container.remove();
 	delete this.$container;
+	delete this.editor.blocks[this.id];
 	return this.serialize();
 };
 
