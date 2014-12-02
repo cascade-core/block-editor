@@ -216,19 +216,25 @@ Block.prototype._toggleInputEditor = function(e) {
 };
 
 Block.prototype.getNewId = function() {
-	var id = window.prompt(_('New block ID:'), this.id);
+	var old = this.id;
+	var id = null;
+	while (id === null) {
+		id = window.prompt(_('New block ID:'), old);
 
-	if (id === null) {
-		return;
-	} else if (!id.match(/^[a-zA-Z][a-zA-Z0-9_]*$/)) {
-		alert(_('Only letters, numbers and underscore are allowed in block ID and the first character must be a letter.'));
-	} else if (id in this.editor.blocks) {
-		alert(_('This block ID is already taken by another block.'));
-	} else {
-		return id;
+		if (id === null) {
+			return id;
+		} else if (!id.match(/^[a-zA-Z][a-zA-Z0-9_]*$/)) {
+			alert(_('Only letters, numbers and underscore are allowed in block ID and the first character must be a letter.'));
+			old = id;
+			id = null;
+		} else if (id in this.editor.blocks) {
+			alert(_('This block ID is already taken by another block.'));
+			old = id;
+			id = null;
+		}
 	}
 
-	return null;
+	return id;
 };
 
 Block.prototype._changeId = function() {
@@ -246,15 +252,27 @@ Block.prototype._changeId = function() {
 };
 
 Block.prototype._changeType = function() {
-	var type = window.prompt(_('New block type:'), this.type);
 	// todo selectbox?
+	var old = this.type;
+	var type = null;
+	while (type === null) {
+		type = window.prompt(_('New block ID:'), old);
+
+		if (type === null) {
+			break;
+		} else if (!type.match(/^[a-zA-Z][a-zA-Z0-9_/]*$/)) {
+			alert(_('Only letters, numbers and underscore are allowed in block type and the first character must be a letter.'));
+			old = type;
+			type = null;
+		} else if (!(type in this.palette.blocks)) {
+			alert(_('This block type does not exist.'));
+			old = type;
+			type = null;
+		}
+	}
 
 	if (type === null) {
 		return;
-	} else if (!type.match(/^[a-zA-Z][a-zA-Z0-9_/]*$/)) {
-		alert(_('Only letters, numbers and underscore are allowed in block type and the first character must be a letter.'));
-	} else if (!(type in this.palette.blocks)) {
-		alert(_('This block type does not exist.'));
 	} else {
 		this.type = type;
 		this.redraw();
@@ -290,7 +308,6 @@ Block.prototype.renderConnections = function() {
 };
 
 Block.prototype._renderConnection = function(id, source, x2, y2) {
-	console.log(id, source, x2, y2);
 	// aggregation (:and, :or, ...)
 	if (source[0] === '') {
 		var query = '.' + BlockEditor._namespace + '-invar-' + id;

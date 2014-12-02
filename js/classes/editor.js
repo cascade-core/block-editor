@@ -32,7 +32,7 @@ Editor.prototype.render = function() {
 	// create new variable
 	if (this._variable === '*') {
 		this._variable = this.getNewName();
-		if (this._variable === undefined) {
+		if (this._variable === null) {
 			return;
 		}
 		this.block.values[this._variable] = undefined;
@@ -195,17 +195,23 @@ Editor.prototype._save = function() {
 };
 
 Editor.prototype.getNewName = function() {
-	var name = window.prompt(_('New input name:'), this.id);
+	var old = this.id;
+	var name = null;
+	while (name === null) {
+		name = window.prompt(_('New input name:'), old);
 
-	if (name === null) {
-		return;
-	} else if (!name.match(/^[a-zA-Z][a-zA-Z0-9_]*$/)) {
-		alert(_('Only letters, numbers and underscore are allowed in variable name and the first character must be a letter.'));
-	} else if (name in this.block.values) {
-		alert(_('This name is already taken by another variable.'));
-	} else {
-		return name;
+		if (name === null) {
+			return name;
+		} else if (!name.match(/^[a-zA-Z][a-zA-Z0-9_]*$/)) {
+			alert(_('Only letters, numbers and underscore are allowed in variable name and the first character must be a letter.'));
+			old = name;
+			name = null;
+		} else if (name === 'enable' || name in this.block.values) {
+			alert(_('This name is already taken by another variable.'));
+			old = name;
+			name = null;
+		}
 	}
 
-	return null;
+	return name;
 };

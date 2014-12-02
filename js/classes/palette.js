@@ -4,7 +4,6 @@
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
  *
  * @todo autocomplete filter vedle selectu
- * @todo novy block / infinite loop na nove jmeno / neztracet hodnotu
  * @todo dummy block bez typy na zacatek palety - zvyraznit pokud ma neexistujici typ
  */
 var Palette = function(editor, blocks, docLink) {
@@ -194,6 +193,9 @@ Palette.prototype._toggleParentProperties = function() {
 };
 
 Palette.prototype._copy = function() {
+	var id = this.editor.blocks.skeleton.getNewId();
+	console.log(id);return;
+
 	var ret = {};
 	for (var i in this.editor.blocks) {
 		var b = this.editor.blocks[i];
