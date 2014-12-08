@@ -49,6 +49,7 @@ Editor.prototype.render = function() {
 
 Editor.prototype._close = function() {
 	this.$container.remove();
+	$(document).off('click.editor', this.canvas);
 	return false;
 };
 
@@ -63,13 +64,13 @@ Editor.prototype._bind = function() {
 	}, this));
 
 	// close on outside click
-	$(document).off('click.editor').on('click.editor', $.proxy(function(e) {
+	$(document).off('click.editor', this.canvas).on('click.editor', $.proxy(function(e) {
 		if ($(e.target).is('.' + this._namespace) || $(e.target).closest('.' + this._namespace).length > 0) {
 			return true;
 		} else {
 			return this._close();
 		}
-	}, this));
+	}, this), this.canvas);
 };
 
 Editor.prototype._create = function() {
