@@ -20,7 +20,12 @@
 
 	$.fn.blockEditor = function(options) {
 		return this.each(function() {
-			new BlockEditor(this, options);
+			var editor = $(this).data(BlockEditor._namespace);
+			if (editor && typeof options === 'string' && typeof editor[options] === 'function') {
+				editor[options]();
+			} else {
+				new BlockEditor(this, options);
+			}
 		});
 	};
 

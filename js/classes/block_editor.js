@@ -26,7 +26,7 @@ var BlockEditor = function(el, options) {
 	this.options = $.extend(this.defaults, options, meta);
 
 	// reference to self
-    this.$el.data(this._namespace, this);
+    this.$el.data(BlockEditor._namespace, this);
 
 	// init block editor
 	this.init();
@@ -115,10 +115,13 @@ BlockEditor.prototype.serialize = function() {
 	return JSON.stringify(ret);
 };
 
-// todo
-//BlockEditor.prototype.destroy = function() {
-//	this.$el.off('.' + this._namespace);
-//	this.$el.find('*').off('.' + this._namespace);
-//	this.$el.removeData(this._namespace);
-//	this.$el = null;
-//};
+BlockEditor.prototype.destroy = function() {
+	this.$container.remove();
+	delete this.$container;
+	$(document).off('keydown.palette');
+	$(document).off('keydown.editor');
+	this.$el.find('*').off('.' + this._namespace);
+	this.$el.removeData(this._namespace);
+	this.$el.show();
+	this.$el = null;
+};

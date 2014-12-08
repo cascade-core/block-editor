@@ -31,7 +31,7 @@ Palette.prototype._createFilter = function() {
 
 	className = BlockEditor._namespace + '-filter';
 	this.$filter.addClass(className);
-	$(document).off('change.palette').on('change.palette', 'select.' + className, this._filter.bind(this));
+	$(document).off('change.palette', 'select.' + className).on('change.palette', 'select.' + className, this._filter.bind(this));
 	return this.$filter;
 };
 
