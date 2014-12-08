@@ -3,7 +3,6 @@
  *
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
  *
- * @todo klavesova zpratka v [] v title u tlacitek
  * @todo toolbar promenliva sirka
  *
  * @todo autocomplete filter vedle selectu
@@ -48,7 +47,7 @@ Palette.prototype.render = function() {
 	var $fullscreen = $('<a>');
 	var className = BlockEditor._namespace + '-fullscreen-toggle';
 	$fullscreen.html('<i class="fa fa-fw fa-arrows-alt"></i> F');
-	$fullscreen.attr('title', 'Toggle fullscreen');
+	$fullscreen.attr('title', 'Toggle fullscreen [Ctrl + Shift + F]');
 	$fullscreen.attr('href', '#fullscreen');
 	$fullscreen.addClass(className);
 	$(document).on('click', 'a.' + className, this._toggleFullScreen.bind(this));
@@ -58,7 +57,7 @@ Palette.prototype.render = function() {
 	var $parent = $('<a>');
 	className = BlockEditor._namespace + '-parent-properties-toggle';
 	$parent.html('<i class="fa fa-fw fa-cogs"></i> P');
-	$parent.attr('title', 'Edit parent block properties');
+	$parent.attr('title', 'Edit parent block properties [Ctrl + Shift + P]');
 	$parent.attr('href', '#parent-properties');
 	$parent.addClass(className);
 	$(document).on('click', 'a.' + className, this._toggleParentProperties.bind(this));
@@ -68,7 +67,7 @@ Palette.prototype.render = function() {
 	var $copy = $('<a>');
 	className = BlockEditor._namespace + '-copy';
 	$copy.html('<i class="fa fa-fw fa-copy"></i> C');
-	$copy.attr('title', 'Copy active block');
+	$copy.attr('title', 'Copy active block [Ctrl + C]');
 	$copy.attr('href', '#copy');
 	$copy.addClass(className);
 	$(document).on('click', 'a.' + className, this._copy.bind(this));
@@ -78,7 +77,7 @@ Palette.prototype.render = function() {
 	var $cut = $('<a>');
 	className = BlockEditor._namespace + '-cut';
 	$cut.html('<i class="fa fa-fw fa-cut"></i> X');
-	$cut.attr('title', 'Cut active block');
+	$cut.attr('title', 'Cut active block [Ctrl + X]');
 	$cut.attr('href', '#cut');
 	$cut.addClass(className);
 	$(document).on('click', 'a.' + className, this._cut.bind(this));
@@ -88,7 +87,7 @@ Palette.prototype.render = function() {
 	var $paste = $('<a>');
 	className = BlockEditor._namespace + '-paste';
 	$paste.html('<i class="fa fa-fw fa-paste"></i> P');
-	$paste.attr('title', 'Paste block');
+	$paste.attr('title', 'Paste block [Ctrl + V]');
 	$paste.attr('href', '#paste');
 	$paste.addClass(className);
 	$(document).on('click', 'a.' + className, this._paste.bind(this));
@@ -137,7 +136,12 @@ Palette.prototype._keydown = function(e) {
 		this._paste();
 	} else if (e.metaKey && code === 88) { // ctrl + x => cut
 		this._cut();
-	} else if (e.metaKey && $.inArray(code, [8, 46]) !== -1) { // ctrl + esc => disable selection
+	} else if (e.metaKey && e.shiftKey && code === 70) { // ctrl + shift + f => fullscreen
+		this._toggleFullScreen();
+		return false;
+	} else if (e.metaKey && e.shiftKey && code === 80) { // ctrl + shift + p => parent block properties
+		this._toggleParentProperties();
+	} else if (code === 8 || (e.metaKey && code === 46)) { // del / ctrl + backspace => disable selection
 		for (var id in this.editor.blocks) {
 			if (this.editor.blocks[id].isActive()) {
 				this.editor.blocks[id].remove();
