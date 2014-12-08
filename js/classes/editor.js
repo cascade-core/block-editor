@@ -191,7 +191,13 @@ Editor.prototype._save = function() {
 			break;
 
 		case 'connection':
-			var rows = text.split('\n');
+			var rows = text.trim().split(/\n+/); // ignore empty lines
+
+			// check for missing aggregation
+			if (rows.length > 1 && rows[0].indexOf(':') !== 0) {
+				alert(_('You have to use aggregation function on first row when multiple connections are used!'));
+				return false;
+			}
 
 			var connections = [];
 			for	(var i in rows) {
