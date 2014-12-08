@@ -3,7 +3,6 @@
  *
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
  *
- * @todo focus selectu po otevreni
  * @todo select na prvni radek nebo pred popisek
  *
  * @todo nove spojeni pretazenim - shift / ctrl
@@ -85,7 +84,7 @@ Editor.prototype._create = function() {
 	$title.append($close);
 	this.$container.append($title);
 
-	var $type = $('<select></select>');
+	var $type = $('<select autofocus="autofocus"></select>');
 	var $textarea = $('<textarea></textarea>');
 	var $desc = $('<div></div>').addClass(this._namespace + '-desc');
 	var $save = $('<input type="submit">').val(_('Save'));
