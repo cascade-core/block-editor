@@ -3,7 +3,6 @@
  *
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
  *
- * @todo typ vstupu JSON
  * @todo focus selectu po otevreni
  * @todo select na prvni radek nebo pred popisek
  *
@@ -24,7 +23,8 @@ var Editor = function(block, editor, target) {
 		'connection': 	[true,  'Connection', 		'Input is connected to these outputs: (Syntax: "block:output", one connection per line.)'],
 		'bool': 		[true,  'Boolean value', 	'Input is set to this boolean value (true or false):'],
 		'int': 			[true,  'Integer value', 	'Input is set to this number:'],
-		'string': 		[true,  'String value', 	'Input is set to this text:']
+		'string': 		[true,  'String value', 	'Input is set to this text:'],
+		'json': 		[true,  'JSON', 			'Input is set to this JSON:']
 	};
 };
 
@@ -120,9 +120,12 @@ Editor.prototype._create = function() {
 	} else if (type === 'number') {
 		$type.val('int');
 		$textarea.val(values[this._variable]);
-	} else {
+	} else if (type === 'string') {
 		$type.val('string');
 		$textarea.val(values[this._variable]);
+	} else {
+		$type.val('json');
+		$textarea.val(JSON.stringify(values[this._variable]));
 	}
 	$type.change();
 };
@@ -183,6 +186,14 @@ Editor.prototype._save = function() {
 		case 'string':
 			this.block.values[this._variable] = text;
 			break;
+
+		case 'json':
+			if (!this._isValidJson(text)) {
+				alert(_('Entered text is not valid JSON string!'));
+				return false;
+			}
+			this.block.values[this._variable] = JSON.parse(text);
+			break;
 	}
 
 	if (def) {
@@ -217,4 +228,13 @@ Editor.prototype.getNewName = function() {
 	}
 
 	return name;
+};
+
+Editor.prototype._isValidJson = function(str) {
+	try {
+		JSON.parse(str);
+	} catch (e) {
+		return false;
+	}
+	return true;
 };
