@@ -20,9 +20,9 @@
 function TPL_html5__block_editor__html_head($t, $id, $d, $so)
 {
 	echo "\t<!-- Block Editor plugin -->\n",
+		"\t<link rel=\"stylesheet\" href=\"//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css\" type=\"text/css\">\n",
 		"\t<link rel=\"stylesheet\" href=\"/plugin/block_editor/css/block_editor_old.css\" type=\"text/css\">\n",
 		"\t<link rel=\"stylesheet\" href=\"/plugin/block_editor/css/block_editor.css\" type=\"text/css\">\n",
-		"\t<link rel=\"stylesheet\" href=\"//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css\" type=\"text/css\">\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/jquery.pack.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/raphael-min.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/classes/block.js\"></script>\n",

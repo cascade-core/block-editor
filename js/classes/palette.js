@@ -47,7 +47,7 @@ Palette.prototype.render = function() {
 	// fullscreen button
 	var $fullscreen = $('<a>');
 	var className = BlockEditor._namespace + '-fullscreen-toggle';
-	$fullscreen.html('<i class="fa fa-arrows-alt"></i>');
+	$fullscreen.html('<i class="fa fa-fw fa-arrows-alt"></i> F');
 	$fullscreen.attr('title', 'Toggle fullscreen');
 	$fullscreen.attr('href', '#fullscreen');
 	$fullscreen.addClass(className);
@@ -57,7 +57,7 @@ Palette.prototype.render = function() {
 	// parent block properties button
 	var $parent = $('<a>');
 	className = BlockEditor._namespace + '-parent-properties-toggle';
-	$parent.html('<i class="fa fa-cogs"></i>');
+	$parent.html('<i class="fa fa-fw fa-cogs"></i> P');
 	$parent.attr('title', 'Edit parent block properties');
 	$parent.attr('href', '#parent-properties');
 	$parent.addClass(className);
@@ -67,7 +67,7 @@ Palette.prototype.render = function() {
 	// copy button
 	var $copy = $('<a>');
 	className = BlockEditor._namespace + '-copy';
-	$copy.html('<i class="fa fa-copy"></i>');
+	$copy.html('<i class="fa fa-fw fa-copy"></i> C');
 	$copy.attr('title', 'Copy active block');
 	$copy.attr('href', '#copy');
 	$copy.addClass(className);
@@ -77,7 +77,7 @@ Palette.prototype.render = function() {
 	// cut button
 	var $cut = $('<a>');
 	className = BlockEditor._namespace + '-cut';
-	$cut.html('<i class="fa fa-cut"></i>');
+	$cut.html('<i class="fa fa-fw fa-cut"></i> X');
 	$cut.attr('title', 'Cut active block');
 	$cut.attr('href', '#cut');
 	$cut.addClass(className);
@@ -87,7 +87,7 @@ Palette.prototype.render = function() {
 	// paste button
 	var $paste = $('<a>');
 	className = BlockEditor._namespace + '-paste';
-	$paste.html('<i class="fa fa-paste"></i>');
+	$paste.html('<i class="fa fa-fw fa-paste"></i> P');
 	$paste.attr('title', 'Paste block');
 	$paste.attr('href', '#paste');
 	$paste.addClass(className);
