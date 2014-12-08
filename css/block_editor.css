@@ -283,6 +283,16 @@
 	margin: 0 9px;
 }
 
+.block-editor-selection {
+	z-index: 150;
+	position: absolute;
+	border: 1px solid #89B;
+	background: #BCE;
+	opacity: 0.5;
+	background-color: #BEC;
+	border-color: #8B9;
+}
+
 i.fa {
 	display: inline-block;
 }

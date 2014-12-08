@@ -1,6 +1,8 @@
 /**
  * block entity
  *
+ * @todo agregacni funkce do zavorky k navzu vstupu, vcetne dvojtecky
+ *
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
  */
 var Block = function(id, data, editor) {
@@ -47,6 +49,7 @@ Block.prototype.remove = function() {
 	this.$container.remove();
 	delete this.$container;
 	delete this.editor.blocks[this.id];
+	this.editor.onChange();
 	return this.serialize();
 };
 
@@ -115,14 +118,18 @@ Block.prototype._onDragEnd = function(e) {
 
 Block.prototype._onClick = function(e) {
 	if (!this._moved && !$(e.target).is('a')) {
-		var className = BlockEditor._namespace + '-active';
-		this.$container.toggleClass(className);
-		this._active = this.$container.hasClass(className);
+		this.activate();
 	}
 };
 
 Block.prototype.isActive = function() {
 	return this._active;
+};
+
+Block.prototype.activate = function() {
+	this._active = true;
+	var className = BlockEditor._namespace + '-active';
+	this.$container.addClass(className);
 };
 
 Block.prototype.deactivate = function() {
@@ -206,7 +213,7 @@ Block.prototype.addOutput = function (variable) {
 	$output.text(variable);
 	$output.addClass(BlockEditor._namespace + '-outvar-' + variable);
 	this.$outputs.append($output);
-}
+};
 
 Block.prototype._toggleInputEditor = function(e) {
 	var editor = new Editor(this, this.editor, $(e.target).text());
@@ -341,11 +348,11 @@ Block.prototype._renderConnection = function(id, source, x2, y2) {
 
 		var offset = block.position();
 		var x1 = offset.left // from left of block container
-			+ 1			 // offset
-			+ block.$container.outerWidth(); // add container width
+				+ 1			 // offset
+				+ block.$container.outerWidth(); // add container width
 		var y1 = offset.top // from top of block container
-			+ 7			// center of row
-			+ block.$container.find(query).position().top; // add position of variable
+				+ 7			// center of row
+				+ block.$container.find(query).position().top; // add position of variable
 		this.canvas._drawConnection(x1, y1, x2, yy2);
 	}
 };
@@ -359,6 +366,14 @@ Block.prototype.serialize = function() {
 	if (this.force_exec !== null) {
 		B.force_exec = this.force_exec;
 	}
+	for (var input in this.values) {
+		if (input !== '*' && this.values[input] !== undefined) {
+			if (!('in_val' in B)) {
+				B.in_val = {};
+			}
+			B.in_val[input] = this.values[input];
+		}
+	}
 	for (var input in this.connections) {
 		if (input !== '*' && this.connections[input] !== undefined) {
 			if (this.connections[input] instanceof Array) {
@@ -369,14 +384,6 @@ Block.prototype.serialize = function() {
 					.map(function (x) {return x[0] === ':' ? [x] : x.split(':');})
 					.reduce(function (a, b) {return a.concat(b);});
 			}
-		}
-	}
-	for (var input in this.values) {
-		if (input !== '*' && this.values[input] !== undefined) {
-			if (!('in_val' in B)) {
-				B.in_val = {};
-			}
-			B.in_val[input] = this.values[input];
 		}
 	}
 	return B;

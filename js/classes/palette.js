@@ -3,6 +3,9 @@
  *
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
  *
+ * @todo klavesova zpratka v [] v title u tlacitek
+ * @todo toolbar promenliva sirka
+ *
  * @todo autocomplete filter vedle selectu
  * @todo dummy block bez typy na zacatek palety - zvyraznit pokud ma neexistujici typ
  */
@@ -98,7 +101,7 @@ Palette.prototype.render = function() {
 	$(document).off('keydown.palette').on('keydown.palette', this._keydown.bind(this));
 
 	// disable selection
-	$(document).off('click.disable-selection', this.canvas).on('click.disable-selection', this._disableSelection.bind(this));
+	$(document).off('click.disable-selection', this.canvas).on('click.disable-selection', this.canvas, this._disableSelection.bind(this));
 
 	// blocks
 	for (var id in this.blocks) {
@@ -112,11 +115,12 @@ Palette.prototype.render = function() {
 };
 
 Palette.prototype._disableSelection = function(e) {
-	if ($(e.target).is('canvas')) {
+	if ($(e.target).is('canvas') && !this.canvas.selection) {
 		for (var id in this.editor.blocks) {
 			this.editor.blocks[id].deactivate();
 		}
 	}
+	this.canvas.selection = false;
 };
 
 Palette.prototype._keydown = function(e) {
@@ -193,9 +197,6 @@ Palette.prototype._toggleParentProperties = function() {
 };
 
 Palette.prototype._copy = function() {
-	var id = this.editor.blocks.skeleton.getNewId();
-	console.log(id);return;
-
 	var ret = {};
 	for (var i in this.editor.blocks) {
 		var b = this.editor.blocks[i];
@@ -209,7 +210,6 @@ Palette.prototype._copy = function() {
 };
 
 Palette.prototype._cut = function() {
-	var ret = this._copy();
 	var ret = {};
 	for (var id in this.editor.blocks) {
 		var b = this.editor.blocks[id];
@@ -239,6 +239,7 @@ Palette.prototype._paste = function() {
 			block.render();
 		}
 		this.canvas.redraw();
+		this.editor.onChange();
 	}
 
 	return false;

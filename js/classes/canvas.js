@@ -77,6 +77,21 @@ Canvas.prototype._create = function() {
 };
 
 Canvas.prototype._onMouseDown = function(e) {
+	if (e.metaKey) { // selecting blocks
+		this._cursor = {
+			x: e.pageX - this.$container.offset().left + this.$container.scrollLeft(),
+			y: e.pageY - this.$container.offset().top + this.$container.scrollTop()
+		};
+		this._$selection = $('<div class="' + BlockEditor._namespace + '-selection">');
+		this._$selection.css({
+			left: this._cursor.x,
+			top: this._cursor.y
+		});
+		this.$container.append(this._$selection);
+		this.$container.disableSelection();
+		return;
+	}
+
 	var block = $(e.target).closest('table.' + BlockEditor._namespace + '-block')[0];
 	if (!block) {
 		var speed = this.options.canvasSpeed;
@@ -90,6 +105,23 @@ Canvas.prototype._onMouseDown = function(e) {
 };
 
 Canvas.prototype._onMouseMove = function(e) {
+	if (this._$selection) {
+		var currX = e.pageX - this.$container.offset().left + this.$container.scrollLeft();
+		var currY = e.pageY - this.$container.offset().top + this.$container.scrollTop();
+		var width = currX - this._cursor.x;
+		var height = currY - this._cursor.y;
+		this._$selection.css({
+			width: Math.abs(width),
+			height: Math.abs(height)
+		});
+		if (width < 0) {
+			this._$selection.css('left', currX);
+		}
+		if (height < 0) {
+			this._$selection.css('top', currY);
+		}
+	}
+
 	if (this._moving) {
 		var speed = this.options.canvasSpeed;
 		this.$container.scrollLeft((this.canvas.width - speed * e.pageX) - this._cursor.x);
@@ -98,6 +130,35 @@ Canvas.prototype._onMouseMove = function(e) {
 };
 
 Canvas.prototype._onMouseUp = function(e) {
+	if (this._$selection) {
+		for (var id in this.editor.blocks) {
+			var b = this.editor.blocks[id];
+			var currX = e.pageX - this.$container.offset().left + this.$container.scrollLeft();
+			var currY = e.pageY - this.$container.offset().top + this.$container.scrollTop();
+			var blockX = b.position().left;
+			var blockXW = b.position().left + b.$container.width();
+			var blockY = b.position().top;
+			var blockYH = b.position().top + b.$container.height();
+
+			if (currX - this._cursor.x < 0) { // right to left selection => allow selecting just part of block
+				if (currX < blockXW && this._cursor.x > blockX &&
+					((currY > blockY && this._cursor.y < blockYH) || (this._cursor.y > blockY && currY < blockYH))) {
+					b.activate();
+				}
+			} else { // left to right selection => select only whole block
+				if (currX > blockXW && this._cursor.x < blockX &&
+					((currY > blockYH && this._cursor.y < blockY) || this._cursor.y > blockYH && currY < blockY)) {
+					b.activate();
+				}
+			}
+		}
+
+		this._$selection.remove();
+		delete this._$selection;
+		this.selection = true; // prevent disabling selection by click event on canvas
+
+		return false;
+	}
 	this._moving = false;
 };
 

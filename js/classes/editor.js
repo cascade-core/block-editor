@@ -3,9 +3,12 @@
  *
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
  *
- * @todo core/class/Block.php#collectOutputs funkce :and :or ...
+ * @todo typ vstupu JSON
+ * @todo focus selectu po otevreni
+ * @todo select na prvni radek nebo pred popisek
+ *
  * @todo nove spojeni pretazenim - shift / ctrl
- * @todo zmena typu spojeni na ...
+ * @todo zmena typu spojeni na ... ->
  * @todo historie pri zmene typu
  * @todo nevalidni spojeni vykreslit cervene
  */

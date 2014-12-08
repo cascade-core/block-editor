@@ -1,6 +1,8 @@
 /**
  * parent block properties editor
  *
+ * @todo tabs, posledni tab se "zbytkem" - pouze nezname vlastnosti
+ *
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
  */
 var ParentEditor = function(editor) {

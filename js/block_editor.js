@@ -28,10 +28,10 @@
 
 	// run
 	$(document).ready(function() {
-		var second = $('textarea.block_editor_widget').clone();
-		$('textarea.block_editor_widget').parent().append(second);
+		//var second = $('textarea.block_editor_widget').clone();
+		//$('textarea.block_editor_widget').parent().append(second);
 		$('textarea.block_editor_widget:eq(0)').newBlockEditorWidget();
-		$('textarea.block_editor_widget:eq(1)').blockEditorWidget();
+		//$('textarea.block_editor_widget:eq(1)').blockEditorWidget();
 	});
 
 })(jQuery);
