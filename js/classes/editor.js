@@ -8,7 +8,6 @@
  * @todo nove spojeni pretazenim - shift / ctrl
  * @todo zmena typu spojeni na ... ->
  * @todo historie pri zmene typu
- * @todo nevalidni spojeni vykreslit cervene
  */
 var Editor = function(block, editor, target) {
 	this.block = block;

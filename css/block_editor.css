@@ -179,6 +179,12 @@
 	color: #999;
 }
 
+.block-editor-block-input.missing a,
+.block-editor-block-output.missing {
+	color: #f00;
+	font-style: italic;
+}
+
 .block-editor-block-outputs {
 	text-align: right;
 	padding: 3px 3px 3px 10px;

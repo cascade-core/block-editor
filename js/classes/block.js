@@ -196,7 +196,7 @@ Block.prototype.addInput = function(variable) {
 	var $input = $('<div class="' + BlockEditor._namespace + '-block-input" />');
 	$input.attr('data-variable', variable);
 	var $link = $('<a href="#settings">' + variable + '</a>');
-	$link.on('click', this._toggleInputEditor.bind(this))
+	$link.on('click', this._toggleInputEditor.bind(this));
 	$input.append($link);
 	$input.addClass(BlockEditor._namespace + '-invar-' + variable);
 	if ((!this.values || !this.values[variable]) && (!this.connections[variable])) {
@@ -207,6 +207,11 @@ Block.prototype.addInput = function(variable) {
 
 Block.prototype.addOutput = function (variable) {
 	var $output = $('<div class="' + BlockEditor._namespace + '-block-output" />');
+
+	if (!(variable in this.defaults.outputs) && !('*' in this.defaults.outputs)) {
+		$output.addClass('missing');
+	}
+
 	$output.text(variable);
 	$output.addClass(BlockEditor._namespace + '-outvar-' + variable);
 	this.$outputs.append($output);
@@ -335,14 +340,12 @@ Block.prototype._renderConnection = function(id, source, x2, y2) {
 			var yy2 = y2 + 36; // block header height + center of row
 		}
 		query = '.' + BlockEditor._namespace + '-outvar-' + source[1];
+		var $output = $(query, block.$container);
+		var missing = $output.hasClass('missing');
 
 		if (block.$container.find(query).length === 0) {
-			if ('*' in block.defaults.outputs) {
-				block.addOutput(source[1]);
-				this.canvas.redraw();
-			} else {
-				alert(_('Source block does not have output with given name or wildcard output!'));
-			}
+			block.addOutput(source[1]);
+			this.canvas.redraw();
 			return false;
 		}
 
@@ -353,7 +356,8 @@ Block.prototype._renderConnection = function(id, source, x2, y2) {
 		var y1 = offset.top // from top of block container
 				+ 7			// center of row
 				+ block.$container.find(query).position().top; // add position of variable
-		this.canvas._drawConnection(x1, y1, x2, yy2);
+		var color = missing ? '#f00' : '#000';
+		this.canvas._drawConnection(x1, y1, x2, yy2, color);
 	}
 };
 
