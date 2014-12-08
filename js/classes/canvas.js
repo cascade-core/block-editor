@@ -88,7 +88,6 @@ Canvas.prototype._onMouseDown = function(e) {
 			top: this._cursor.y
 		});
 		this.$container.append(this._$selection);
-		this.$container.disableSelection();
 		return;
 	}
 
@@ -100,7 +99,6 @@ Canvas.prototype._onMouseDown = function(e) {
 			x: (this.canvas.width - speed * e.pageX) - this.$container.scrollLeft(),
 			y: (this.canvas.height - speed * e.pageY) - this.$container.scrollTop()
 		};
-		this.$container.disableSelection();
 	}
 };
 

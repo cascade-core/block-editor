@@ -38,7 +38,6 @@ Placeholder.prototype._onDragStart = function(e) {
 			- this.$container.parent()[0].offsetTop
 			+ this.$container.parent()[0].scrollTop
 	};
-	this.$container.disableSelection();
 
 	$('body').on({
 		'mousemove.block-editor': this._onDragOver.bind(this),

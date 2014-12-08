@@ -64,7 +64,7 @@ Editor.prototype._bind = function() {
 
 	// close on outside click
 	$(document).off('click.editor', this.canvas).on('click.editor', $.proxy(function(e) {
-		if ($(e.target).is('.' + this._namespace) || $(e.target).closest('.' + this._namespace).length > 0) {
+		if (this._dragging || $(e.target).is('.' + this._namespace) || $(e.target).closest('.' + this._namespace).length > 0) {
 			return true;
 		} else {
 			return this._close();
@@ -75,6 +75,9 @@ Editor.prototype._bind = function() {
 Editor.prototype._create = function() {
 	// create table container
 	this.$container = $('<div class="' + this._namespace + '">');
+
+	// make it draggable
+	this.$container.on('mousedown', this._onDragStart.bind(this));
 
 	var $title = $('<div class="' + this._namespace + '-title">');
 	var $close = $('<a href="#">&times;</a>')
@@ -128,6 +131,44 @@ Editor.prototype._create = function() {
 		$textarea.val(JSON.stringify(values[this._variable]));
 	}
 	$type.change();
+};
+
+Editor.prototype._onDragStart = function(e) {
+	this._dragging = true;
+	this._moved = false;
+	this._cursor = {
+		x: e.clientX - this.$container[0].offsetLeft + parseInt(this.$container.css('margin-left')),
+		y: e.clientY - this.$container[0].offsetTop + parseInt(this.$container.css('margin-top'))
+	};
+
+	$('body').on({
+		'mousemove.block-editor': this._onDragOver.bind(this),
+		'mouseup.block-editor': this._onDragEnd.bind(this)
+	});
+};
+
+Editor.prototype._onDragOver = function(e) {
+	if (this._dragging) {
+		var left = e.clientX - this._cursor.x;
+		var top = e.clientY - this._cursor.y;
+
+		this._moved = this.$container[0].offsetLeft !== left || this.$container[0].offsetTop !== top;
+		if (this._moved) {
+			this.$container.css({
+				left: left,
+				top: top
+			});
+		}
+	}
+};
+
+Editor.prototype._onDragEnd = function(e) {
+	// wait to prevent closing editor from onClick event
+	var that = this;
+	setTimeout(function() {
+		that._dragging = false;
+	}, 1);
+	$('body').off('mousemove.block-editor mouseup.block-editor');
 };
 
 Editor.prototype._changeType = function(e) {

@@ -68,7 +68,6 @@ Block.prototype._onDragStart = function(e) {
 		x: e.clientX - this.position().left,
 		y: e.clientY - this.position().top
 	};
-	this.$container.disableSelection();
 
 	$('body').on({
 		'mousemove.block-editor': this._onDragOver.bind(this),

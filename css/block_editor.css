@@ -64,6 +64,7 @@
 
 .block-editor-block,
 .block-editor-toolbar,
+.block-editor-variable-editor,
 .block-editor-palette {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
