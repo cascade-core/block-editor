@@ -1,8 +1,6 @@
 /**
  * block entity
  *
- * @todo agregacni funkce do zavorky k navzu vstupu, vcetne dvojtecky
- *
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
  */
 var Block = function(id, data, editor) {
@@ -307,29 +305,32 @@ Block.prototype.renderConnections = function() {
 	var y2 = this.position().top;
 	for (var id in this.connections) {
 		var sources = this.connections[id];
-		for (var i = 0; i < sources.length; i = i + 2) {
+
+		// aggregation (:and, :or, ...)
+		var query = '.' + BlockEditor._namespace + '-invar-' + id;
+		var $input = $(query, this.$container);
+		$input.find('span').remove();
+		var i = 0;
+		if (sources[0] === '') {
+			$input.append('<span> (:' + sources[1] + ')</span>');
+			i += 2;
+		}
+
+		for (; i < sources.length; i = i + 2) {
 			this._renderConnection(id, sources.slice(i, i + 2), x2, y2);
 		}
 	}
 };
 
 Block.prototype._renderConnection = function(id, source, x2, y2) {
-	// aggregation (:and, :or, ...)
-	if (source[0] === '') {
-		var query = '.' + BlockEditor._namespace + '-invar-' + id;
-		var yy2 = y2 // from top of block container
-			+ this.$container.find(query).position().top; // add position of variable
-		this.canvas._writeText(source[1], x2 - 15, yy2);
-		return;
-	}
-
+	var query = '.' + BlockEditor._namespace + '-invar-' + id;
+	var $input = $(query, this.$container);
 	var block = this.editor.blocks[source[0]];
 	if (block) {
-		var query = '.' + BlockEditor._namespace + '-invar-' + id;
-		if (this.$container.find(query).length) {
+		if ($input.length) {
 			var yy2 = y2 // from top of block container
 				+ 7	 // center of row
-				+ this.$container.find(query).position().top; // add position of variable
+				+ $input.position().top; // add position of variable
 		} else {
 			var yy2 = y2 + 36; // block header height + center of row
 		}
