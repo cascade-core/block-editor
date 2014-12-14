@@ -5,7 +5,6 @@
  */
 var Toolbar = function(editor) {
 	this.editor = editor;
-	this.limit = editor.options.historyLimit;
 	this.canvas = editor.canvas;
 };
 

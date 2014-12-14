@@ -10,7 +10,7 @@ var BlockEditor = function(el, options) {
 	// default options
 	this.defaults = {
 		paletteData: '/admin/block-editor-palette.json',
-		historyLimit: 500, // count of remembered changes
+		historyLimit: 100, // count of remembered changes
 		canvasOffset: 500, // px start rendering blocks from top left corner + canvasOffset
 		canvasWidth: 2000,
 		canvasHeight: 2000,
@@ -120,6 +120,9 @@ BlockEditor.prototype.onChange = function() {
 		// save new history state
 		var undo = sessionStorage.undo ? JSON.parse(sessionStorage.undo) : [];
 		undo.push(oldData);
+		if (undo.length > this.options.historyLimit) {
+			undo.splice(0, undo.length - this.options.historyLimit);
+		}
 		sessionStorage.undo = JSON.stringify(undo);
 		sessionStorage.removeItem('redo');
 	}
