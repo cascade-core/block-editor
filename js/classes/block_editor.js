@@ -10,12 +10,13 @@ var BlockEditor = function(el, options) {
 	// default options
 	this.defaults = {
 		paletteData: '/admin/block-editor-palette.json',
+		historyLimit: 100, // count of remembered changes
 		canvasOffset: 500, // px start rendering blocks from top left corner + canvasOffset
 		canvasWidth: 2000,
 		canvasHeight: 2000,
 		canvasSpeed: 2, // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
 		canvasBackgroundColor: '#fff',
-		canvasBackgroundLineColor: '#eeeeff',
+		canvasBackgroundLineColor: '#eef',
 		canvasBackgroundLineStep: 10 // px
 	};
 
@@ -87,6 +88,24 @@ BlockEditor.prototype.render = function() {
 	this.canvas.$container.scrollLeft(this.options.canvasOffset - 45);
 };
 
+BlockEditor.prototype.refresh = function() {
+	// remove old blocks
+	for (var id in this.blocks) {
+		this.blocks[id].$container.remove();
+	}
+
+	// update data
+	this.processData();
+
+	// redraw all blocks
+	for (var id in this.blocks) {
+		this.blocks[id].render();
+	}
+
+	// then re-render connections
+	this.canvas.redraw();
+};
+
 BlockEditor.prototype.addBlock = function(id, data) {
 	this.blocks[id] = new Block(id, data, this);
 	this.blocks[id].render();
@@ -94,7 +113,21 @@ BlockEditor.prototype.addBlock = function(id, data) {
 };
 
 BlockEditor.prototype.onChange = function() {
-	this.$el.val(this.serialize());
+	// normalize string from textarea
+	var oldData = JSON.stringify(JSON.parse(this.$el.val()));
+	var newData = this.serialize();
+	if (oldData !== newData) {
+		// save new history state
+		var undo = sessionStorage.undo ? JSON.parse(sessionStorage.undo) : [];
+		undo.push(oldData);
+		sessionStorage.undo = JSON.stringify(undo);
+		sessionStorage.removeItem('redo');
+	}
+
+	this.palette.toolbar.updateDisabledClasses();
+
+	// set data to textarea
+	this.$el.val(newData);
 };
 
 BlockEditor.prototype.serialize = function() {

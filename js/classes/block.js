@@ -135,6 +135,8 @@ Block.prototype._onDragStart = function(e) {
 				$('.' + BlockEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
 				this.canvas.redraw();
 				$('body').off('mousemove.block-editor mouseup.block-editor');
+
+				console.log(this._moved);
 			}, this)
 		});
 	} else {
@@ -151,7 +153,7 @@ Block.prototype._onDragStart = function(e) {
 Block.prototype._onDragOver = function(e) {
 	if (this._dragging) {
 		if (!this._active) {
-			this.palette.disableSelection();
+			this.palette.toolbar.disableSelection();
 			this.activate();
 		}
 
@@ -197,7 +199,7 @@ Block.prototype._onDragEnd = function(e) {
 
 Block.prototype._onClick = function(e) {
 	if (!e.metaKey && !this._moved) {
-		this.palette.disableSelection();
+		this.palette.toolbar.disableSelection();
 	}
 	if (!this._moved && !$(e.target).is('a')) {
 		if (e.metaKey) {
@@ -224,12 +226,14 @@ Block.prototype.activate = function() {
 	this._active = true;
 	var className = BlockEditor._namespace + '-active';
 	this.$container.addClass(className);
+	this.palette.toolbar.updateDisabledClasses();
 };
 
 Block.prototype.deactivate = function() {
 	this._active = false;
 	var className = BlockEditor._namespace + '-active';
 	this.$container.removeClass(className);
+	this.palette.toolbar.updateDisabledClasses();
 };
 
 Block.prototype._create = function() {
@@ -314,8 +318,10 @@ Block.prototype.addOutput = function (variable) {
 };
 
 Block.prototype._toggleInputEditor = function(e) {
-	var editor = new Editor(this, this.editor, $(e.target).data('variable'));
-	editor.render();
+	if (!this._moved) {
+		var editor = new Editor(this, this.editor, $(e.target).data('variable'));
+		editor.render();
+	}
 
 	return false;
 };
@@ -484,14 +490,6 @@ Block.prototype.serialize = function() {
 	if (this.force_exec !== null) {
 		B.force_exec = this.force_exec;
 	}
-	for (var input in this.values) {
-		if (input !== '*' && this.values[input] !== undefined) {
-			if (!('in_val' in B)) {
-				B.in_val = {};
-			}
-			B.in_val[input] = this.values[input];
-		}
-	}
 	for (var input in this.connections) {
 		if (input !== '*' && this.connections[input] !== undefined) {
 			if (this.connections[input] instanceof Array) {
@@ -502,6 +500,14 @@ Block.prototype.serialize = function() {
 					.map(function (x) {return x[0] === ':' ? [x] : x.split(':');})
 					.reduce(function (a, b) {return a.concat(b);});
 			}
+		}
+	}
+	for (var input in this.values) {
+		if (input !== '*' && this.values[input] !== undefined) {
+			if (!('in_val' in B)) {
+				B.in_val = {};
+			}
+			B.in_val[input] = this.values[input];
 		}
 	}
 	return B;

@@ -34,7 +34,8 @@
 	top: 25px;
 	left: 0;
 	bottom: 0;
-	width: 250px;
+	width: auto;
+	max-width: 300px;
 	background: #fff;
 	overflow: hidden;
 	overflow-y: scroll;
@@ -56,7 +57,7 @@
 	background: #fff;
 	border-bottom: 1px solid #aaa;
 	border-right: 1px solid #aaa;
-	width: 250px;
+	width: auto;
 	height: 25px;
 	text-align: left;
 	z-index: 150;
@@ -76,6 +77,10 @@
 
 .block-editor-toolbar a {
 	text-align: center;
+}
+
+.block-editor-toolbar select {
+	margin-right: 3px;
 }
 
 .block-editor-block {
@@ -224,6 +229,28 @@
 	border: 1px solid #aaa;
 }
 
+.block-editor-toolbar a.hover,
+.block-editor-toolbar a:hover {
+	border: 1px solid #666;
+	background: #efe;
+}
+
+.block-editor-toolbar a.disabled,
+.block-editor-toolbar a.disabled:hover {
+	background: #fff;
+	border-color: #aaa;
+	color: #666;
+	opacity: 0.5;
+}
+
+.block-editor-toolbar-divider {
+	background: #aaa;
+	width: 1px;
+	margin: 0 2px !important;
+	height: 100%;
+	display: inline-block;
+}
+
 .block-editor-fullscreen {
 	position: fixed;
 	top: 6%;
@@ -233,6 +260,7 @@
 	width: auto !important;
 	height: auto !important;
 	z-index: 1000;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, .2);
 }
 
 .block-editor-fullscreen .block-editor-toolbar {
@@ -246,7 +274,8 @@
 }
 
 .block-editor-fullscreen .block-editor-palette:hover {
-	width: 250px;
+	width: auto;
+	max-width: 300px;
 }
 
 .block-editor-variable-editor {
@@ -260,6 +289,7 @@
 	max-height: 300px;
 	z-index: 150;
 	border: 1px solid #999;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, .2);
 	padding: 0;
 	text-align: center;
 }
