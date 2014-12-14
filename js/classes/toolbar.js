@@ -289,7 +289,8 @@ Toolbar.prototype._paste = function() {
 		var blocks = JSON.parse(localStorage.clipboard);
 		for (var id in blocks) {
 			var b = blocks[id];
-			if (id in this.editor.blocks) {
+			var exists = id in this.editor.blocks;
+			if (exists) {
 				id = this.editor.blocks[id].getNewId();
 				if (!id) {
 					continue;
@@ -297,8 +298,15 @@ Toolbar.prototype._paste = function() {
 			}
 			var block = new Block(id, b, this.editor);
 			this.editor.blocks[id] = block;
+			if (exists) {
+				block.x += 10;
+				block.y += 10;
+				b.x += 10;
+				b.y += 10;
+			}
 			block.render();
 		}
+		localStorage.clipboard = JSON.stringify(blocks);
 		this.canvas.redraw();
 		this.editor.onChange();
 	}
