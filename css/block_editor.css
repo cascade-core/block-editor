@@ -175,14 +175,32 @@
 	padding: 3px 10px 3px 3px;
 }
 
-.block-editor-block-input.default a {
+.block-editor-block-input {
+	display: block;
+}
+
+.block-editor-block-input.default {
 	color: #999;
 }
 
-.block-editor-block-input.missing a,
+.block-editor-block-output.selecting {
+	color: #c60;
+}
+
+.block-editor-block-input.missing,
 .block-editor-block-output.missing {
 	color: #f00;
 	font-style: italic;
+}
+
+.block-editor-block-input.hover-invalid,
+.block-editor-block-output.hover-invalid {
+	color: #f00;
+}
+
+.block-editor-block-input.hover-valid,
+.block-editor-block-output.hover-valid {
+	color: #0c0;
 }
 
 .block-editor-block-outputs {
@@ -190,9 +208,9 @@
 	padding: 3px 3px 3px 10px;
 }
 
-/*.block-editor-block-outputs a {
-	color: #000;
-}*/
+.block-editor-block-outputs div {
+	cursor: pointer;
+}
 
 .block-editor * {
 	box-sizing: border-box;

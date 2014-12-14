@@ -64,6 +64,10 @@ Canvas.prototype._create = function() {
 		mouseup: this._onMouseUp.bind(this),
 		mousemove: this._onMouseMove.bind(this)
 	});
+	// disable text selection, forces default cursor when selecting
+	this.$container[0].onselectstart = function() {
+		return false;
+	};
 	this.$container.append(this.canvas);
 	this.editor.$container.append(this.$container);
 };

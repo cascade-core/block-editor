@@ -59,18 +59,93 @@ Block.prototype.redraw = function() {
 	this.canvas.redraw();
 };
 
+Block.prototype.addConnection = function(source, target) {
+	if (this.connections[target]) {
+		// check if connection not exists
+		for	(var i = 0; i < this.connections[target].length; i += 2) {
+			if (this.connections[target][i] === source[0] && this.connections[target][i + 1] === source[1]) {
+				return false;
+			}
+		}
+
+		// connection to this target already exists, prompt for aggregation func
+		if (this.connections[target][0] !== '') {
+			var func = this.getNewAggregationFunc();
+			if (!func) {
+				return false;
+			}
+			this.connections[target].unshift('', func);
+		}
+	} else {
+		this.connections[target] = [];
+	}
+	this.connections[target].push(source[0], source[1]);
+	this.$container.find('.' + BlockEditor._namespace + '-invar-' + target).removeClass('default');
+	this.editor.onChange();
+};
+
 Block.prototype._onDragStart = function(e) {
-	this._dragging = true;
-	this._moved = false;
 	this._cursor = {
 		x: e.clientX - this.position().left,
 		y: e.clientY - this.position().top
 	};
 
-	$('body').on({
-		'mousemove.block-editor': this._onDragOver.bind(this),
-		'mouseup.block-editor': this._onDragEnd.bind(this)
-	});
+	if (e.metaKey && $(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
+		var $target = $(e.target);
+		var source = [this.id, $target.text()];
+
+		$target.addClass('selecting');
+		$('body').on({
+			'mousemove.block-editor': $.proxy(function(e) {
+				// compute current mouse position
+				var x = e.pageX + this.canvas.$container[0].scrollLeft - this.canvas.$container.offset().left;
+				var y = e.pageY
+					  + this.canvas.$container[0].scrollTop
+					  - this.canvas.$container.offset().top
+					  - $target.parent().position().top - 10;
+
+				// highlight target
+				$('.' + BlockEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
+				if ($(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
+					$(e.target).addClass('hover-invalid');
+				}
+				if ($(e.target).hasClass(BlockEditor._namespace + '-block-input')) {
+					$(e.target).addClass('hover-valid');
+					var id = $(e.target).closest('.' + BlockEditor._namespace + '-block')
+						.find('.' + BlockEditor._namespace + '-block-id').text();
+					var block = this.editor.blocks[id];
+					x = block.position().left - 3;
+					y = block.position().top - 29
+					  + $(e.target).position().top; 	// add position of variable
+				}
+				this.canvas.redraw();
+				this._renderConnection(null, source, x, y, '#c60');
+			}, this),
+			'mouseup.block-editor': $.proxy(function(e) {
+				// create connection
+				if ($(e.target).hasClass(BlockEditor._namespace + '-block-input')) {
+					var id = $(e.target).closest('.' + BlockEditor._namespace + '-block')
+										.find('.' + BlockEditor._namespace + '-block-id').text();
+					var target = $(e.target).data('variable');
+					this.editor.blocks[id].addConnection(source, target)
+				}
+
+				// clean up
+				$('.' + BlockEditor._namespace + '-block-output.selecting').removeClass('selecting');
+				$('.' + BlockEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
+				this.canvas.redraw();
+				$('body').off('mousemove.block-editor mouseup.block-editor');
+			}, this)
+		});
+	} else {
+		this._dragging = true;
+		this._moved = false;
+
+		$('body').on({
+			'mousemove.block-editor': this._onDragOver.bind(this),
+			'mouseup.block-editor': this._onDragEnd.bind(this)
+		});
+	}
 };
 
 Block.prototype._onDragOver = function(e) {
@@ -215,11 +290,10 @@ Block.prototype._createHeader = function() {
 }
 
 Block.prototype.addInput = function(variable) {
-	var $input = $('<div class="' + BlockEditor._namespace + '-block-input" />');
+	var $input = $('<a href="#settings" class="' + BlockEditor._namespace + '-block-input" />');
 	$input.attr('data-variable', variable);
-	var $link = $('<a href="#settings">' + variable + '</a>');
-	$link.on('click', this._toggleInputEditor.bind(this));
-	$input.append($link);
+	$input.text(variable);
+	$input.on('click', this._toggleInputEditor.bind(this));
 	$input.addClass(BlockEditor._namespace + '-invar-' + variable);
 	if ((!this.values || !this.values[variable]) && (!this.connections[variable])) {
 		$input.addClass('default');
@@ -240,7 +314,7 @@ Block.prototype.addOutput = function (variable) {
 };
 
 Block.prototype._toggleInputEditor = function(e) {
-	var editor = new Editor(this, this.editor, $(e.target).text());
+	var editor = new Editor(this, this.editor, $(e.target).data('variable'));
 	editor.render();
 
 	return false;
@@ -260,6 +334,24 @@ Block.prototype.getNewId = function() {
 			id = null;
 		} else if (id in this.editor.blocks) {
 			alert(_('This block ID is already taken by another block.'));
+			old = id;
+			id = null;
+		}
+	}
+
+	return id;
+};
+
+Block.prototype.getNewAggregationFunc = function() {
+	var old = 'and';
+	var id = null;
+	while (id === null) {
+		id = window.prompt(_('Aggregation function:'), old);
+
+		if (id === null) {
+			return id;
+		} else if (!id.match(/^[a-z]*$/)) {
+			alert(_('Only lowercase letters are allowed in aggregation function name.'));
 			old = id;
 			id = null;
 		}
@@ -349,7 +441,7 @@ Block.prototype.renderConnections = function() {
 	}
 };
 
-Block.prototype._renderConnection = function(id, source, x2, y2) {
+Block.prototype._renderConnection = function(id, source, x2, y2, color) {
 	var query = '.' + BlockEditor._namespace + '-invar-' + id;
 	var $input = $(query, this.$container);
 	var block = this.editor.blocks[source[0]];
@@ -378,7 +470,7 @@ Block.prototype._renderConnection = function(id, source, x2, y2) {
 		var y1 = offset.top // from top of block container
 				+ 7			// center of row
 				+ block.$container.find(query).position().top; // add position of variable
-		var color = missing ? '#f00' : '#000';
+		var color = color || (missing ? '#f00' : '#000');
 		this.canvas._drawConnection(x1, y1, x2, yy2, color);
 	}
 };
