@@ -2,14 +2,6 @@
  * canvas class
  *
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
- *
- *     @todo oznaceni vice bloku najednou pomoci tazeni mysi ( + ctrl)
- *     		- zleva doprava bere jen cele bloky
- *     		- zprava doleva bere i casti bloku
- *     		- klikem na canvas odznacit vse
- *     		- jinak pridavat do oznaceni
- *       	- schranka s historii
- *      	- vyuziti systemovy schranky (copy z wordu napr)
  */
 var Canvas = function(editor) {
 	this.editor = editor;
@@ -77,7 +69,7 @@ Canvas.prototype._create = function() {
 };
 
 Canvas.prototype._onMouseDown = function(e) {
-	if (e.metaKey) { // selecting blocks
+	if (e.metaKey && $(e.target).is('canvas')) { // selecting blocks
 		this._cursor = {
 			x: e.pageX - this.$container.offset().left + this.$container.scrollLeft(),
 			y: e.pageY - this.$container.offset().top + this.$container.scrollTop()

@@ -100,7 +100,7 @@ Palette.prototype.render = function() {
 	$(document).off('keydown.palette').on('keydown.palette', this._keydown.bind(this));
 
 	// disable selection
-	$(document).off('click.disable-selection', this.canvas).on('click.disable-selection', this.canvas, this._disableSelection.bind(this));
+	$(document).off('click.disable-selection', this.canvas.$container).on('click.disable-selection', this.canvas.$container, this.disableSelection.bind(this));
 
 	// blocks
 	for (var id in this.blocks) {
@@ -113,8 +113,8 @@ Palette.prototype.render = function() {
 	this.editor.$container.append(this.$container);
 };
 
-Palette.prototype._disableSelection = function(e) {
-	if ($(e.target).is('canvas') && !this.canvas.selection) {
+Palette.prototype.disableSelection = function(e) {
+	if (!e || ($(e.target).is('canvas') && !this.canvas.selection)) {
 		for (var id in this.editor.blocks) {
 			this.editor.blocks[id].deactivate();
 		}
@@ -141,7 +141,7 @@ Palette.prototype._keydown = function(e) {
 		return false;
 	} else if (e.metaKey && e.shiftKey && code === 80) { // ctrl + shift + p => parent block properties
 		this._toggleParentProperties();
-	} else if (code === 8 || (e.metaKey && code === 46)) { // del / ctrl + backspace => disable selection
+	} else if (code === 8 || (e.metaKey && code === 46)) { // del / ctrl + backspace => remove selection
 		for (var id in this.editor.blocks) {
 			if (this.editor.blocks[id].isActive()) {
 				this.editor.blocks[id].remove();

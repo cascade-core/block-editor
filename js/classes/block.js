@@ -75,6 +75,11 @@ Block.prototype._onDragStart = function(e) {
 
 Block.prototype._onDragOver = function(e) {
 	if (this._dragging) {
+		if (!this._active) {
+			this.palette.disableSelection();
+			this.activate();
+		}
+
 		var left = e.clientX - this._cursor.x;
 		var top = e.clientY - this._cursor.y;
 
@@ -108,19 +113,36 @@ Block.prototype.updatePosition = function(dx, dy) {
 };
 
 Block.prototype._onDragEnd = function(e) {
-	this._dragging = false;
+	setTimeout(function() {
+		this._dragging = false;
+	}, 0);
 	$('body').off('mousemove.block-editor mouseup.block-editor');
 	this.editor.onChange();
 };
 
 Block.prototype._onClick = function(e) {
+	if (!e.metaKey && !this._moved) {
+		this.palette.disableSelection();
+	}
 	if (!this._moved && !$(e.target).is('a')) {
-		this.activate();
+		if (e.metaKey) {
+			this.toggle();
+		} else {
+			this.activate();
+		}
 	}
 };
 
 Block.prototype.isActive = function() {
 	return this._active;
+};
+
+Block.prototype.toggle = function() {
+	if (!this._active) {
+		this.activate();
+	} else {
+		this.deactivate();
+	}
 };
 
 Block.prototype.activate = function() {
