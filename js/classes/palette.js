@@ -130,7 +130,12 @@ Palette.prototype._keydown = function(e) {
 	}
 
 	var code = e.keyCode ? e.keyCode : e.which;
-	if (e.metaKey && code === 67) { // ctrl + c => copy
+	if (e.metaKey && code === 65) { // ctrl + a => select all blocks
+		for (var id in this.editor.blocks) {
+			this.editor.blocks[id].activate();
+		}
+		return false;
+	} else if (e.metaKey && code === 86) { // ctrl + v => paste
 		this._copy();
 	} else if (e.metaKey && code === 86) { // ctrl + v => paste
 		this._paste();
