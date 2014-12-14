@@ -303,15 +303,20 @@ Block.prototype._createHeader = function() {
 	$header.append($docButton);
 
 	return $header;
-}
+};
 
 Block.prototype.addInput = function(variable) {
+	var selector = 'a.' + BlockEditor._namespace + '-block-input[data-variable="' + variable + '"]';
+	if ($(selector, this.$inputs).length) {
+		return; // already exists
+	}
+
 	var $input = $('<a href="#settings" class="' + BlockEditor._namespace + '-block-input" />');
 	$input.attr('data-variable', variable);
 	$input.text(variable);
 	$input.on('click', this._toggleInputEditor.bind(this));
 	$input.addClass(BlockEditor._namespace + '-invar-' + variable);
-	if ((!this.values || !this.values[variable]) && (!this.connections[variable])) {
+	if ((!this.values || !this.values[variable]) && !this.connections[variable]) {
 		$input.addClass('default');
 	}
 	this.$inputs.append($input);
@@ -331,7 +336,8 @@ Block.prototype.addOutput = function (variable) {
 
 Block.prototype._toggleInputEditor = function(e) {
 	if (!this._moved) {
-		var editor = new Editor(this, this.editor, $(e.target).data('variable'));
+		var selector = '.' + BlockEditor._namespace + '-block-input';
+		var editor = new Editor(this, this.editor, $(e.target).closest(selector).data('variable'));
 		editor.render();
 	}
 
