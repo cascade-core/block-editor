@@ -40,7 +40,7 @@ Editor.prototype.render = function() {
 		this.block.redraw();
 	}
 
-	// create new one
+	// create new editor element
 	this._create();
 	this.editor.$container.append(this.$container);
 };

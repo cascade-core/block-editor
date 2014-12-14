@@ -10,7 +10,7 @@ var BlockEditor = function(el, options) {
 	// default options
 	this.defaults = {
 		paletteData: '/admin/block-editor-palette.json',
-		historyLimit: 100, // count of remembered changes
+		historyLimit: 500, // count of remembered changes
 		canvasOffset: 500, // px start rendering blocks from top left corner + canvasOffset
 		canvasWidth: 2000,
 		canvasHeight: 2000,

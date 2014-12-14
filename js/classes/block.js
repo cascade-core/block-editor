@@ -77,9 +77,18 @@ Block.prototype.addConnection = function(source, target) {
 			this.connections[target].unshift('', func);
 		}
 	} else {
+		// create new variable
+		if (target === '*') {
+			var editor = new Editor(this, this.editor, target);
+			target = editor.getNewName();
+			if (target === null) {
+				return false;
+			}
+		}
 		this.connections[target] = [];
 	}
 	this.connections[target].push(source[0], source[1]);
+	this.redraw();
 	this.$container.find('.' + BlockEditor._namespace + '-invar-' + target).removeClass('default');
 	this.editor.onChange();
 };
@@ -135,8 +144,6 @@ Block.prototype._onDragStart = function(e) {
 				$('.' + BlockEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
 				this.canvas.redraw();
 				$('body').off('mousemove.block-editor mouseup.block-editor');
-
-				console.log(this._moved);
 			}, this)
 		});
 	} else {
@@ -255,6 +262,11 @@ Block.prototype._create = function() {
 	for (var variable in this.values) {
 		if (!(variable in this.defaults.inputs)) {
 			this.addInput(variable);
+		}
+	}
+	for (var conn in this.connections) {
+		if (!(conn in this.defaults.inputs)) {
+			this.addInput(conn);
 		}
 	}
 	this.addInput('enable');
