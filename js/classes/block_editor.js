@@ -139,17 +139,19 @@ BlockEditor.prototype.onChange = function() {
 };
 
 BlockEditor.prototype.serialize = function() {
-	var ret = this.properties;
-	console.log(ret);
 	var blocks = {};
-
 	for (var i in this.blocks) {
 		var b = this.blocks[i];
 		blocks[b.id] = b.serialize();
 	}
 
-	// insert blocks at second position
-	ret.splice(1, 0, blocks);
+	var ret = {
+		'_': this.properties._, // security
+		'blocks': blocks
+	};
+	for (var t in this.properties) {
+		ret[t] = this.properties[t];
+	}
 
 	return JSON.stringify(ret);
 };
