@@ -10,7 +10,7 @@ var BlockEditor = function(el, options) {
 	// default options
 	this.defaults = {
 		paletteData: '/admin/block-editor-palette.json',
-		historyLimit: 100, // count of remembered changes
+		historyLimit: 1000, // count of remembered changes,
 		canvasOffset: 500, // px start rendering blocks from top left corner + canvasOffset
 		canvasWidth: 2000,
 		canvasHeight: 2000,
@@ -60,11 +60,16 @@ BlockEditor.prototype.init = function() {
 BlockEditor.prototype.processData = function() {
 	this.data = JSON.parse(this.$el.val());
 	this.blocks = {};
-	this['_security'] = this.data['_'];
-	this['policy'] = this.data['policy'];
-	this['copy-inputs'] = this.data['copy-inputs'];
-	this['outputs'] = this.data['outputs'];
-	this['forward-outputs'] = this.data['forward-outputs'];
+
+	// parent block properties
+	this.properties = {};
+	for (var opt in this.data) {
+		if (opt !== 'blocks') {
+			this.properties[opt] = this.data[opt];
+		}
+	}
+
+	// blocks
 	if (this.data.blocks) {
 		for (var id in this.data.blocks) {
 			this.blocks[id] = new Block(id, this.data.blocks[id], this);
@@ -134,19 +139,17 @@ BlockEditor.prototype.onChange = function() {
 };
 
 BlockEditor.prototype.serialize = function() {
-	var ret = {
-		'_': 				this['_security'],
-		'policy': 			this['policy'],
-		'copy-inputs': 		this['copy-inputs'],
-		'outputs': 			this['outputs'],
-		'forward-outputs': 	this['forward-outputs'],
-		'blocks': {}
-	};
+	var ret = this.properties;
+	console.log(ret);
+	var blocks = {};
 
 	for (var i in this.blocks) {
 		var b = this.blocks[i];
-		ret.blocks[b.id] = b.serialize();
+		blocks[b.id] = b.serialize();
 	}
+
+	// insert blocks at second position
+	ret.splice(1, 0, blocks);
 
 	return JSON.stringify(ret);
 };
