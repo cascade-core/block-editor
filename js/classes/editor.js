@@ -5,9 +5,7 @@
  *
  * @todo select na prvni radek nebo pred popisek
  *
- * @todo nove spojeni pretazenim - shift / ctrl
  * @todo zmena typu spojeni na ... ->
- * @todo historie pri zmene typu
  */
 var Editor = function(block, editor, target) {
 	this.block = block;
@@ -88,12 +86,16 @@ Editor.prototype._create = function() {
 
 	var $type = $('<select autofocus="autofocus"></select>');
 	var $textarea = $('<textarea></textarea>');
+	$textarea.on('keydown', this._fixTabs);
 	var $desc = $('<div></div>').addClass(this._namespace + '-desc');
 	var $save = $('<input type="submit">').val(_('Save'));
+	$close = $('<input type="button">').val(_('Close'));
+	$close.on('click', this._close.bind(this));
 	this.$container.append($type);
 	this.$container.append($desc);
 	this.$container.append($textarea);
 	this.$container.append($save);
+	this.$container.append($close);
 
 	for (var t in this._types) {
 		$type.append($('<option>').text(_(this._types[t][1])).val(t));
@@ -127,7 +129,7 @@ Editor.prototype._create = function() {
 		$textarea.val(values[this._variable]);
 	} else {
 		$type.val('json');
-		$textarea.val(JSON.stringify(values[this._variable]));
+		$textarea.val(JSON.stringify(values[this._variable], null, "\t"));
 	}
 	$type.change();
 };
@@ -283,4 +285,47 @@ Editor.prototype._isValidJson = function(str) {
 		return false;
 	}
 	return true;
+};
+
+Editor.prototype._fixTabs = function(e) {
+	if (e.keyCode === 9) { // tab
+		var pos, r, re, rc;
+		// get caret position
+		if (this.selectionStart) {
+			pos = this.selectionStart;
+		} else if (document.selection) {
+			r = document.selection.createRange();
+			if (r === null) {
+				return true;
+			}
+			re = this.createTextRange();
+			rc = re.duplicate();
+			re.moveToBookmark(r.getBookmark());
+			rc.setEndPoint('EndToStart', re);
+
+			pos = rc.text.length;
+		}
+		var str = $(this).val();
+		if (e.shiftKey) { // shift + tab -> remove current tab
+			// no tab here -> ignore
+			if (str.slice(pos - 1, pos) !== '\t') {
+				return false;
+			}
+			str = str.slice(0, pos - 1) + str.slice(pos);
+			pos -= 1;
+		} else {
+			str = str.slice(0, pos) + '\t' + str.slice(pos);
+			pos += 1;
+		}
+		$(this).val(str);
+		// set caret position
+		if (this.selectionStart) {
+			this.selectionStart = pos;
+			this.selectionEnd = pos;
+		} else if (document.selection) {
+			var start = offsetToRangeCharacterMove(this, pos);
+			re.move("character", start);
+		}
+		return false;
+	}
 };
