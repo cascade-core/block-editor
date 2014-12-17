@@ -65,7 +65,7 @@
 
 .block-editor-block,
 .block-editor-toolbar,
-.block-editor-variable-editor,
+.block-editor-variable-editor-title,
 .block-editor-palette {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
@@ -315,6 +315,10 @@
 
 .block-editor-variable-editor-close:hover {
 	background: #ccc;
+}
+
+.block-editor-variable-editor textarea {
+	outline: none;
 }
 
 .block-editor-variable-editor-tabs {

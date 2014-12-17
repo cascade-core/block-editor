@@ -73,11 +73,11 @@ Editor.prototype._create = function() {
 	// create table container
 	this.$container = $('<div class="' + this._namespace + '">');
 
-	// make it draggable
-	this.$container.on('mousedown', this._onDragStart.bind(this));
-
 	var $title = $('<div class="' + this._namespace + '-title">');
-	var $close = $('<a href="#">&times;</a>')
+	// make it draggable
+	$title.on('mousedown', this._onDragStart.bind(this));
+
+	var $close = $('<a href="#">&times;</a>');
 	$close.addClass(this._namespace + '-close');
 	$close.on('click', this._close.bind(this));
 	$title.text(this.block.id + ':' + this._variable);
@@ -87,6 +87,7 @@ Editor.prototype._create = function() {
 	var $type = $('<select autofocus="autofocus"></select>');
 	var $textarea = $('<textarea></textarea>');
 	$textarea.on('keydown', this._fixTabs);
+	$textarea.prop('autofocus', true);
 	var $desc = $('<div></div>').addClass(this._namespace + '-desc');
 	var $save = $('<input type="submit">').val(_('Save'));
 	$close = $('<input type="button">').val(_('Close'));
@@ -174,8 +175,8 @@ Editor.prototype._onDragEnd = function(e) {
 
 Editor.prototype._changeType = function(e) {
 	var type = this._types[e.target.value];
-	this.$container.find('textarea').css('display', type[0] ? 'block' : 'none');
 	this.$container.find('div.' + this._namespace + '-desc').html(type[2]);
+	this.$container.find('textarea').css('display', type[0] ? 'block' : 'none').focus();
 };
 
 Editor.prototype._save = function() {

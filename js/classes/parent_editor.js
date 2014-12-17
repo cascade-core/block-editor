@@ -38,11 +38,11 @@ ParentEditor.prototype._create = function() {
 	// create table container
 	this.$container = $('<div class="' + this._namespace + '">');
 
-	// make it draggable
-	this.$container.on('mousedown', this._onDragStart.bind(this));
-
 	var $title = $('<div class="' + this._namespace + '-title">');
-	var $close = $('<a href="#">&times;</a>')
+	// make it draggable
+	$title.on('mousedown', this._onDragStart.bind(this));
+
+	var $close = $('<a href="#">&times;</a>');
 	$close.addClass(this._namespace + '-close');
 	$close.on('click', this._close.bind(this));
 	$title.text('Parent block properties');
