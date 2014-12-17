@@ -15,7 +15,7 @@ var Block = function(id, data, editor) {
 	this.x = data.x;
 	this.y = data.y;
 
-	this.defaults = this.palette.blocks[data.block] || {};
+	this.defaults = this.palette.blocks[data.block] || { inputs: {}, outputs: {} };
 };
 
 Block.prototype.render = function() {
@@ -55,6 +55,13 @@ Block.prototype.redraw = function() {
 	this.$container.remove();
 	delete this.$container;
 	this.defaults = this.palette.blocks[this.type];
+	// make sure inputs and outputs are not undefined (palette may be bugged a little)
+	if (!this.defaults.inputs) {
+		this.defaults.inputs = {};
+	}
+	if (!this.defaults.outputs) {
+		this.defaults.outputs = {};
+	}
 	this.render();
 	this.canvas.redraw();
 };
