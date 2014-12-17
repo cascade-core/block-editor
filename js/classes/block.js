@@ -256,25 +256,29 @@ Block.prototype._create = function() {
 
 	// inputs
 	this.$inputs = $('<td class="' + BlockEditor._namespace + '-block-inputs" />');
-	for (var variable in this.defaults.inputs) {
-		this.addInput(variable);
-	}
-	for (var variable in this.values) {
-		if (!(variable in this.defaults.inputs)) {
+	if (this.defaults.inputs) {
+		for (var variable in this.defaults.inputs) {
 			this.addInput(variable);
 		}
-	}
-	for (var conn in this.connections) {
-		if (!(conn in this.defaults.inputs)) {
-			this.addInput(conn);
+		for (var variable in this.values) {
+			if (!(variable in this.defaults.inputs)) {
+				this.addInput(variable);
+			}
+		}
+		for (var conn in this.connections) {
+			if (!(conn in this.defaults.inputs)) {
+				this.addInput(conn);
+			}
 		}
 	}
 	this.addInput('enable');
 
 	// outputs
 	this.$outputs = $('<td class="' + BlockEditor._namespace + '-block-outputs" />');
-	for (var variable in this.defaults.outputs) {
-		this.addOutput(variable);
+	if (this.defaults.outputs) {
+		for (var variable in this.defaults.outputs) {
+			this.addOutput(variable);
+		}
 	}
 
 	this.$container.append($('<tr />').append($header));
