@@ -99,7 +99,7 @@ Block.prototype._onDragStart = function(e) {
 		y: e.clientY - this.position().top
 	};
 
-	if (e.metaKey && $(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
+	if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
 		var $target = $(e.target);
 		var source = [this.id, $target.text()];
 
@@ -205,11 +205,11 @@ Block.prototype._onDragEnd = function(e) {
 };
 
 Block.prototype._onClick = function(e) {
-	if (!e.metaKey && !this._moved) {
+	if (!(e.metaKey || e.ctrlKey) && !this._moved) {
 		this.palette.toolbar.disableSelection();
 	}
 	if (!this._moved && !$(e.target).is('a')) {
-		if (e.metaKey) {
+		if ((e.metaKey || e.ctrlKey)) {
 			this.toggle();
 		} else {
 			this.activate();

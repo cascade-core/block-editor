@@ -124,34 +124,34 @@ Toolbar.prototype._keydown = function(e) {
 	}
 
 	var code = e.keyCode ? e.keyCode : e.which;
-	if (e.metaKey && code === 65) { // ctrl + a => select all blocks
+	if ((e.metaKey || e.ctrlKey) && code === 65) { // ctrl + a => select all blocks
 		for (var id in this.editor.blocks) {
 			this.editor.blocks[id].activate();
 		}
 		return false;
-	} else if (e.metaKey && code === 67) { // ctrl + c => copy
+	} else if ((e.metaKey || e.ctrlKey) && code === 67) { // ctrl + c => copy
 		this.$copy.addClass('hover');
 		this._copy();
-	} else if (e.metaKey && code === 86) { // ctrl + v => paste
+	} else if ((e.metaKey || e.ctrlKey) && code === 86) { // ctrl + v => paste
 		this.$paste.addClass('hover');
 		this._paste();
-	} else if (e.metaKey && code === 88) { // ctrl + x => cut
+	} else if ((e.metaKey || e.ctrlKey) && code === 88) { // ctrl + x => cut
 		this.$cut.addClass('hover');
 		this._cut();
-	} else if (e.metaKey && e.shiftKey && code === 90) { // ctrl + shift + z => redo
+	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 90) { // ctrl + shift + z => redo
 		this.$redo.addClass('hover');
 		this._redo();
-	} else if (e.metaKey && code === 90) { // ctrl + z => undo
+	} else if ((e.metaKey || e.ctrlKey) && code === 90) { // ctrl + z => undo
 		this.$undo.addClass('hover');
 		this._undo();
-	} else if (e.metaKey && e.shiftKey && code === 70) { // ctrl + shift + f => fullscreen
+	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 70) { // ctrl + shift + f => fullscreen
 		this.$fullscreen.addClass('hover');
 		this._toggleFullScreen();
 		return false;
-	} else if (e.metaKey && e.shiftKey && code === 80) { // ctrl + shift + p => parent block properties
+	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 80) { // ctrl + shift + p => parent block properties
 		this.$parent.addClass('hover');
 		this._toggleParentProperties();
-	} else if (code === 8 || (e.metaKey && code === 46)) { // del / ctrl + backspace => remove selection
+	} else if (code === 8 || ((e.metaKey || e.ctrlKey) && code === 46)) { // del / ctrl + backspace => remove selection
 		for (var id in this.editor.blocks) {
 			if (this.editor.blocks[id].isActive()) {
 				this.editor.blocks[id].remove();
