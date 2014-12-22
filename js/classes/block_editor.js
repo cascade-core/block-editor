@@ -156,6 +156,11 @@ BlockEditor.prototype.serialize = function() {
 	return JSON.stringify(ret);
 };
 
+/**
+ * Removes editor instance
+ *
+ * @fixme fails when editor was not properly initialized (e.g. ajax load of palette not done yet)
+ */
 BlockEditor.prototype.destroy = function() {
 	this.$container.remove();
 	delete this.$container;

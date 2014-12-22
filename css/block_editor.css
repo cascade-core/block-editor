@@ -188,6 +188,7 @@
 	color: #999;
 }
 
+.block-editor-block-input.selecting,
 .block-editor-block-output.selecting {
 	color: #c60;
 }

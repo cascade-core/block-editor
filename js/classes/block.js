@@ -67,6 +67,24 @@ Block.prototype.redraw = function() {
 };
 
 Block.prototype.addConnection = function(source, target) {
+	// create new input variable
+	if (target === '*') {
+		var editor = new Editor(this, this.editor, target);
+		target = editor.getNewName();
+		if (target === null) {
+			return false;
+		}
+	}
+
+	// create new output variable
+	if (source[1] === '*') {
+		var editor = new Editor(this, this.editor, target);
+		source[1] = editor.getNewName(true, source[0]);
+		if (source[1] === null) {
+			return false;
+		}
+	}
+
 	if (this.connections[target]) {
 		// check if connection not exists
 		for	(var i = 0; i < this.connections[target].length; i += 2) {
@@ -84,76 +102,43 @@ Block.prototype.addConnection = function(source, target) {
 			this.connections[target].unshift('', func);
 		}
 	} else {
-		// create new variable
-		if (target === '*') {
-			var editor = new Editor(this, this.editor, target);
-			target = editor.getNewName();
-			if (target === null) {
-				return false;
-			}
-		}
 		this.connections[target] = [];
 	}
 	this.connections[target].push(source[0], source[1]);
 	this.redraw();
-	this.$container.find('.' + BlockEditor._namespace + '-invar-' + target).removeClass('default');
+	this.$container.find('.' + BlockEditor._namespace + '-invar-' + (target === '*' ? '_asterisk_' : target)).removeClass('default');
 	this.editor.onChange();
 };
 
 Block.prototype._onDragStart = function(e) {
-	this._cursor = {
-		x: e.clientX - this.position().left,
-		y: e.clientY - this.position().top
-	};
-
+	var $target = $(e.target);
 	if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
-		var $target = $(e.target);
-		var source = [this.id, $target.text()];
-
 		$target.addClass('selecting');
 		$('body').on({
 			'mousemove.block-editor': $.proxy(function(e) {
-				// compute current mouse position
-				var x = e.pageX + this.canvas.$container[0].scrollLeft - this.canvas.$container.offset().left;
-				var y = e.pageY
-					  + this.canvas.$container[0].scrollTop
-					  - this.canvas.$container.offset().top
-					  - $target.parent().position().top - 10;
-
-				// highlight target
-				$('.' + BlockEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
-				if ($(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
-					$(e.target).addClass('hover-invalid');
-				}
-				if ($(e.target).hasClass(BlockEditor._namespace + '-block-input')) {
-					$(e.target).addClass('hover-valid');
-					var id = $(e.target).closest('.' + BlockEditor._namespace + '-block')
-						.find('.' + BlockEditor._namespace + '-block-id').text();
-					var block = this.editor.blocks[id];
-					x = block.position().left - 3;
-					y = block.position().top - 29
-					  + $(e.target).position().top; 	// add position of variable
-				}
-				this.canvas.redraw();
-				this._renderConnection(null, source, x, y, '#c60');
+				this._onDragOverFromOutput.call(this, e, $target);
 			}, this),
 			'mouseup.block-editor': $.proxy(function(e) {
-				// create connection
-				if ($(e.target).hasClass(BlockEditor._namespace + '-block-input')) {
-					var id = $(e.target).closest('.' + BlockEditor._namespace + '-block')
-										.find('.' + BlockEditor._namespace + '-block-id').text();
-					var target = $(e.target).data('variable');
-					this.editor.blocks[id].addConnection(source, target)
-				}
-
-				// clean up
-				$('.' + BlockEditor._namespace + '-block-output.selecting').removeClass('selecting');
-				$('.' + BlockEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
-				this.canvas.redraw();
-				$('body').off('mousemove.block-editor mouseup.block-editor');
+				this._onDragEndFromOutput.call(this, e, $target);
+			}, this)
+		});
+	} else if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(BlockEditor._namespace + '-block-input')) {
+		$target.addClass('selecting');
+		$('body').on({
+			'mousemove.block-editor': $.proxy(function(e) {
+				this._onDragOverFromInput.call(this, e, $target);
+				return false;
+			}, this),
+			'mouseup.block-editor': $.proxy(function(e) {
+				this._onDragEndFromInput.call(this, e, $target);
+				return false;
 			}, this)
 		});
 	} else {
+		this._cursor = {
+			x: e.clientX - this.position().left,
+			y: e.clientY - this.position().top
+		};
 		this._dragging = true;
 		this._moved = false;
 
@@ -162,6 +147,99 @@ Block.prototype._onDragStart = function(e) {
 			'mouseup.block-editor': this._onDragEnd.bind(this)
 		});
 	}
+};
+
+Block.prototype._onDragOverFromOutput = function(e, $target) {
+	var source = [this.id, $target.text()];
+	// compute current mouse position
+	var x = e.pageX + this.canvas.$container[0].scrollLeft - this.canvas.$container.offset().left;
+	var y = e.pageY
+		  + this.canvas.$container[0].scrollTop
+		  - this.canvas.$container.offset().top
+		  - $target.parent().position().top - 10;
+
+	// highlight target
+	$('.' + BlockEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
+	if ($(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
+		$(e.target).addClass('hover-invalid');
+	}
+	if ($(e.target).hasClass(BlockEditor._namespace + '-block-input')) {
+		$(e.target).addClass('hover-valid');
+		var id = $(e.target).closest('.' + BlockEditor._namespace + '-block')
+			   .find('.' + BlockEditor._namespace + '-block-id').text();
+		var block = this.editor.blocks[id];
+		x = block.position().left - 3;
+		y = block.position().top - 29
+		  + $(e.target).position().top; 	// add position of variable
+	}
+	this.canvas.redraw();
+	this._renderConnection(null, source, x, y, '#c60');
+};
+
+Block.prototype._onDragEndFromOutput = function(e, $target) {
+	var source = [this.id, $target.text()];
+	// create connection
+	if ($(e.target).hasClass(BlockEditor._namespace + '-block-input')) {
+		var id = $(e.target).closest('.' + BlockEditor._namespace + '-block')
+							.find('.' + BlockEditor._namespace + '-block-id').text();
+		var target = $(e.target).data('variable');
+		this.editor.blocks[id].addConnection(source, target);
+	}
+
+	// clean up
+	$('.' + BlockEditor._namespace + '-block-output.selecting').removeClass('selecting');
+	$('.' + BlockEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
+	this.canvas.redraw();
+	$('body').off('mousemove.block-editor mouseup.block-editor');
+};
+
+Block.prototype._onDragOverFromInput = function(e, $target) {
+	// compute current mouse position
+	var x = e.pageX
+		  + this.canvas.$container[0].scrollLeft
+		  - this.canvas.$container.offset().left;
+	var y = e.pageY
+		  + this.canvas.$container[0].scrollTop
+		  - this.canvas.$container.offset().top;
+	var x2 = this.position().left - 3;
+	var y2 = this.position().top
+		   + 7 // center of row
+		   + $target.position().top; // add position of variable
+
+	// highlight target
+	$('.' + BlockEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
+	if ($(e.target).hasClass(BlockEditor._namespace + '-block-input')) {
+		$(e.target).addClass('hover-invalid');
+	}
+	if ($(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
+		$(e.target).addClass('hover-valid');
+		var id = $(e.target).closest('.' + BlockEditor._namespace + '-block')
+							.find('.' + BlockEditor._namespace + '-block-id').text();
+		var block = this.editor.blocks[id];
+		x = block.position().left + 1
+		  + block.$container.outerWidth();
+		y = block.position().top + 7
+		  + $(e.target).position().top; 	// add position of variable
+	}
+
+	this.canvas.redraw();
+	this.canvas._drawConnection(x, y, x2, y2, '#c60');
+};
+
+Block.prototype._onDragEndFromInput = function(e, $target) {
+	// create connection
+	if ($(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
+		var id = $(e.target).closest('.' + BlockEditor._namespace + '-block')
+							.find('.' + BlockEditor._namespace + '-block-id').text();
+		var target = $(e.target).text();
+		this.editor.blocks[this.id].addConnection([id, target], $target.data('variable'));
+	}
+
+	// clean up
+	$('.' + BlockEditor._namespace + '-block-input.selecting').removeClass('selecting');
+	$('.' + BlockEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
+	this.canvas.redraw();
+	$('body').off('mousemove.block-editor mouseup.block-editor');
 };
 
 Block.prototype._onDragOver = function(e) {
@@ -322,7 +400,7 @@ Block.prototype.addInput = function(variable) {
 	$input.attr('data-variable', variable);
 	$input.text(variable);
 	$input.on('click', this._toggleInputEditor.bind(this));
-	$input.addClass(BlockEditor._namespace + '-invar-' + variable);
+	$input.addClass(BlockEditor._namespace + '-invar-' + (variable === '*' ? '_asterisk_' : variable));
 	if ((!this.values || !this.values[variable]) && !this.connections[variable]) {
 		$input.addClass('default');
 	}
@@ -337,7 +415,7 @@ Block.prototype.addOutput = function (variable) {
 	}
 
 	$output.text(variable);
-	$output.addClass(BlockEditor._namespace + '-outvar-' + variable);
+	$output.addClass(BlockEditor._namespace + '-outvar-' + (variable === '*' ? '_asterisk_' : variable));
 	this.$outputs.append($output);
 };
 
@@ -457,7 +535,7 @@ Block.prototype.renderConnections = function() {
 		var sources = this.connections[id];
 
 		// aggregation (:and, :or, ...)
-		var query = '.' + BlockEditor._namespace + '-invar-' + id;
+		var query = '.' + BlockEditor._namespace + '-invar-' + (id === '*' ? '_asterisk_' : id);
 		var $input = $(query, this.$container);
 		$input.find('span').remove();
 		var i = 0;
@@ -473,7 +551,7 @@ Block.prototype.renderConnections = function() {
 };
 
 Block.prototype._renderConnection = function(id, source, x2, y2, color) {
-	var query = '.' + BlockEditor._namespace + '-invar-' + id;
+	var query = '.' + BlockEditor._namespace + '-invar-' + (id === '*' ? '_asterisk_' : id);
 	var $input = $(query, this.$container);
 	var block = this.editor.blocks[source[0]];
 	if (block) {
@@ -484,7 +562,7 @@ Block.prototype._renderConnection = function(id, source, x2, y2, color) {
 		} else {
 			var yy2 = y2 + 36; // block header height + center of row
 		}
-		query = '.' + BlockEditor._namespace + '-outvar-' + source[1];
+		query = '.' + BlockEditor._namespace + '-outvar-' + (source[1] === '*' ? '_asterisk_' : source[1]);
 		var $output = $(query, block.$container);
 		var missing = $output.hasClass('missing');
 
@@ -503,6 +581,9 @@ Block.prototype._renderConnection = function(id, source, x2, y2, color) {
 				+ block.$container.find(query).position().top; // add position of variable
 		var color = color || (missing ? '#f00' : '#000');
 		this.canvas._drawConnection(x1, y1, x2, yy2, color);
+	} else {
+		// block outside of this scope or not exists
+		this.$container.find(query).addClass('missing').attr('title', _('Source of this connection may be invalid'));
 	}
 };
 

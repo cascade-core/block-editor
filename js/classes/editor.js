@@ -4,8 +4,6 @@
  * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
  *
  * @todo select na prvni radek nebo pred popisek
- *
- * @todo zmena typu spojeni na ... ->
  */
 var Editor = function(block, editor, target) {
 	this.block = block;
@@ -133,6 +131,7 @@ Editor.prototype._create = function() {
 		$textarea.val(JSON.stringify(values[this._variable], null, "\t"));
 	}
 	$type.change();
+	this._type = $type.val();
 };
 
 Editor.prototype._onDragStart = function(e) {
@@ -191,6 +190,11 @@ Editor.prototype._save = function() {
 	if (this._variable in this.block.connections) {
 		delete this.block.connections[this._variable];
 		redraw = true;
+	}
+
+	if (this._type === 'connection') { // was connection -> remove old value
+		delete this.block.connections[this._variable];
+		this.block.$container.find(selector).removeClass('missing').removeAttr('title');
 	}
 
 	switch (type) {
@@ -268,11 +272,11 @@ Editor.prototype._save = function() {
 	return false;
 };
 
-Editor.prototype.getNewName = function() {
+Editor.prototype.getNewName = function(output) {
 	var old = this.id;
 	var name = null;
 	while (name === null) {
-		name = window.prompt(_('New input name:'), old);
+		name = window.prompt(_('New ' + (output ? 'output' : 'input') + ' name:'), old);
 
 		if (name === null) {
 			return name;
@@ -280,7 +284,7 @@ Editor.prototype.getNewName = function() {
 			alert(_('Only letters, numbers and underscore are allowed in variable name and the first character must be a letter.'));
 			old = name;
 			name = null;
-		} else if (name === 'enable' || name in this.block.values) {
+		} else if (!output && (name === 'enable' || name in this.block.values)) {
 			alert(_('This name is already taken by another variable.'));
 			old = name;
 			name = null;
