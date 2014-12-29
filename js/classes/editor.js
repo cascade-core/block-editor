@@ -185,6 +185,13 @@ Editor.prototype._save = function() {
 	var selector = '.' + BlockEditor._namespace + '-block-input';
 	selector += '[data-variable="' + this._variable + '"]';
 	var def = false;
+	var redraw = false;
+
+	// remove any old connection - it will be overwritten anyway
+	if (this._variable in this.block.connections) {
+		delete this.block.connections[this._variable];
+		redraw = true;
+	}
 
 	switch (type) {
 		case 'default':
@@ -215,7 +222,7 @@ Editor.prototype._save = function() {
 				def = true;
 			}
 
-			this.editor.canvas.redraw();
+			redraw = true;
 			break;
 
 		case 'bool':
@@ -249,6 +256,10 @@ Editor.prototype._save = function() {
 		$(selector, this.block.$container).addClass('default');
 	} else {
 		$(selector, this.block.$container).removeClass('default');
+	}
+
+	if (redraw) {
+		this.editor.canvas.redraw();
 	}
 
 	this._close();
