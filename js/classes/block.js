@@ -459,8 +459,8 @@ Block.prototype.getNewAggregationFunc = function() {
 
 		if (id === null) {
 			return id;
-		} else if (!id.match(/^[a-z]*$/)) {
-			alert(_('Only lowercase letters are allowed in aggregation function name.'));
+		} else if (!id.match(/^[a-zA-Z][a-zA-Z0-9_]*$/)) {
+			alert(_('Only letters, numbers and underscore are allowed in aggregation function name and the first character must be a letter.'));
 			old = id;
 			id = null;
 		}
