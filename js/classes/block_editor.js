@@ -48,6 +48,13 @@ BlockEditor.prototype.init = function() {
 
 	this.canvas = new Canvas(this); // create canvas
 
+	// reset undo & redo history when URL changed (new block loaded)
+	if (sessionStorage.url !== location.href) {
+		sessionStorage.url = location.href;
+		sessionStorage.removeItem('undo');
+		sessionStorage.removeItem('redo');
+	}
+
 	var self = this;
 	$.get(this.options.paletteData).done(function(data) {
 		self.palette = new Palette(self, data, self.$el.data('doc_link')); // create blocks palette
