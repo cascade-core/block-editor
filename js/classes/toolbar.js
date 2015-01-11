@@ -88,8 +88,6 @@ Toolbar.prototype.render = function($container) {
 	$(document).on('click', 'a.' + className, this._paste.bind(this));
 	this.$toolbar.append(this.$paste);
 
-	this.$toolbar.append($divider.clone());
-
 	$(document).off('keydown.toolbar').on('keydown.toolbar', this._keydown.bind(this));
 
 	// disable selection

@@ -39,13 +39,11 @@ Palette.prototype.render = function() {
 	this.$container.addClass(BlockEditor._namespace + '-palette');
 
 	// toolbar
-	var $toolbar = this.toolbar.render(this.$container);
-	var $divider = $('<div>').addClass(BlockEditor._namespace + '-toolbar-divider');
-	$toolbar.append($divider.clone());
+	this.toolbar.render(this.$container);
 
 	// filter
 	var $filter = this._createFilter();
-	$toolbar.append($filter);
+	this.$container.append($filter);
 
 	// blocks
 	for (var id in this.blocks) {
