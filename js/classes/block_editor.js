@@ -1,13 +1,17 @@
-/*
+/**
  * Block Editor 2.0
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
+ *
+ * @param {HTMLElement} el - textarea element
+ * @param {Array} [options]
+ * @class
  */
 var BlockEditor = function(el, options) {
-	// plugin data variable name
+	/** @property {jQuery} $el plugin data variable name */
     this.$el = $(el);
 
-	// default options
+	/** @property {string} defaults default options */
 	this.defaults = {
 		paletteData: '/admin/block-editor-palette.json',
 		historyLimit: 1000, // count of remembered changes,
@@ -33,9 +37,12 @@ var BlockEditor = function(el, options) {
 	this.init();
 };
 
-// plugin namespace
+/** @property {string} _namespace plugin namespace */
 BlockEditor._namespace = 'block-editor';
 
+/**
+ * Initialization, loads palette data via AJAX
+ */
 BlockEditor.prototype.init = function() {
 	// create container
 	this.$container = $('<div>');
@@ -64,6 +71,9 @@ BlockEditor.prototype.init = function() {
 	});
 };
 
+/**
+ * Parses textarea data and initializes parent block properties and child blocks
+ */
 BlockEditor.prototype.processData = function() {
 	this.data = JSON.parse(this.$el.val());
 	this.blocks = {};
@@ -84,6 +94,9 @@ BlockEditor.prototype.processData = function() {
 	}
 };
 
+/**
+ * Renders block editor
+ */
 BlockEditor.prototype.render = function() {
 	// render all blocks first to get their offset
 	for (var id in this.blocks) {
@@ -100,6 +113,9 @@ BlockEditor.prototype.render = function() {
 	this.canvas.$container.scrollLeft(this.options.canvasOffset - 45);
 };
 
+/**
+ * Refreshes editor based on textarea data
+ */
 BlockEditor.prototype.refresh = function() {
 	// remove old blocks
 	for (var id in this.blocks) {
@@ -118,12 +134,21 @@ BlockEditor.prototype.refresh = function() {
 	this.canvas.redraw();
 };
 
+/**
+ * Adds new block to this editor instance
+ *
+ * @param {string} id - New block identification
+ * @param {Object} data - JSON object with block data
+ */
 BlockEditor.prototype.addBlock = function(id, data) {
 	this.blocks[id] = new Block(id, data, this);
 	this.blocks[id].render();
 	this.onChange();
 };
 
+/**
+ * On change handler, propagates changes to textarea
+ */
 BlockEditor.prototype.onChange = function() {
 	// normalize string from textarea
 	var oldData = JSON.stringify(JSON.parse(this.$el.val()));
@@ -145,6 +170,11 @@ BlockEditor.prototype.onChange = function() {
 	this.$el.val(newData);
 };
 
+/**
+ * Serializes all blocks and parent block information to JSON string
+ *
+ * @returns {string}
+ */
 BlockEditor.prototype.serialize = function() {
 	var blocks = {};
 	for (var i in this.blocks) {

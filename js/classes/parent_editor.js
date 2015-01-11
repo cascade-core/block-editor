@@ -1,10 +1,14 @@
 /**
- * parent block properties editor
+ * Parent block properties editor
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
+ *
+ * @param {BlockEditor} editor - reference to plugin instance
+ * @extends Editor
+ * @class
  */
 var ParentEditor = function(editor) {
-	// extends Block
+	// extends Editor
 	Editor.apply(this, arguments);
 
 	this.editor = editor;
@@ -30,10 +34,15 @@ var ParentEditor = function(editor) {
 	}
 };
 
-// extends Block
+/** @extends Editor */
 ParentEditor.prototype = Object.create(Editor.prototype);
 ParentEditor.prototype.constructor = ParentEditor;
 
+/**
+ * Creates HTML container
+ *
+ * @private
+ */
 ParentEditor.prototype._create = function() {
 	// create table container
 	this.$container = $('<div class="' + this._namespace + '">');
@@ -86,6 +95,13 @@ ParentEditor.prototype._create = function() {
 	}
 };
 
+/**
+ * Saves current variable
+ *
+ * @param {string} type - property type
+ * @returns {boolean}
+ * @private
+ */
 ParentEditor.prototype._saveTextarea = function(type) {
 	// save current data to temp property
 	var $ta = this.$container.find('textarea');
@@ -119,6 +135,13 @@ ParentEditor.prototype._saveTextarea = function(type) {
 	return true;
 };
 
+/**
+ * Changes active tab, used as on click handler
+ *
+ * @param {MouseEvent} e - Event
+ * @returns {boolean}
+ * @private
+ */
 ParentEditor.prototype._changeTab = function(e) {
 	// save current data to temp property
 	var type = $(e.target).parent().find('a.active').data('type');
@@ -140,6 +163,12 @@ ParentEditor.prototype._changeTab = function(e) {
 	return false;
 };
 
+/**
+ * Saves new variable value, hides editor
+ *
+ * @returns {boolean}
+ * @private
+ */
 ParentEditor.prototype._save = function() {
 	// save current data to temp property
 	var type = this.$container.find('a.active').data('type');

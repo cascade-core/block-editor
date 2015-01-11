@@ -3,7 +3,6 @@
  * All rights reserved.
  *
  * Licensed under MIT license.
- *
  */
 
 if (typeof(_) == 'undefined') {
@@ -11,4 +10,3 @@ if (typeof(_) == 'undefined') {
 		return str;
 	}
 }
-

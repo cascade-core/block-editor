@@ -1,8 +1,10 @@
 /**
  * palette class
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
  *
+ * @param {BlockEditor} editor - plugin instance
+ * @class
  * @todo autocomplete filter vedle selectu
  * @todo dummy block bez typy na zacatek palety - zvyraznit pokud ma neexistujici typ
  */
@@ -14,6 +16,12 @@ var Palette = function(editor, blocks, docLink) {
 	this.toolbar = new Toolbar(editor);
 };
 
+/**
+ * Creates palette filter
+ *
+ * @returns {jQuery}
+ * @private
+ */
 Palette.prototype._createFilter = function() {
 	this.$filter = $('<select>');
 
@@ -28,12 +36,15 @@ Palette.prototype._createFilter = function() {
 		this.$filter.append($option);
 	}
 
-	className = BlockEditor._namespace + '-filter';
+	var className = BlockEditor._namespace + '-filter';
 	this.$filter.addClass(className);
 	$(document).off('change.palette', 'select.' + className).on('change.palette', 'select.' + className, this._filter.bind(this));
 	return this.$filter;
 };
 
+/**
+ * Renders palette
+ */
 Palette.prototype.render = function() {
 	this.$container = $('<div>');
 	this.$container.addClass(BlockEditor._namespace + '-palette');
@@ -55,6 +66,13 @@ Palette.prototype.render = function() {
 	this.editor.$container.append(this.$container);
 };
 
+/**
+ * Filters blocks inside palette
+ *
+ * @param {MouseEvent} e - Event
+ * @returns {boolean}
+ * @private
+ */
 Palette.prototype._filter = function(e) {
 	if ($(e.target).val() === '*') {
 		var className = BlockEditor._namespace + '-block';

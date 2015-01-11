@@ -1,7 +1,12 @@
 /**
- * block entity
+ * Creates new Block instance
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
+ *
+ * @param {string} id - Block identification
+ * @param {Object} data - Block properties
+ * @param {BlockEditor} editor - reference to plugin instance
+ * @class
  */
 var Block = function(id, data, editor) {
 	this.id = id;
@@ -18,6 +23,9 @@ var Block = function(id, data, editor) {
 	this.defaults = this.palette.blocks[data.block] || { inputs: {}, outputs: {} };
 };
 
+/**
+ * Renders block to canvas
+ */
 Block.prototype.render = function() {
 	// create DOM if not exists
 	if (!this.$container) {
@@ -32,6 +40,11 @@ Block.prototype.render = function() {
 	});
 };
 
+/**
+ * Gets current block container position inside canvas
+ *
+ * @returns {?Object} with top and left offset values, null when container not rendered
+ */
 Block.prototype.position = function() {
 	if (!this.$container) {
 		return null;
@@ -43,6 +56,11 @@ Block.prototype.position = function() {
 	};
 };
 
+/**
+ * Removes block from canvas
+ *
+ * @returns {Object} Block data in JSON object
+ */
 Block.prototype.remove = function() {
 	this.$container.remove();
 	delete this.$container;
@@ -51,6 +69,9 @@ Block.prototype.remove = function() {
 	return this.serialize();
 };
 
+/**
+ * Redraw this block
+ */
 Block.prototype.redraw = function() {
 	this.$container.remove();
 	delete this.$container;
@@ -66,6 +87,13 @@ Block.prototype.redraw = function() {
 	this.canvas.redraw();
 };
 
+/**
+ * Adds connection to this block
+ *
+ * @param {Array} source - Source block id and variable name
+ * @param {string} target -
+ * @returns {?boolean} false when source block not present inside canvas or no name for wildcard variable provided
+ */
 Block.prototype.addConnection = function(source, target) {
 	// create new input variable
 	if (target === '*') {
@@ -110,6 +138,13 @@ Block.prototype.addConnection = function(source, target) {
 	this.editor.onChange();
 };
 
+/**
+ * Drag start handler - used on mousedown event
+ * when CTRL is pressed, creates new connections
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Block.prototype._onDragStart = function(e) {
 	var $target = $(e.target);
 	if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
@@ -149,6 +184,14 @@ Block.prototype._onDragStart = function(e) {
 	}
 };
 
+/**
+ * Drag over handler - used on mousemove event
+ * renders connection from output of source block to current mouse position
+ *
+ * @param {MouseEvent} e - Event
+ * @param {jQuery} $target
+ * @private
+ */
 Block.prototype._onDragOverFromOutput = function(e, $target) {
 	var source = [this.id, $target.text()];
 	// compute current mouse position
@@ -176,6 +219,14 @@ Block.prototype._onDragOverFromOutput = function(e, $target) {
 	this._renderConnection(null, source, x, y, '#c60');
 };
 
+/**
+ * Drag end handler - used on mouseup event
+ * creates connection from output of source block to target
+ *
+ * @param {MouseEvent} e - Event
+ * @param {jQuery} $target - source block output variable element
+ * @private
+ */
 Block.prototype._onDragEndFromOutput = function(e, $target) {
 	var source = [this.id, $target.text()];
 	// create connection
@@ -193,6 +244,14 @@ Block.prototype._onDragEndFromOutput = function(e, $target) {
 	$('body').off('mousemove.block-editor mouseup.block-editor');
 };
 
+/**
+ * Drag over handler - used on mousemove event
+ * renders connection from output of source block to current mouse position
+ *
+ * @param {MouseEvent} e - Event
+ * @param {jQuery} $target - target block input variable element
+ * @private
+ */
 Block.prototype._onDragOverFromInput = function(e, $target) {
 	// compute current mouse position
 	var x = e.pageX
@@ -226,6 +285,14 @@ Block.prototype._onDragOverFromInput = function(e, $target) {
 	this.canvas._drawConnection(x, y, x2, y2, '#c60');
 };
 
+/**
+ * Drag end handler - used on mouseup event
+ * creates connection from output of source block
+ *
+ * @param {MouseEvent} e - Event
+ * @param {jQuery} $target - target block input variable element
+ * @private
+ */
 Block.prototype._onDragEndFromInput = function(e, $target) {
 	// create connection
 	if ($(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
@@ -242,6 +309,13 @@ Block.prototype._onDragEndFromInput = function(e, $target) {
 	$('body').off('mousemove.block-editor mouseup.block-editor');
 };
 
+/**
+ * Drag over handler - used on mousemove event
+ * moves block over canvas
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Block.prototype._onDragOver = function(e) {
 	if (this._dragging) {
 		if (!this._active) {
@@ -272,6 +346,27 @@ Block.prototype._onDragOver = function(e) {
 	}
 };
 
+/**
+ * Drag end handler - used on mouseup event
+ * saves new block position
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
+Block.prototype._onDragEnd = function(e) {
+	setTimeout(function() {
+		this._dragging = false;
+	}, 0);
+	$('body').off('mousemove.block-editor mouseup.block-editor');
+	this.editor.onChange();
+};
+
+/**
+ * Updates current block position
+ *
+ * @param {number} dx - horizontal difference in px
+ * @param {number} dy - vertical difference in px
+ */
 Block.prototype.updatePosition = function(dx, dy) {
 	this.$container.css({
 		left: parseInt(this.$container.css('left')) - dx,
@@ -281,14 +376,12 @@ Block.prototype.updatePosition = function(dx, dy) {
 	this.y = this.y - dy;
 };
 
-Block.prototype._onDragEnd = function(e) {
-	setTimeout(function() {
-		this._dragging = false;
-	}, 0);
-	$('body').off('mousemove.block-editor mouseup.block-editor');
-	this.editor.onChange();
-};
-
+/**
+ * Click handler, sets active state to current block, or toggles it when CTRL pressed
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Block.prototype._onClick = function(e) {
 	if (!(e.metaKey || e.ctrlKey) && !this._moved) {
 		this.palette.toolbar.disableSelection();
@@ -302,10 +395,18 @@ Block.prototype._onClick = function(e) {
 	}
 };
 
+/**
+ * Is current block selected?
+ *
+ * @returns {boolean}
+ */
 Block.prototype.isActive = function() {
-	return this._active;
+	return !!this._active; // cast as bool
 };
 
+/**
+ * Toggles active state of current block
+ */
 Block.prototype.toggle = function() {
 	if (!this._active) {
 		this.activate();
@@ -314,6 +415,9 @@ Block.prototype.toggle = function() {
 	}
 };
 
+/**
+ * Activates current block
+ */
 Block.prototype.activate = function() {
 	this._active = true;
 	var className = BlockEditor._namespace + '-active';
@@ -321,6 +425,9 @@ Block.prototype.activate = function() {
 	this.palette.toolbar.updateDisabledClasses();
 };
 
+/**
+ * Deactivates current block
+ */
 Block.prototype.deactivate = function() {
 	this._active = false;
 	var className = BlockEditor._namespace + '-active';
@@ -328,6 +435,10 @@ Block.prototype.deactivate = function() {
 	this.palette.toolbar.updateDisabledClasses();
 };
 
+/**
+ * Creates HTML container for current block
+ * @private
+ */
 Block.prototype._create = function() {
 	// create table container
 	this.$container = $('<table class="' + BlockEditor._namespace + '-block">');
@@ -366,6 +477,12 @@ Block.prototype._create = function() {
 	this.$container.append($('<tr />').append(this.$inputs).append(this.$outputs));
 };
 
+/**
+ * Creates HTML header element of this block
+ *
+ * @returns {jQuery}
+ * @private
+ */
 Block.prototype._createHeader = function() {
 	var $id = $('<div class="' + BlockEditor._namespace + '-block-id">');
 	$id.on('dblclick', this._changeId.bind(this));
@@ -390,6 +507,11 @@ Block.prototype._createHeader = function() {
 	return $header;
 };
 
+/**
+ * Adds input variable
+ *
+ * @param {string} variable
+ */
 Block.prototype.addInput = function(variable) {
 	var selector = 'a.' + BlockEditor._namespace + '-block-input[data-variable="' + variable + '"]';
 	if ($(selector, this.$inputs).length) {
@@ -407,6 +529,11 @@ Block.prototype.addInput = function(variable) {
 	this.$inputs.append($input);
 };
 
+/**
+ * Adds output variable
+ *
+ * @param {string} variable
+ */
 Block.prototype.addOutput = function (variable) {
 	var $output = $('<div class="' + BlockEditor._namespace + '-block-output" />');
 
@@ -419,6 +546,14 @@ Block.prototype.addOutput = function (variable) {
 	this.$outputs.append($output);
 };
 
+/**
+ * Toggles input variable editor
+ * used as on click handler for input variables
+ *
+ * @param {MouseEvent} e - Event
+ * @returns {boolean}
+ * @private
+ */
 Block.prototype._toggleInputEditor = function(e) {
 	if (!this._moved) {
 		var selector = '.' + BlockEditor._namespace + '-block-input';
@@ -429,6 +564,11 @@ Block.prototype._toggleInputEditor = function(e) {
 	return false;
 };
 
+/**
+ * Gets new block id from user via window.prompt()
+ *
+ * @returns {?string}
+ */
 Block.prototype.getNewId = function() {
 	var old = this.id;
 	var id = null;
@@ -451,6 +591,11 @@ Block.prototype.getNewId = function() {
 	return id;
 };
 
+/**
+ * Gets new aggregation function name
+ *
+ * @returns {?string}
+ */
 Block.prototype.getNewAggregationFunc = function() {
 	var old = 'and';
 	var id = null;
@@ -469,6 +614,13 @@ Block.prototype.getNewAggregationFunc = function() {
 	return id;
 };
 
+/**
+ * Changes current block id
+ * used as on click handler
+ *
+ * @returns {boolean}
+ * @private
+ */
 Block.prototype._changeId = function() {
 	var id = this.getNewId();
 
@@ -483,6 +635,13 @@ Block.prototype._changeId = function() {
 	return false;
 };
 
+/**
+ * Changes current block type
+ * used as on click handler
+ *
+ * @returns {boolean}
+ * @private
+ */
 Block.prototype._changeType = function() {
 	// todo selectbox?
 	var old = this.type;
@@ -514,6 +673,14 @@ Block.prototype._changeType = function() {
 	return false;
 };
 
+/**
+ * Removes current block
+ * used as on click handler
+ *
+ * @returns {boolean}
+ * @private
+ * @todo parametric translation + there is undo button now
+ */
 Block.prototype._remove = function() {
 	if (confirm(_('Do you wish to remove block "' + this.id + '"? There is no undo button.'))) {
 		for (var i in this.connections) {
@@ -528,6 +695,9 @@ Block.prototype._remove = function() {
 	return false;
 };
 
+/**
+ * Renders connections to this block
+ */
 Block.prototype.renderConnections = function() {
 	var x2 = this.position().left - 3;
 	var y2 = this.position().top;
@@ -550,6 +720,17 @@ Block.prototype.renderConnections = function() {
 	}
 };
 
+/**
+ * Renders single connection
+ *
+ * @param {string} id - input variable name
+ * @param {Array} source - source block id and variable
+ * @param {number} x2 - target base x position
+ * @param {number} y2 - target base y position
+ * @param {string} [color] - css color string starting with #
+ * @returns {boolean}
+ * @private
+ */
 Block.prototype._renderConnection = function(id, source, x2, y2, color) {
 	var query = '.' + BlockEditor._namespace + '-invar-' + (id === '*' ? '_asterisk_' : id);
 	var $input = $(query, this.$container);
@@ -587,6 +768,11 @@ Block.prototype._renderConnection = function(id, source, x2, y2, color) {
 	}
 };
 
+/**
+ * Serializes current block to JSON object
+ *
+ * @returns {Object}
+ */
 Block.prototype.serialize = function() {
 	var B = {
 		block: this.type,

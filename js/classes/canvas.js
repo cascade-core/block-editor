@@ -1,7 +1,10 @@
-/*
+/**
  * canvas class
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
+ *
+ * @param {BlockEditor} editor - reference to plugin instance
+ * @class
  */
 var Canvas = function(editor) {
 	this.editor = editor;
@@ -12,6 +15,15 @@ var Canvas = function(editor) {
 	this._create();
 };
 
+/**
+ * Draws straight line to this canvas
+ *
+ * @param {number} fromX
+ * @param {number} fromY
+ * @param {number} toX
+ * @param {number} toY
+ * @private
+ */
 Canvas.prototype._drawLine = function(fromX, fromY, toX, toY) {
 	this.context.save();
 	this.context.beginPath();
@@ -23,6 +35,10 @@ Canvas.prototype._drawLine = function(fromX, fromY, toX, toY) {
 	this.context.restore();
 };
 
+/**
+ * Draws canvas background
+ * @private
+ */
 Canvas.prototype._drawBackground = function() {
 	$(this.canvas).css('background', this.options.canvasBackgroundColor);
 	this.context.strokeStyle = this.options.canvasBackgroundLineColor;
@@ -44,6 +60,10 @@ Canvas.prototype._drawBackground = function() {
 	this.context.fillStyle = '#000';
 };
 
+/**
+ * Creates container and canvas element
+ * @private
+ */
 Canvas.prototype._create = function() {
 	// create canvas element
 	this.canvas = $('<canvas>')[0];
@@ -72,6 +92,13 @@ Canvas.prototype._create = function() {
 	this.editor.$container.append(this.$container);
 };
 
+/**
+ * Move canvas or start making selection
+ * used as mouse down handler
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Canvas.prototype._onMouseDown = function(e) {
 	if ((e.metaKey || e.ctrlKey) && $(e.target).is('canvas')) { // selecting blocks
 		this._cursor = {
@@ -98,6 +125,12 @@ Canvas.prototype._onMouseDown = function(e) {
 	}
 };
 
+/**
+ * Moves canvas - used as mousemove handler
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Canvas.prototype._onMouseMove = function(e) {
 	if (this._$selection) {
 		var currX = e.pageX - this.$container.offset().left + this.$container.scrollLeft();
@@ -123,6 +156,12 @@ Canvas.prototype._onMouseMove = function(e) {
 	}
 };
 
+/**
+ * Completes selection of blocks
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Canvas.prototype._onMouseUp = function(e) {
 	if (this._$selection) {
 		for (var id in this.editor.blocks) {
@@ -156,6 +195,16 @@ Canvas.prototype._onMouseUp = function(e) {
 	this._moving = false;
 };
 
+/**
+ * Draws connection line with arrow pointing to end
+ *
+ * @param {number} fromX
+ * @param {number} fromY
+ * @param {number} toX
+ * @param {number} toY
+ * @param {string} [color='#000'] defaults to black
+ * @private
+ */
 Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
 	// line style
 	color = color || '#000';
@@ -182,12 +231,29 @@ Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
 	this._drawArrow(toX, toY, color);
 };
 
+/**
+ * Computes distance between to points in euclidean space
+ *
+ * @param {number} fromX
+ * @param {number} fromY
+ * @param {number} toX
+ * @param {number} toY
+ * @returns {number}
+ * @private
+ */
 Canvas.prototype._dist = function(fromX, fromY, toX, toY) {
 	var diffX = (toX - fromX) * (toX - fromX);
 	var diffY = (toY - fromY) * (toY - fromY);
 	return Math.sqrt(diffX + diffY);
 };
 
+/**
+ * Draws arrow pointing to the right
+ *
+ * @param {number} x - horizontal position of the peak of arrow
+ * @param {number} y - vertical position of the peak of arrow
+ * @private
+ */
 Canvas.prototype._drawArrow = function(x, y) {
 	this.context.save();
 	this.context.beginPath();
@@ -205,6 +271,14 @@ Canvas.prototype._drawArrow = function(x, y) {
 	this.context.restore();
 };
 
+/**
+ * Writes text to canvas
+ *
+ * @param {string} text
+ * @param {number} x
+ * @param {number} y
+ * @private
+ */
 Canvas.prototype._writeText = function(text, x, y) {
 	this.context.save();
 	this.context.fillStyle = "#690299";
@@ -214,6 +288,9 @@ Canvas.prototype._writeText = function(text, x, y) {
 	this.context.restore();
 };
 
+/**
+ * Redraws canvas
+ */
 Canvas.prototype.redraw = function() {
 	this.context.clearRect(0, 0, this.width, this.height);
 	this._drawBackground();

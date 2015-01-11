@@ -1,7 +1,13 @@
 /**
- * placeholder entity
+ * Creates new placeholder instance
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
+ *
+ * @param {string} id - block name
+ * @param {Array} data - block properties
+ * @param {BlockEditor} editor - reference to plugin instance
+ * @extends Block
+ * @class
  */
 var Placeholder = function(id, data, editor) {
 	// extends Block
@@ -14,10 +20,16 @@ var Placeholder = function(id, data, editor) {
 	this.defaults = data;
 };
 
-// extends Block
+/** @extends Block */
 Placeholder.prototype = Object.create(Block.prototype);
 Placeholder.prototype.constructor = Placeholder;
 
+/**
+ * Creates HTML container
+ *
+ * @param e
+ * @private
+ */
 Placeholder.prototype._create = function(e) {
 	Block.prototype._create.call(this);
 	var t = this.type.replace(/\/[^\/]*$/, '').replace(/\//g, '-');
@@ -25,6 +37,13 @@ Placeholder.prototype._create = function(e) {
 	this.$container.off('click');
 };
 
+/**
+ * Moves block placeholder to editor canvas - binds move events
+ * used as mousedown handler
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Placeholder.prototype._onDragStart = function(e) {
 	this._dragging = true;
 	this._moved = false;
@@ -45,6 +64,13 @@ Placeholder.prototype._onDragStart = function(e) {
 	});
 };
 
+/**
+ * Moves block placeholder to editor canvas
+ * used as mousemove handler
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Placeholder.prototype._onDragOver = function(e) {
 	if (this._dragging) {
 		if (!this.$clone) {
@@ -63,7 +89,13 @@ Placeholder.prototype._onDragOver = function(e) {
 	}
 };
 
-Placeholder.prototype._onDragEnd = function(e) {
+/**
+ * Moves block placeholder to editor canvas - create block instance from placeholder
+ * used as mouseup handler
+ *
+ * @private
+ */
+Placeholder.prototype._onDragEnd = function() {
 	if (this.$clone && this._moved) {
 		var id = this.getNewId();
 		if (id) {

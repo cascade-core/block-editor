@@ -1,13 +1,22 @@
 /**
  * Toolbar class
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
+ *
+ * @param {BlockEditor} editor - reference to plugin instance
+ * @class
  */
 var Toolbar = function(editor) {
 	this.editor = editor;
 	this.canvas = editor.canvas;
 };
 
+/**
+ * Renders toolbar
+ *
+ * @param {jQuery} $container
+ * @returns {jQuery}
+ */
 Toolbar.prototype.render = function($container) {
 	this.$container = $container;
 	this.$toolbar = $('<div>');
@@ -100,6 +109,11 @@ Toolbar.prototype.render = function($container) {
 	return this.$toolbar;
 };
 
+/**
+ * Disables block selection, used as on click handler
+ *
+ * @param {MouseEvent} e - Event
+ */
 Toolbar.prototype.disableSelection = function(e) {
 	if (!e || ($(e.target).is('canvas') && !this.canvas.selection)) {
 		for (var id in this.editor.blocks) {
@@ -109,6 +123,13 @@ Toolbar.prototype.disableSelection = function(e) {
 	this.canvas.selection = false;
 };
 
+/**
+ * Keydown handler, binds keyboard shortcuts
+ *
+ * @param {KeyboardEvent} e - Event
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._keydown = function(e) {
 	// set timeout for loosing hover
 	setTimeout(function() {
@@ -163,6 +184,12 @@ Toolbar.prototype._keydown = function(e) {
 	}
 };
 
+/**
+ * Toggles fullscreen mode
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._toggleFullScreen = function() {
 	var shift = this.editor.$container[0].getBoundingClientRect();
 	var position = [this.canvas.$container.scrollLeft(), this.canvas.$container.scrollTop()];
@@ -201,6 +228,12 @@ Toolbar.prototype._toggleFullScreen = function() {
 	return false;
 };
 
+/**
+ * Toggles parent block properties editor
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._toggleParentProperties = function() {
 	var editor = new ParentEditor(this.editor);
 	editor.render();
@@ -208,6 +241,12 @@ Toolbar.prototype._toggleParentProperties = function() {
 	return false;
 };
 
+/**
+ * Undo last action
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._undo = function() {
 	if (sessionStorage.undo && JSON.parse(sessionStorage.undo).length) {
 		// save current state to redo
@@ -229,6 +268,12 @@ Toolbar.prototype._undo = function() {
 	return false;
 };
 
+/**
+ * Redo last reverted action
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._redo = function() {
 	if (sessionStorage.redo && JSON.parse(sessionStorage.redo).length) {
 		// save current state to undo
@@ -250,6 +295,12 @@ Toolbar.prototype._redo = function() {
 	return false;
 };
 
+/**
+ * Copies active block(s)
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._copy = function() {
 	var ret = {};
 	for (var i in this.editor.blocks) {
@@ -266,6 +317,12 @@ Toolbar.prototype._copy = function() {
 	return false;
 };
 
+/**
+ * Cuts active block(s)
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._cut = function() {
 	var ret = {};
 	for (var id in this.editor.blocks) {
@@ -282,6 +339,12 @@ Toolbar.prototype._cut = function() {
 	return false;
 };
 
+/**
+ * Pastes blocks from clipboard
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._paste = function() {
 	if (localStorage.clipboard && JSON.parse(localStorage.clipboard)) {
 		var blocks = JSON.parse(localStorage.clipboard);
@@ -312,19 +375,9 @@ Toolbar.prototype._paste = function() {
 	return false;
 };
 
-Toolbar.prototype._filter = function(e) {
-	if ($(e.target).val() === '*') {
-		var className = BlockEditor._namespace + '-block';
-	} else {
-		var className = BlockEditor._namespace + '-filter-' + $(e.target).val();
-	}
-
-	this.$container.find('.' + BlockEditor._namespace + '-block').hide();
-	this.$container.find('.' + className).show();
-
-	return false;
-};
-
+/**
+ * Updates disable state of all buttons inside toolbar
+ */
 Toolbar.prototype.updateDisabledClasses = function() {
 	// set disabled class to toolbar buttons
 	var active = false;

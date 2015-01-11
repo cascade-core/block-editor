@@ -1,8 +1,12 @@
 /**
  * variable editor
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
  *
+ * @param {Block} block - block to edit
+ * @param {BlockEditor} editor - plugin instance
+ * @param {string} target - variable name to edit
+ * @class
  * @todo select na prvni radek nebo pred popisek
  */
 var Editor = function(block, editor, target) {
@@ -22,6 +26,9 @@ var Editor = function(block, editor, target) {
 	};
 };
 
+/**
+ * Renders variable editor
+ */
 Editor.prototype.render = function() {
 	// remove existing editors
 	$('div.' + this._namespace).remove();
@@ -41,12 +48,22 @@ Editor.prototype.render = function() {
 	this.editor.$container.append(this.$container);
 };
 
+/**
+ * Closes editor
+ *
+ * @returns {boolean}
+ * @private
+ */
 Editor.prototype._close = function() {
 	this.$container.remove();
 	$(document).off('click.editor', this.canvas);
 	return false;
 };
 
+/**
+ * Binds close handler to close button and ESC key
+ * @private
+ */
 Editor.prototype._bind = function() {
 	// close on escape
 	$(document).off('keydown.editor').on('keydown.editor', $.proxy(function(e) {
@@ -67,6 +84,10 @@ Editor.prototype._bind = function() {
 	}, this), this.canvas);
 };
 
+/**
+ * Creates variable editor container
+ * @private
+ */
 Editor.prototype._create = function() {
 	// create table container
 	this.$container = $('<div class="' + this._namespace + '">');
@@ -134,6 +155,12 @@ Editor.prototype._create = function() {
 	this._type = $type.val();
 };
 
+/**
+ * Moves editor - binds move events
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Editor.prototype._onDragStart = function(e) {
 	this._dragging = true;
 	this._moved = false;
@@ -148,6 +175,12 @@ Editor.prototype._onDragStart = function(e) {
 	});
 };
 
+/**
+ * Moves editor
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Editor.prototype._onDragOver = function(e) {
 	if (this._dragging) {
 		var left = e.clientX - this._cursor.x;
@@ -163,6 +196,12 @@ Editor.prototype._onDragOver = function(e) {
 	}
 };
 
+/**
+ * Moves editor - unbinds move events
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Editor.prototype._onDragEnd = function(e) {
 	// wait to prevent closing editor from onClick event
 	var that = this;
@@ -172,12 +211,25 @@ Editor.prototype._onDragEnd = function(e) {
 	$('body').off('mousemove.block-editor mouseup.block-editor');
 };
 
+/**
+ * Changes type of current variable
+ * used as on click handler
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Editor.prototype._changeType = function(e) {
 	var type = this._types[e.target.value];
 	this.$container.find('div.' + this._namespace + '-desc').html(type[2]);
 	this.$container.find('textarea').css('display', type[0] ? 'block' : 'none').focus();
 };
 
+/**
+ * Saves new variable value, hides editor
+ *
+ * @returns {boolean}
+ * @private
+ */
 Editor.prototype._save = function() {
 	var type = this.$container.find('select').val();
 	var text = this.$container.find('textarea').val();
@@ -272,6 +324,12 @@ Editor.prototype._save = function() {
 	return false;
 };
 
+/**
+ * Gets new variable name
+ *
+ * @param {boolean} [output] - Prompt for input or output variable name?
+ * @returns {?string}
+ */
 Editor.prototype.getNewName = function(output) {
 	var old = this.id;
 	var name = null;
@@ -294,6 +352,13 @@ Editor.prototype.getNewName = function(output) {
 	return name;
 };
 
+/**
+ * Checks whether string is valid JSON string
+ *
+ * @param {string} str
+ * @returns {boolean}
+ * @private
+ */
 Editor.prototype._isValidJson = function(str) {
 	try {
 		JSON.parse(str);
@@ -303,6 +368,13 @@ Editor.prototype._isValidJson = function(str) {
 	return true;
 };
 
+/**
+ * Keydown handler that allows adding tab keys
+ *
+ * @param {KeyboardEvent} e - Event
+ * @returns {boolean}
+ * @private
+ */
 Editor.prototype._fixTabs = function(e) {
 	if (e.keyCode === 9) { // tab
 		var pos, r, re, rc;
