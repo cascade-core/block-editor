@@ -682,7 +682,7 @@ Block.prototype._changeType = function() {
  * @todo parametric translation + there is undo button now
  */
 Block.prototype._remove = function() {
-	if (confirm(_('Do you wish to remove block "' + this.id + '"? There is no undo button.'))) {
+	if (confirm(_('Do you wish to remove block "' + this.id + '"?'))) {
 		for (var i in this.connections) {
 			delete this.connections[i];
 		}
