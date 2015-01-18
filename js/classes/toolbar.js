@@ -170,7 +170,7 @@ Toolbar.prototype._keydown = function(e) {
 	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 80) { // ctrl + shift + p => parent block properties
 		this.$parent.addClass('hover');
 		this._toggleParentProperties();
-	} else if (code === 8 || ((e.metaKey || e.ctrlKey) && code === 46)) { // del / ctrl + backspace => remove selection
+	} else if (code === 46 || ((e.metaKey || e.ctrlKey) && code === 8)) { // del / ctrl + backspace => remove selection
 		for (var id in this.editor.blocks) {
 			if (this.editor.blocks[id].isActive()) {
 				this.editor.blocks[id].remove();
