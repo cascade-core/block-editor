@@ -56,13 +56,13 @@ Canvas.prototype._drawBackground = function() {
 	// vertical lines
 	var max = this.width / step;
 	for (var i = 0; i < max; i++) {
-		this._drawLine(i * step, 0, i * step, this.width);
+		this._drawLine(i * step, 0, i * step, this.height);
 	}
 
 	// horizontal lines
 	max = this.height / step;
 	for (var i = 0; i < max; i++) {
-		this._drawLine(0, i * step, this.height, i * step);
+		this._drawLine(0, i * step, this.width, i * step);
 	}
 
 	this.context.fillStyle = '#000';
