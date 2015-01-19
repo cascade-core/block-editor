@@ -34,17 +34,17 @@ var BlockEditor = function(el, options) {
     this.$el.data(BlockEditor._namespace, this);
 
 	// init block editor
-	this.init();
+	this._createContainer();
+	this._init();
 };
 
 /** @property {string} _namespace plugin namespace */
 BlockEditor._namespace = 'block-editor';
 
 /**
- * Initialization, loads palette data via AJAX
+ * Creates container
  */
-BlockEditor.prototype.init = function() {
-	// create container
+BlockEditor.prototype._createContainer = function() {
 	this.$container = $('<div>');
 	this.$container.attr('class', BlockEditor._namespace);
 	this.$container.css({
@@ -52,7 +52,14 @@ BlockEditor.prototype.init = function() {
 		height: this.$el.height()
 	});
 	this.$el.after(this.$container).hide();
+};
 
+/**
+ * Initialization, loads palette data via AJAX
+ *
+ * @private
+ */
+BlockEditor.prototype._init = function() {
 	// reset undo & redo history when URL changed (new block loaded)
 	if (sessionStorage.url !== location.href) {
 		sessionStorage.url = location.href;
@@ -60,8 +67,10 @@ BlockEditor.prototype.init = function() {
 		sessionStorage.removeItem('redo');
 	}
 
+	// load palette data from cache and trigger reloading
 	var self = this;
-	$.get(this.options.paletteData).done(function(data) {
+	var callback = function(data) {
+		localStorage.palette = JSON.stringify(data);
 		self.canvas = new Canvas(self); // create canvas
 		self.palette = new Palette(self, data, self.$el.data('doc_link')); // create blocks palette
 		self.processData(); // load and process data from textarea
@@ -69,7 +78,15 @@ BlockEditor.prototype.init = function() {
 		self.canvas.render(self.box);
 		self.palette.render();
 		self.render();
-	});
+	};
+	if (localStorage.palette) {
+		callback(JSON.parse(localStorage.palette)); // load instantly from cache
+		setTimeout(function() {
+			self.palette.toolbar.$reload.click(); // and trigger reloading immediately
+		}, 100);
+	} else {
+		$.get(this.options.paletteData).done(callback);
+	}
 };
 
 /**

@@ -100,6 +100,6 @@ Palette.prototype.reload = function(callback) {
 	$.get(this.editor.options.paletteData).done(function(data) {
 		self.blocks = data;
 		self.render();
-		callback.call();
+		callback.call(data);
 	});
 };
