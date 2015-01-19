@@ -14,13 +14,33 @@ var Block = function(id, data, editor) {
 	this.palette = editor.palette;
 	this.canvas = editor.canvas;
 	this.values = data.in_val || {};
-	this.connections = data.in_con || {};
+	this.connections = data.in_con ? this._processConnections(data.in_con) : {};
 	this.type = data.block;
 
 	this.x = data.x;
 	this.y = data.y;
 
 	this.defaults = this.palette.blocks[data.block] || { inputs: {}, outputs: {} };
+};
+
+/**
+ * Normalizes connections to internal format, where aggregation
+ * function is stored as pair ["", "func"] instead of [":func"]
+ *
+ * @param {Object} connections
+ * @returns {Object}
+ * @private
+ */
+Block.prototype._processConnections = function(connections) {
+	if (connections) {
+		for (var id in connections) {
+			if (connections[id].length > 1 && connections[id][0][0] === ':') {
+				connections[id][0] = connections[id][0].substr(1);
+				connections[id].unshift('');
+			}
+		}
+	}
+	return connections;
 };
 
 /**
@@ -779,13 +799,20 @@ Block.prototype.serialize = function() {
 	}
 	for (var input in this.connections) {
 		if (input !== '*' && this.connections[input] !== undefined) {
-			if (this.connections[input] instanceof Array) {
+			if (this.connections[input] instanceof Array && this.connections[input].length > 0) {
 				if (!('in_con' in B)) {
 					B.in_con = {};
 				}
-				B.in_con[input] = this.connections[input]
-					.map(function (x) {return x[0] === ':' ? [x] : x.split(':');})
-					.reduce(function (a, b) {return a.concat(b);});
+				var conn = [];
+				var i = 0;
+				if (this.connections[input][0] === '') {
+					conn.push(':' + this.connections[input][1]); // aggregation func
+					i = 2;
+				}
+				for (; i < this.connections[input].length; i++) {
+					conn.push(this.connections[input][i]);
+				}
+				B.in_con[input] = conn;
 			}
 		}
 	}
