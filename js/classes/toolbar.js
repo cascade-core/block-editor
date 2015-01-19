@@ -6,8 +6,9 @@
  * @param {BlockEditor} editor - reference to plugin instance
  * @class
  */
-var Toolbar = function(editor) {
+var Toolbar = function(editor, palette) {
 	this.editor = editor;
+	this.palette = palette;
 	this.canvas = editor.canvas;
 };
 
@@ -18,6 +19,12 @@ var Toolbar = function(editor) {
  * @returns {jQuery}
  */
 Toolbar.prototype.render = function($container) {
+	if (this._rendered) {
+		// prevent multiple rendering
+		return false;
+	}
+
+	this._rendered = true;
 	this.$container = $container;
 	this.$toolbar = $('<div>');
 	this.$toolbar.addClass(BlockEditor._namespace + '-toolbar');
@@ -42,6 +49,16 @@ Toolbar.prototype.render = function($container) {
 	this.$parent.addClass(className);
 	$(document).on('click', 'a.' + className, this._toggleParentProperties.bind(this));
 	this.$toolbar.append(this.$parent);
+
+	// palette refresh button
+	this.$reload = $('<a>');
+	className = BlockEditor._namespace + '-palette-reload';
+	this.$reload.html('<i class="fa fa-fw fa-refresh"></i> R');
+	this.$reload.attr('title', 'Reload palette data [Ctrl + Shift + R]');
+	this.$reload.attr('href', '#reload-palette');
+	this.$reload.addClass(className);
+	$(document).on('click', 'a.' + className, this._reloadPalette.bind(this));
+	this.$toolbar.append(this.$reload);
 
 	this.$toolbar.append($divider.clone());
 
@@ -103,7 +120,7 @@ Toolbar.prototype.render = function($container) {
 	$(document).off('click.disable-selection', this.canvas.$container)
 			   .on('click.disable-selection', this.canvas.$container, this.disableSelection.bind(this));
 
-	this.editor.$container.append(this.$toolbar);
+	this.$container.append(this.$toolbar);
 	this.updateDisabledClasses();
 
 	return this.$toolbar;
@@ -112,7 +129,7 @@ Toolbar.prototype.render = function($container) {
 /**
  * Disables block selection, used as on click handler
  *
- * @param {MouseEvent} e - Event
+ * @param {MouseEvent} [e] - Event
  */
 Toolbar.prototype.disableSelection = function(e) {
 	if (!e || ($(e.target).is('canvas') && !this.canvas.selection)) {
@@ -121,6 +138,25 @@ Toolbar.prototype.disableSelection = function(e) {
 		}
 	}
 	this.canvas.selection = false;
+};
+
+/**
+ * Reloads palette data via ajax
+ *
+ * @private
+ */
+Toolbar.prototype._reloadPalette = function() {
+	if (this.$reload.hasClass('disabled')) {
+		return false;
+	}
+	this.$reload.addClass('disabled');
+	this.$reload.find('i.fa').addClass('fa-spin');
+	var self = this;
+	this.palette.reload(function() {
+		self.$reload.find('i.fa').removeClass('fa-spin');
+		self.$reload.removeClass('disabled');
+	});
+	return false;
 };
 
 /**
@@ -166,6 +202,10 @@ Toolbar.prototype._keydown = function(e) {
 	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 70) { // ctrl + shift + f => fullscreen
 		this.$fullscreen.addClass('hover');
 		this._toggleFullScreen();
+		return false;
+	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 82) { // ctrl + shift + r => reload palette data
+		this.$reload.addClass('hover');
+		this._reloadPalette();
 		return false;
 	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 80) { // ctrl + shift + p => parent block properties
 		this.$parent.addClass('hover');

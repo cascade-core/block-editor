@@ -13,7 +13,7 @@ var Palette = function(editor, blocks, docLink) {
 	this.canvas = editor.canvas;
 	this.blocks = blocks;
 	this.docLink = docLink;
-	this.toolbar = new Toolbar(editor);
+	this.toolbar = new Toolbar(editor, this);
 };
 
 /**
@@ -46,11 +46,15 @@ Palette.prototype._createFilter = function() {
  * Renders palette
  */
 Palette.prototype.render = function() {
+	if (this.$container) {
+		this.$container.remove();
+	}
+
 	this.$container = $('<div>');
 	this.$container.addClass(BlockEditor._namespace + '-palette');
 
 	// toolbar
-	this.toolbar.render(this.$container);
+	this.toolbar.render(this.editor.$container);
 
 	// filter
 	var $filter = this._createFilter();
@@ -84,4 +88,18 @@ Palette.prototype._filter = function(e) {
 	this.$container.find('.' + className).show();
 
 	return false;
+};
+
+/**
+ * Reloads palette data via AJAX
+ *
+ * @param {function} callback - triggered when loading done
+ */
+Palette.prototype.reload = function(callback) {
+	var self = this;
+	$.get(this.editor.options.paletteData).done(function(data) {
+		self.blocks = data;
+		self.render();
+		callback.call();
+	});
 };
