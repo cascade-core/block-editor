@@ -9,9 +9,17 @@
 var Canvas = function(editor) {
 	this.editor = editor;
 	this.options = this.editor.options;
-	this.width = this.options.canvasWidth;
-	this.height = this.options.canvasHeight;
 	this.controls = {};
+};
+
+/**
+ * Renders canvas and its container, computes width and height based on diagram bounding box
+
+ * @param {object} box
+ */
+Canvas.prototype.render = function(box) {
+	this.width = box.maxX - box.minX + 2 * this.options.canvasExtraWidth;
+	this.height = box.maxY - box.minY + 2 * this.options.canvasExtraHeight;
 	this._create();
 };
 

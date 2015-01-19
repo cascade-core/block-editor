@@ -35,8 +35,8 @@ Block.prototype.render = function() {
 
 	// update position
 	this.$container.css({
-		top: this.y + this.canvas.options.canvasOffset,
-		left: this.x + this.canvas.options.canvasOffset
+		top: this.y + this.canvas.options.canvasExtraWidth,
+		left: this.x + this.canvas.options.canvasExtraHeight
 	});
 };
 
@@ -330,12 +330,7 @@ Block.prototype._onDragOver = function(e) {
 		if (this._moved) {
 			var dx = this.position().left - left;
 			var dy = this.position().top - top;
-			this.$container.css({
-				left: left < 0 ? 0 : left,
-				top: top < 0 ? 0 : top
-			});
-			this.y = this.position().top - this.canvas.options.canvasOffset;
-			this.x = this.position().left - this.canvas.options.canvasOffset;
+			this.updatePosition(dx, dy);
 			for (var id in this.editor.blocks) {
 				if (this !== this.editor.blocks[id] && this.editor.blocks[id].isActive()) {
 					this.editor.blocks[id].updatePosition(dx, dy);

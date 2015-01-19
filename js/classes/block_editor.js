@@ -15,9 +15,9 @@ var BlockEditor = function(el, options) {
 	this.defaults = {
 		paletteData: '/admin/block-editor-palette.json',
 		historyLimit: 1000, // count of remembered changes,
-		canvasOffset: 500, // px start rendering blocks from top left corner + canvasOffset
-		canvasWidth: 2000,
-		canvasHeight: 2000,
+		canvasOffset: 30, // px start rendering blocks from top left corner of diagram - canvasOffset
+		canvasExtraWidth: 1000, // px added to each side of diagram bounding box
+		canvasExtraHeight: 1000, // px added to each side of diagram bounding box
 		canvasSpeed: 2, // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
 		canvasBackgroundColor: '#fff',
 		canvasBackgroundLineColor: '#eef',
@@ -53,8 +53,6 @@ BlockEditor.prototype.init = function() {
 	});
 	this.$el.after(this.$container).hide();
 
-	this.canvas = new Canvas(this); // create canvas
-
 	// reset undo & redo history when URL changed (new block loaded)
 	if (sessionStorage.url !== location.href) {
 		sessionStorage.url = location.href;
@@ -64,9 +62,12 @@ BlockEditor.prototype.init = function() {
 
 	var self = this;
 	$.get(this.options.paletteData).done(function(data) {
+		self.canvas = new Canvas(self); // create canvas
 		self.palette = new Palette(self, data, self.$el.data('doc_link')); // create blocks palette
-		self.palette.render();
 		self.processData(); // load and process data from textarea
+		self.box = self._getBoundingBox();
+		self.canvas.render(self.box);
+		self.palette.render();
 		self.render();
 	});
 };
@@ -108,9 +109,34 @@ BlockEditor.prototype.render = function() {
 		this.blocks[id].renderConnections();
 	}
 
-	// scroll to relative zero
-	this.canvas.$container.scrollTop(this.options.canvasOffset - 45);
-	this.canvas.$container.scrollLeft(this.options.canvasOffset - 45);
+	// scroll to top left corner of diagram bounding box
+	var top = this.box.minY - this.options.canvasOffset + this.canvas.options.canvasExtraWidth;
+	var left = this.box.minX - this.options.canvasOffset + this.canvas.options.canvasExtraHeight;
+	this.canvas.$container.scrollTop(top);
+	this.canvas.$container.scrollLeft(left);
+};
+
+/**
+ * Finds diagram bounding box
+ *
+ * @returns {{minX: number, maxX: number, minY: number, maxY: number}}
+ * @private
+ */
+BlockEditor.prototype._getBoundingBox = function() {
+	var minX = Infinity, maxX = -Infinity;
+	var minY = Infinity, maxY = -Infinity;
+
+	for (var id in this.blocks) {
+		minX = Math.min(minX, this.blocks[id].x);
+		maxX = Math.max(maxX, this.blocks[id].x);
+		minY = Math.min(minY, this.blocks[id].y);
+		maxY = Math.max(maxY, this.blocks[id].y);
+	}
+
+	return {
+		minX: minX, maxX: maxX,
+		minY: minY, maxY: maxY
+	};
 };
 
 /**
