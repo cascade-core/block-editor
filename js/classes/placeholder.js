@@ -103,8 +103,8 @@ Placeholder.prototype._onDragEnd = function() {
 				block: this.type,
 				in_con: {},
 				in_val: {},
-				x: this.$clone[0].offsetLeft - this.editor.options.canvasOffset,
-				y: this.$clone[0].offsetTop - this.editor.options.canvasOffset
+				x: this.$clone[0].offsetLeft - this.editor.options.canvasExtraWidth,
+				y: this.$clone[0].offsetTop - this.editor.options.canvasExtraHeight
 			};
 			this.editor.addBlock(id, data);
 		}
