@@ -99,12 +99,19 @@ Placeholder.prototype._onDragEnd = function() {
 	if (this.$clone && this._moved) {
 		var id = this.getNewId();
 		if (id) {
+			// zoom correction to preserve center position after scaling dropped block
+			var zoom = this.canvas.getZoom();
+			var correction = {
+				x: this.$clone.outerWidth() * (1 - zoom) / 2,
+				y: this.$clone.outerHeight() * (1 - zoom) / 2
+			};
+			// create new block
 			var data = {
 				block: this.type,
 				in_con: {},
 				in_val: {},
-				x: this.$clone[0].offsetLeft - this.editor.options.canvasExtraWidth,
-				y: this.$clone[0].offsetTop - this.editor.options.canvasExtraHeight
+				x: (this.$clone[0].offsetLeft + correction.x) / zoom - this.editor.options.canvasExtraWidth,
+				y: (this.$clone[0].offsetTop + correction.y) / zoom - this.editor.options.canvasExtraHeight
 			};
 			this.editor.addBlock(id, data);
 		}
