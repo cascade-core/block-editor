@@ -247,6 +247,9 @@ Toolbar.prototype._keydown = function(e) {
 		this.$parent.addClass('hover');
 		this._toggleParentProperties();
 	} else if (code === 46 || ((e.metaKey || e.ctrlKey) && code === 8)) { // del / ctrl + backspace => remove selection
+		if (!window.confirm(_('Do you realy want to delete selected blocks?'))) {
+			return false;
+		}
 		for (var id in this.editor.blocks) {
 			if (this.editor.blocks[id].isActive()) {
 				this.editor.blocks[id].remove();
@@ -385,10 +388,15 @@ Toolbar.prototype._redo = function() {
  */
 Toolbar.prototype._copy = function() {
 	var ret = {};
+	var box = this.editor.getBoundingBox(true);
+	var midX = box.minX + (box.maxX - box.minX) / 2;
+	var midY = box.minY + (box.maxY - box.minY) / 2;
 	for (var i in this.editor.blocks) {
 		var b = this.editor.blocks[i];
 		if (b.isActive()) {
 			ret[b.id] = b.serialize();
+			ret[b.id].x -= midX + this.canvas.options.canvasExtraWidth;
+			ret[b.id].y -= midY + this.canvas.options.canvasExtraHeight;
 		}
 	}
 	if (ret) {
@@ -407,15 +415,21 @@ Toolbar.prototype._copy = function() {
  */
 Toolbar.prototype._cut = function() {
 	var ret = {};
+	var box = this.editor.getBoundingBox(true);
+	var midX = box.minX + (box.maxX - box.minX) / 2;
+	var midY = box.minY + (box.maxY - box.minY) / 2;
 	for (var id in this.editor.blocks) {
 		var b = this.editor.blocks[id];
 		if (b.isActive()) {
 			ret[b.id] = b.remove();
+			ret[b.id].x -= midX + this.canvas.options.canvasExtraWidth;
+			ret[b.id].y -= midY + this.canvas.options.canvasExtraHeight;
 		}
 	}
 	if (ret) {
 		localStorage.clipboard = JSON.stringify(ret);
 		this.canvas.redraw();
+		this.updateDisabledClasses();
 	}
 
 	return false;
@@ -428,8 +442,10 @@ Toolbar.prototype._cut = function() {
  * @private
  */
 Toolbar.prototype._paste = function() {
-	if (localStorage.clipboard && JSON.parse(localStorage.clipboard)) {
-		var blocks = JSON.parse(localStorage.clipboard);
+	var blocks;
+	if (localStorage.clipboard && (blocks = JSON.parse(localStorage.clipboard))) {
+		var center = this.canvas.getCenter();
+		this.disableSelection();
 		for (var id in blocks) {
 			var b = blocks[id];
 			var exists = id in this.editor.blocks;
@@ -447,11 +463,15 @@ Toolbar.prototype._paste = function() {
 				b.x += 10;
 				b.y += 10;
 			}
+			block.x += center.x;
+			block.y += center.y;
 			block.render();
+			block.activate();
 		}
 		localStorage.clipboard = JSON.stringify(blocks);
 		this.canvas.redraw();
 		this.editor.onChange();
+		this.updateDisabledClasses();
 	}
 
 	return false;

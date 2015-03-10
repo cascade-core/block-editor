@@ -393,8 +393,8 @@ Block.prototype._onDragEnd = function(e) {
  * @param {number} dy - vertical difference in px
  */
 Block.prototype.updatePosition = function(dx, dy) {
-	this.x = this.x - dx;
-	this.y = this.y - dy;
+	this.x -= dx;
+	this.y -= dy;
 	this.$container.css({
 		left: parseInt(this.$container.css('left')) - dx,
 		top: parseInt(this.$container.css('top')) - dy
@@ -525,7 +525,6 @@ Block.prototype._createHeader = function() {
 	var $editButton = $('<a href="#edit" class="' + BlockEditor._namespace + '-block-edit">e</a>');
 	$editButton.attr('href', this.editor.$el.data('edit_link').replace('{block}', this.type));
 	$editButton.attr('target', '_blank');
-	//$editButton.on('click', this._edit.bind(this));
 	$editButton.attr('title', 'Edit block in new window');
 
 	var $header = $('<th colspan="2" class="' + BlockEditor._namespace + '-block-header" />');

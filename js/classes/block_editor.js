@@ -77,7 +77,7 @@ BlockEditor.prototype._init = function() {
 		self.canvas = new Canvas(self); // create canvas
 		self.palette = new Palette(self, data); // create blocks palette
 		self.processData(); // load and process data from textarea
-		self.box = self._getBoundingBox();
+		self.box = self.getBoundingBox();
 		self.canvas.render(self.box);
 		self.palette.render();
 		self.render();
@@ -140,18 +140,22 @@ BlockEditor.prototype.render = function() {
 /**
  * Finds diagram bounding box
  *
+ * @param {boolean} [active] - Process all or only active blocks
  * @returns {{minX: number, maxX: number, minY: number, maxY: number}}
- * @private
  */
-BlockEditor.prototype._getBoundingBox = function() {
+BlockEditor.prototype.getBoundingBox = function(active) {
 	var minX = Infinity, maxX = -Infinity;
 	var minY = Infinity, maxY = -Infinity;
 
 	for (var id in this.blocks) {
-		minX = Math.min(minX, this.blocks[id].x);
-		maxX = Math.max(maxX, this.blocks[id].x);
-		minY = Math.min(minY, this.blocks[id].y);
-		maxY = Math.max(maxY, this.blocks[id].y);
+		var b = this.blocks[id];
+		if (active && !b.isActive()) {
+			continue;
+		}
+		minX = Math.min(minX, b.x);
+		maxX = Math.max(maxX, b.x + (b.$container ? b.$container.outerWidth() : 100));
+		minY = Math.min(minY, b.y);
+		maxY = Math.max(maxY, b.y + (b.$container ? b.$container.outerHeight() : 100));
 	}
 
 	return {
