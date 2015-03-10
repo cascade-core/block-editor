@@ -518,14 +518,24 @@ Block.prototype._createHeader = function() {
 	var $removeButton = $('<a href="#remove" class="' + BlockEditor._namespace + '-block-remove"><i class="fa fa-fw fa-trash"></i> ×</a>');
 	$removeButton.on('click', this._remove.bind(this));
 	$removeButton.attr('title', 'Remove block');
-	var $docButton = $('<a class="' + BlockEditor._namespace + '-block-doc"><i class="fa fa-fw fa-list-alt"></i> o</a>');
-	$docButton.attr('href', this.editor.$el.data('doc_link').replace('{block}', this.type));
-	$docButton.attr('target', '_blank');
-	$docButton.attr('title', 'Block documentation');
-	var $editButton = $('<a href="#edit" class="' + BlockEditor._namespace + '-block-edit"><i class="fa fa-fw fa-pencil"></i> e</a>');
-	$editButton.attr('href', this.editor.$el.data('edit_link').replace('{block}', this.type));
-	$editButton.attr('target', '_blank');
-	$editButton.attr('title', 'Edit block in new window');
+	if (this.editor.$el.data('doc_link')) {
+		var $docButton = $('<a class="' + BlockEditor._namespace + '-block-doc"><i class="fa fa-fw fa-list-alt"></i> o</a>');
+		$docButton.attr('href', this.editor.$el.data('doc_link').replace('{block}', this.type));
+		$docButton.attr('target', '_blank');
+		$docButton.attr('title', 'Block documentation');
+	} else if (!this.editor._missingDocLinkErrorPrinted) {
+		this.editor._missingDocLinkErrorPrinted = true;
+		console.error(_('data-doc_link parameter missing on textarea element!'));
+	}
+	if (this.editor.$el.data('edit_link')) {
+		var $editButton = $('<a href="#edit" class="' + BlockEditor._namespace + '-block-edit"><i class="fa fa-fw fa-pencil"></i> e</a>');
+		$editButton.attr('href', this.editor.$el.data('edit_link').replace('{block}', this.type));
+		$editButton.attr('target', '_blank');
+		$editButton.attr('title', 'Edit block in new window');
+	} else if (!this.editor._missingEditLinkErrorPrinted) {
+		this.editor._missingEditLinkErrorPrinted = true;
+		console.error(_('data-edit_link parameter missing on textarea element!'));
+	}
 
 	var $header = $('<th colspan="2" class="' + BlockEditor._namespace + '-block-header" />');
 	$header.append($id.text(this.id));
