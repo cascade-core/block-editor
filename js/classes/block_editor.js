@@ -67,6 +67,9 @@ BlockEditor.prototype._init = function() {
 		sessionStorage.removeItem('redo');
 	}
 
+	// reset zoom
+	sessionStorage.zoom = 1.0;
+
 	// load palette data from cache and trigger reloading
 	var self = this;
 	var callback = function(data) {
@@ -78,6 +81,7 @@ BlockEditor.prototype._init = function() {
 		self.canvas.render(self.box);
 		self.palette.render();
 		self.render();
+		self.canvas.$container.scroll(); // force scroll event to save center of viewport
 	};
 	if (localStorage.palette) {
 		callback(JSON.parse(localStorage.palette)); // load instantly from cache

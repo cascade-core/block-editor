@@ -50,7 +50,7 @@ Block.prototype.render = function() {
 	// create DOM if not exists
 	if (!this.$container) {
 		this._create();
-		this.canvas.$container.append(this.$container);
+		this.canvas.$containerInner.append(this.$container);
 	}
 
 	// update position
@@ -190,9 +190,10 @@ Block.prototype._onDragStart = function(e) {
 			}, this)
 		});
 	} else {
+		var zoom = this.canvas.getZoom();
 		this._cursor = {
-			x: e.clientX - this.position().left,
-			y: e.clientY - this.position().top
+			x: e.clientX / zoom - this.position().left,
+			y: e.clientY / zoom - this.position().top
 		};
 		this._dragging = true;
 		this._moved = false;
@@ -215,11 +216,16 @@ Block.prototype._onDragStart = function(e) {
 Block.prototype._onDragOverFromOutput = function(e, $target) {
 	var source = [this.id, $target.text()];
 	// compute current mouse position
-	var x = e.pageX + this.canvas.$container[0].scrollLeft - this.canvas.$container.offset().left;
+	var zoom = this.canvas.getZoom();
+	var x = e.pageX
+		  + this.canvas.$container[0].scrollLeft
+		  - this.canvas.$container.offset().left;
 	var y = e.pageY
 		  + this.canvas.$container[0].scrollTop
 		  - this.canvas.$container.offset().top
 		  - $target.parent().position().top - 10;
+	x /= zoom;
+	y /= zoom;
 
 	// highlight target
 	$('.' + BlockEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
@@ -233,7 +239,7 @@ Block.prototype._onDragOverFromOutput = function(e, $target) {
 		var block = this.editor.blocks[id];
 		x = block.position().left - 3;
 		y = block.position().top - 29
-		  + $(e.target).position().top; 	// add position of variable
+		  + $(e.target).position().top / zoom; // add position of variable
 	}
 	this.canvas.redraw();
 	this._renderConnection(null, source, x, y, '#c60');
@@ -280,10 +286,13 @@ Block.prototype._onDragOverFromInput = function(e, $target) {
 	var y = e.pageY
 		  + this.canvas.$container[0].scrollTop
 		  - this.canvas.$container.offset().top;
+	var zoom = this.canvas.getZoom();
+	x /= zoom;
+	y /= zoom;
 	var x2 = this.position().left - 3;
 	var y2 = this.position().top
 		   + 7 // center of row
-		   + $target.position().top; // add position of variable
+		   + $target.position().top / zoom; // add position of variable
 
 	// highlight target
 	$('.' + BlockEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
@@ -298,7 +307,7 @@ Block.prototype._onDragOverFromInput = function(e, $target) {
 		x = block.position().left + 1
 		  + block.$container.outerWidth();
 		y = block.position().top + 7
-		  + $(e.target).position().top; 	// add position of variable
+		  + $(e.target).position().top / zoom; 	// add position of variable
 	}
 
 	this.canvas.redraw();
@@ -343,8 +352,9 @@ Block.prototype._onDragOver = function(e) {
 			this.activate();
 		}
 
-		var left = e.clientX - this._cursor.x;
-		var top = e.clientY - this._cursor.y;
+		var zoom = this.canvas.getZoom();
+		var left = e.clientX / zoom - this._cursor.x;
+		var top = e.clientY / zoom - this._cursor.y;
 
 		this._moved = this.position().left !== left || this.position().top !== top;
 		if (this._moved) {
@@ -383,12 +393,12 @@ Block.prototype._onDragEnd = function(e) {
  * @param {number} dy - vertical difference in px
  */
 Block.prototype.updatePosition = function(dx, dy) {
+	this.x = this.x - dx;
+	this.y = this.y - dy;
 	this.$container.css({
 		left: parseInt(this.$container.css('left')) - dx,
 		top: parseInt(this.$container.css('top')) - dy
 	});
-	this.x = this.x - dx;
-	this.y = this.y - dy;
 };
 
 /**
@@ -694,7 +704,7 @@ Block.prototype._changeType = function() {
  *
  * @returns {boolean}
  * @private
- * @todo parametric translation + there is undo button now
+ * @todo parametric translation
  */
 Block.prototype._remove = function() {
 	if (confirm(_('Do you wish to remove block "' + this.id + '"?'))) {
@@ -750,11 +760,12 @@ Block.prototype._renderConnection = function(id, source, x2, y2, color) {
 	var query = '.' + BlockEditor._namespace + '-invar-' + (id === '*' ? '_asterisk_' : id);
 	var $input = $(query, this.$container);
 	var block = this.editor.blocks[source[0]];
+	var zoom = this.canvas.getZoom();
 	if (block) {
 		if ($input.length) {
 			var yy2 = y2 // from top of block container
-				+ 7	 // center of row
-				+ $input.position().top; // add position of variable
+					+ 7	 // center of row
+					+ $input.position().top / zoom; // add position of variable
 		} else {
 			var yy2 = y2 + 36; // block header height + center of row
 		}
@@ -774,7 +785,7 @@ Block.prototype._renderConnection = function(id, source, x2, y2, color) {
 				+ block.$container.outerWidth(); // add container width
 		var y1 = offset.top // from top of block container
 				+ 7			// center of row
-				+ block.$container.find(query).position().top; // add position of variable
+				+ block.$container.find(query).position().top / zoom; // add position of variable
 		var color = color || (missing ? '#f00' : '#000');
 		this.canvas._drawConnection(x1, y1, x2, yy2, color);
 	} else {

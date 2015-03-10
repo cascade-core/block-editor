@@ -10,6 +10,10 @@ var Toolbar = function(editor, palette) {
 	this.editor = editor;
 	this.palette = palette;
 	this.canvas = editor.canvas;
+	this._zoom = this.canvas.getZoom();
+	this._zoomStep = 0.1;
+	this._zoomMax = 3.0;
+	this._zoomMin = 0.3;
 };
 
 /**
@@ -113,6 +117,38 @@ Toolbar.prototype.render = function($container) {
 	this.$paste.addClass(className);
 	$(document).on('click', 'a.' + className, this._paste.bind(this));
 	this.$toolbar.append(this.$paste);
+
+	this.$toolbar.append($divider.clone());
+
+	// zoom in button
+	this.$zoomIn = $('<a>').addClass('disabled');
+	className = BlockEditor._namespace + '-zoom-in';
+	this.$zoomIn.html('<i class="fa fa-fw fa-search-plus"></i> +');
+	this.$zoomIn.attr('title', 'Zoom in [+ / =]');
+	this.$zoomIn.attr('href', '#zoom-in');
+	this.$zoomIn.addClass(className);
+	$(document).on('click', 'a.' + className, this._zoomIn.bind(this));
+	this.$toolbar.append(this.$zoomIn);
+
+	// zoom out button
+	this.$zoomOut = $('<a>').addClass('disabled');
+	className = BlockEditor._namespace + '-zoom-out';
+	this.$zoomOut.html('<i class="fa fa-fw fa-search-minus"></i> -');
+	this.$zoomOut.attr('title', 'Zoom out [-]');
+	this.$zoomOut.attr('href', '#zoom-out');
+	this.$zoomOut.addClass(className);
+	$(document).on('click', 'a.' + className, this._zoomOut.bind(this));
+	this.$toolbar.append(this.$zoomOut);
+
+	// zoom reset button
+	this.$zoomReset = $('<a>').addClass('disabled');
+	className = BlockEditor._namespace + '-zoom-reset';
+	this.$zoomReset.html('<i class="fa fa-fw fa-desktop"></i> 0');
+	this.$zoomReset.attr('title', 'Reset zoom [0]');
+	this.$zoomReset.attr('href', '#zoom-reset');
+	this.$zoomReset.addClass(className);
+	$(document).on('click', 'a.' + className, this._zoomReset.bind(this));
+	this.$toolbar.append(this.$zoomReset);
 
 	$(document).off('keydown.toolbar').on('keydown.toolbar', this._keydown.bind(this));
 
@@ -221,6 +257,12 @@ Toolbar.prototype._keydown = function(e) {
 		for (var id in this.editor.blocks) {
 			this.editor.blocks[id].deactivate();
 		}
+	} else if (code === 48) { // 0 => reset zoom
+		this._zoomReset();
+	} else if (code === 189) { // - => zoom out
+		this._zoomOut();
+	} else if (code === 187) { // = / + => zoom in
+		this._zoomIn();
 	}
 };
 
@@ -446,6 +488,24 @@ Toolbar.prototype.updateDisabledClasses = function() {
 		this.$paste.addClass('disabled');
 	}
 
+	if (this._zoom < this._zoomMax) {
+		this.$zoomIn.removeClass('disabled');
+	} else {
+		this.$zoomIn.addClass('disabled');
+	}
+
+	if (this._zoom > this._zoomMin) {
+		this.$zoomOut.removeClass('disabled');
+	} else {
+		this.$zoomOut.addClass('disabled');
+	}
+
+	if (this._zoom !== 1.0) {
+		this.$zoomReset.removeClass('disabled');
+	} else {
+		this.$zoomReset.addClass('disabled');
+	}
+
 	if (active) {
 		this.$copy.removeClass('disabled');
 		this.$cut.removeClass('disabled');
@@ -453,4 +513,68 @@ Toolbar.prototype.updateDisabledClasses = function() {
 		this.$copy.addClass('disabled');
 		this.$cut.addClass('disabled');
 	}
+};
+
+/**
+ * Zooms to given scale
+ *
+ * @param {number} scale
+ * @private
+ */
+Toolbar.prototype._zoomTo = function(scale) {
+	// 0.1 precision
+	scale = Math.round(scale * 10) / 10;
+	sessionStorage.zoom = this._zoom = scale;
+	var centerX = this.canvas.getCenter().x * scale;
+	var centerY = this.canvas.getCenter().y * scale;
+	this.canvas.$containerInner.css({
+		'transform': 'scale(' + this._zoom + ')',
+		'width': (this._zoom * 100) + '%',
+		'height': (this._zoom * 100) + '%'
+	});
+
+	// compensate scroll to preserve center point
+	var $c = this.canvas.$container;
+	this.canvas.$container.scrollLeft(centerX - $c.width() / 2);
+	this.canvas.$container.scrollTop(centerY - $c.height() / 2);
+
+	// force browser to re-render inner container
+	var inner = this.canvas.$containerInner.detach();
+	this.canvas.$container.append(inner);
+	this.canvas.redraw();
+
+	this.updateDisabledClasses();
+};
+
+/**
+ * Zooms in
+ *
+ * @private
+ */
+Toolbar.prototype._zoomIn = function() {
+	if (this._zoom < this._zoomMax) {
+		this._zoomTo(this._zoom + this._zoomStep);
+	}
+	return false;
+};
+
+/**
+ * Zooms out
+ *
+ * @private
+ */
+Toolbar.prototype._zoomOut = function() {
+	if (this._zoom > this._zoomMin) {
+		this._zoomTo(this._zoom - this._zoomStep);
+	}
+	return false;
+};
+/**
+ * Resets zoom
+ *
+ * @private
+ */
+Toolbar.prototype._zoomReset = function() {
+	this._zoomTo(1);
+	return false;
 };

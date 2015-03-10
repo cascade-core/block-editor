@@ -98,8 +98,10 @@ Palette.prototype._filter = function(e) {
 Palette.prototype.reload = function(callback) {
 	var self = this;
 	$.get(this.editor.options.paletteData).done(function(data) {
-		self.blocks = data;
-		self.render();
+		if (localStorage.palette !== JSON.stringify(data)) {
+			self.blocks = data;
+			self.render();
+		}
 		callback.call(data);
 	});
 };
