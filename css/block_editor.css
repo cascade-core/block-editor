@@ -142,10 +142,11 @@
 }
 
 .block-editor-block-doc,
+.block-editor-block-edit,
 .block-editor-block-remove {
 	position: absolute;
-	top: 5px;
-	right: -20px;
+	top: -19px;
+	right: -1px;
 	background: rgba(238, 238, 238, 0.7);
 	border: 1px solid #333;
 	text-decoration: none;
@@ -158,17 +159,33 @@
 	text-align: center;
 }
 
+.block-editor-block-doc:hover,
+.block-editor-block-edit:hover {
+	background: #efe;
+}
+
+.block-editor-block-remove:hover {
+	background: #fcc;
+}
+
 .block-editor-block-doc {
-	left: -19px;
+	left: 0;
+	right: auto;
+}
+
+.block-editor-block-edit {
+	left: 22px;
 	right: auto;
 }
 
 .block-editor-palette .block-editor-block:hover .block-editor-block-doc,
+.block-editor-palette .block-editor-block:hover .block-editor-block-edit,
 .block-editor-palette .block-editor-block:hover .block-editor-block-remove {
 	display: none;
 }
 
 .block-editor-block:hover .block-editor-block-doc,
+.block-editor-block:hover .block-editor-block-edit,
 .block-editor-block:hover .block-editor-block-remove {
 	display: block;
 }

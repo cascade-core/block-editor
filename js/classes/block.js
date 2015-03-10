@@ -519,14 +519,20 @@ Block.prototype._createHeader = function() {
 	$removeButton.on('click', this._remove.bind(this));
 	$removeButton.attr('title', 'Remove block');
 	var $docButton = $('<a class="' + BlockEditor._namespace + '-block-doc">o</a>');
-	$docButton.attr('href', this.palette.docLink.replace('{block}', this.type));
+	$docButton.attr('href', this.editor.$el.data('doc_link').replace('{block}', this.type));
 	$docButton.attr('target', '_blank');
 	$docButton.attr('title', 'Block documentation');
+	var $editButton = $('<a href="#edit" class="' + BlockEditor._namespace + '-block-edit">e</a>');
+	$editButton.attr('href', this.editor.$el.data('edit_link').replace('{block}', this.type));
+	$editButton.attr('target', '_blank');
+	//$editButton.on('click', this._edit.bind(this));
+	$editButton.attr('title', 'Edit block in new window');
 
 	var $header = $('<th colspan="2" class="' + BlockEditor._namespace + '-block-header" />');
 	$header.append($id.text(this.id));
 	$header.append($type);
 	$header.append($removeButton);
+	$header.append($editButton);
 	$header.append($docButton);
 
 	return $header;
@@ -704,10 +710,9 @@ Block.prototype._changeType = function() {
  *
  * @returns {boolean}
  * @private
- * @todo parametric translation
  */
 Block.prototype._remove = function() {
-	if (confirm(_('Do you wish to remove block "' + this.id + '"?'))) {
+	if (confirm(_('Do you wish to remove block "%s"?', [this.id]))) {
 		for (var i in this.connections) {
 			delete this.connections[i];
 		}

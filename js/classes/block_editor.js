@@ -75,7 +75,7 @@ BlockEditor.prototype._init = function() {
 	var callback = function(data) {
 		localStorage.palette = JSON.stringify(data);
 		self.canvas = new Canvas(self); // create canvas
-		self.palette = new Palette(self, data, self.$el.data('doc_link')); // create blocks palette
+		self.palette = new Palette(self, data); // create blocks palette
 		self.processData(); // load and process data from textarea
 		self.box = self._getBoundingBox();
 		self.canvas.render(self.box);

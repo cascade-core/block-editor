@@ -24,6 +24,7 @@ class B_block_editor__test extends \Cascade\Core\Block {
 	protected $inputs = array(
 		'block' => false,		// Block to edit.
 		'doc_link' => '/admin/doc/block/{block}',	// Link to documentation.
+		'edit_link' => '/admin/block-editor/{block}',	// Link to editing of {block}.
 		'back_link' => '/admin/block-editor',		// The "Back to list" link on top of editor
 		'slot' => 'default',
 		'slot_weight' => 50,
@@ -103,6 +104,7 @@ class B_block_editor__test extends \Cascade\Core\Block {
 					'cfg' => $cfg,
 					'storage_id' => $storage_id,
 					'doc_link' => $this->in('doc_link'),
+					'edit_link' => $this->in('edit_link'),
 					'back_link' => $this->in('back_link'),
 					'available_blocks' => $available_blocks,
 				));

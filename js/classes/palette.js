@@ -8,11 +8,10 @@
  * @todo autocomplete filter vedle selectu
  * @todo dummy block bez typy na zacatek palety - zvyraznit pokud ma neexistujici typ
  */
-var Palette = function(editor, blocks, docLink) {
+var Palette = function(editor, blocks) {
 	this.editor = editor;
 	this.canvas = editor.canvas;
 	this.blocks = blocks;
-	this.docLink = docLink;
 	this.toolbar = new Toolbar(editor, this);
 };
 
