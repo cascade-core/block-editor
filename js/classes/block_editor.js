@@ -16,8 +16,8 @@ var BlockEditor = function(el, options) {
 		paletteData: '/admin/block-editor-palette.json',
 		historyLimit: 1000, // count of remembered changes,
 		canvasOffset: 30, // px start rendering blocks from top left corner of diagram - canvasOffset
-		canvasExtraWidth: 1000, // px added to each side of diagram bounding box
-		canvasExtraHeight: 1000, // px added to each side of diagram bounding box
+		canvasExtraWidth: 1500, // px added to each side of diagram bounding box
+		canvasExtraHeight: 1500, // px added to each side of diagram bounding box
 		canvasSpeed: 2, // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
 		canvasBackgroundColor: '#fff',
 		canvasBackgroundLineColor: '#eef',
