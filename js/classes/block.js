@@ -515,14 +515,14 @@ Block.prototype._createHeader = function() {
 	$type.text(this.type);
 	$type.on('dblclick', this._changeType.bind(this));
 
-	var $removeButton = $('<a href="#remove" class="' + BlockEditor._namespace + '-block-remove">×</a>');
+	var $removeButton = $('<a href="#remove" class="' + BlockEditor._namespace + '-block-remove"><i class="fa fa-fw fa-trash"></i> ×</a>');
 	$removeButton.on('click', this._remove.bind(this));
 	$removeButton.attr('title', 'Remove block');
-	var $docButton = $('<a class="' + BlockEditor._namespace + '-block-doc">o</a>');
+	var $docButton = $('<a class="' + BlockEditor._namespace + '-block-doc"><i class="fa fa-fw fa-list-alt"></i> o</a>');
 	$docButton.attr('href', this.editor.$el.data('doc_link').replace('{block}', this.type));
 	$docButton.attr('target', '_blank');
 	$docButton.attr('title', 'Block documentation');
-	var $editButton = $('<a href="#edit" class="' + BlockEditor._namespace + '-block-edit">e</a>');
+	var $editButton = $('<a href="#edit" class="' + BlockEditor._namespace + '-block-edit"><i class="fa fa-fw fa-pencil"></i> e</a>');
 	$editButton.attr('href', this.editor.$el.data('edit_link').replace('{block}', this.type));
 	$editButton.attr('target', '_blank');
 	$editButton.attr('title', 'Edit block in new window');
