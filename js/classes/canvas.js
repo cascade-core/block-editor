@@ -83,10 +83,6 @@ Canvas.prototype._create = function() {
 	// create scroll container
 	this.$container = $('<div>');
 	this.$container.attr('class', BlockEditor._namespace + '-container');
-	this.$container.css({
-		width: this.editor.$container.width(),
-		height: this.editor.$container.height()
-	});
 	this.$container.on({
 		mousedown: this._onMouseDown.bind(this),
 		mouseup: this._onMouseUp.bind(this),

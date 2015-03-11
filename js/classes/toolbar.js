@@ -283,10 +283,6 @@ Toolbar.prototype._toggleFullScreen = function() {
 
 	if (this._fullscreen) {
 		this.editor.$el.after($el);
-		this.canvas.$container.css({
-			width: this.editor.$container.width(),
-			height: this.editor.$container.height()
-		});
 		position[0] += this._shift.left;
 		position[1] += this._shift.top;
 	} else {
@@ -298,10 +294,6 @@ Toolbar.prototype._toggleFullScreen = function() {
 		shift = this.editor.$container[0].getBoundingClientRect();
 		this._shift.top -= shift.top;
 		this._shift.left -= shift.left;
-		this.canvas.$container.css({
-			width: '100%',
-			height: '100%'
-		});
 		position[0] -= this._shift.left;
 		position[1] -= this._shift.top;
 	}

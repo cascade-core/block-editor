@@ -47,10 +47,6 @@ BlockEditor._namespace = 'block-editor';
 BlockEditor.prototype._createContainer = function() {
 	this.$container = $('<div>');
 	this.$container.attr('class', BlockEditor._namespace);
-	this.$container.css({
-		width: this.$el.width(),
-		height: this.$el.height()
-	});
 	this.$el.after(this.$container).hide();
 };
 
