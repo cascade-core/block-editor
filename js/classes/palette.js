@@ -97,7 +97,7 @@ Palette.prototype._filter = function(e) {
 Palette.prototype.reload = function(callback) {
 	var self = this;
 	$.get(this.editor.options.paletteData).done(function(data) {
-		if (localStorage.palette !== JSON.stringify(data)) {
+		if (self.editor.storage.get('palette', true) !== data) {
 			self.blocks = data;
 			self.render();
 		}
