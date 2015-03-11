@@ -41,11 +41,23 @@ class B_block_editor__available_blocks extends \Cascade\Core\Block {
 
 		foreach ($blocks as $plugin => $plugin_blocks) {
 			foreach ($plugin_blocks as $block) {
-				$desc = $cc->describeBlock($block, $this->context);
-				if ($desc !== false) {
-					$available_blocks[$block] = $desc;
-					$available_blocks[$block]['plugin'] = $plugin;
-				} else {
+				try {
+					$desc = $cc->describeBlock($block, $this->context);
+					if ($desc !== false) {
+						$available_blocks[$block] = $desc;
+						$available_blocks[$block]['plugin'] = $plugin;
+					} else {
+						$available_blocks[$block] = array(
+							'block' => $block,
+							'plugin' => $plugin,
+							'force_exec' => TRUE,
+							'inputs' => array('*' => null),
+							'outputs' => array('*' => null),
+						);
+					}
+				}
+				catch (\Exception $ex) {
+					error_msg('Failed to get description of block "%s": %s', $block, $ex->getMessage());
 					$available_blocks[$block] = array(
 						'block' => $block,
 						'plugin' => $plugin,

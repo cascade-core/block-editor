@@ -94,8 +94,6 @@ class B_block_editor__test extends \Cascade\Core\Block {
 				return;
 			}
 
-			$available_blocks = $this->getAvailableBlocks();
-
 			$this->templateAddToSlot('head', 'html_head', 60, 'block_editor/html_head', array());
 
 			$this->templateAdd(null, 'block_editor/test', array(
@@ -106,7 +104,6 @@ class B_block_editor__test extends \Cascade\Core\Block {
 					'doc_link' => $this->in('doc_link'),
 					'edit_link' => $this->in('edit_link'),
 					'back_link' => $this->in('back_link'),
-					'available_blocks' => $available_blocks,
 				));
 		}
 
@@ -213,40 +210,5 @@ class B_block_editor__test extends \Cascade\Core\Block {
 		return true;
 	}
 
-
-	private function getAvailableBlocks()
-	{
-		$cc = $this->getCascadeController();
-		$blocks = $cc->getKnownBlocks();
-
-		$available_blocks = array();
-
-		foreach ($blocks as $plugin => $plugin_blocks) {
-			foreach ($plugin_blocks as $block) {
-				$desc = $cc->describeBlock($block, $this->context);
-				if ($desc !== false) {
-					$available_blocks[$block] = $desc;
-					$available_blocks[$block]['plugin'] = $plugin;
-				} else {
-					$available_blocks[$block] = array(
-						'block' => $block,
-						'plugin' => $plugin,
-						'force_exec' => TRUE,
-						'inputs' => array('*' => null),
-						'outputs' => array('*' => null),
-					);
-				}
-			}
-		}
-
-		ksort($available_blocks);
-
-		/*
-		debug_dump($available_blocks, 'Available blocks');
-		debug_dump($blocks, 'block list');
-		// */
-
-		return $available_blocks;
-	}
 }
 
