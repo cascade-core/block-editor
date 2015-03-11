@@ -1,13 +1,13 @@
 /**
  * variable editor
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
  *
+ * @param {Block} block - block to edit
+ * @param {BlockEditor} editor - plugin instance
+ * @param {string} target - variable name to edit
+ * @class
  * @todo select na prvni radek nebo pred popisek
- *
- * @todo nove spojeni pretazenim - shift / ctrl
- * @todo zmena typu spojeni na ... ->
- * @todo historie pri zmene typu
  */
 var Editor = function(block, editor, target) {
 	this.block = block;
@@ -26,6 +26,9 @@ var Editor = function(block, editor, target) {
 	};
 };
 
+/**
+ * Renders variable editor
+ */
 Editor.prototype.render = function() {
 	// remove existing editors
 	$('div.' + this._namespace).remove();
@@ -45,12 +48,22 @@ Editor.prototype.render = function() {
 	this.editor.$container.append(this.$container);
 };
 
+/**
+ * Closes editor
+ *
+ * @returns {boolean}
+ * @private
+ */
 Editor.prototype._close = function() {
 	this.$container.remove();
 	$(document).off('click.editor', this.canvas);
 	return false;
 };
 
+/**
+ * Binds close handler to close button and ESC key
+ * @private
+ */
 Editor.prototype._bind = function() {
 	// close on escape
 	$(document).off('keydown.editor').on('keydown.editor', $.proxy(function(e) {
@@ -71,15 +84,19 @@ Editor.prototype._bind = function() {
 	}, this), this.canvas);
 };
 
+/**
+ * Creates variable editor container
+ * @private
+ */
 Editor.prototype._create = function() {
 	// create table container
 	this.$container = $('<div class="' + this._namespace + '">');
 
-	// make it draggable
-	this.$container.on('mousedown', this._onDragStart.bind(this));
-
 	var $title = $('<div class="' + this._namespace + '-title">');
-	var $close = $('<a href="#">&times;</a>')
+	// make it draggable
+	$title.on('mousedown', this._onDragStart.bind(this));
+
+	var $close = $('<a href="#">&times;</a>');
 	$close.addClass(this._namespace + '-close');
 	$close.on('click', this._close.bind(this));
 	$title.text(this.block.id + ':' + this._variable);
@@ -88,12 +105,17 @@ Editor.prototype._create = function() {
 
 	var $type = $('<select autofocus="autofocus"></select>');
 	var $textarea = $('<textarea></textarea>');
+	$textarea.on('keydown', this._fixTabs);
+	$textarea.prop('autofocus', true);
 	var $desc = $('<div></div>').addClass(this._namespace + '-desc');
 	var $save = $('<input type="submit">').val(_('Save'));
+	$close = $('<input type="button">').val(_('Close'));
+	$close.on('click', this._close.bind(this));
 	this.$container.append($type);
 	this.$container.append($desc);
 	this.$container.append($textarea);
 	this.$container.append($save);
+	this.$container.append($close);
 
 	for (var t in this._types) {
 		$type.append($('<option>').text(_(this._types[t][1])).val(t));
@@ -127,11 +149,18 @@ Editor.prototype._create = function() {
 		$textarea.val(values[this._variable]);
 	} else {
 		$type.val('json');
-		$textarea.val(JSON.stringify(values[this._variable]));
+		$textarea.val(JSON.stringify(values[this._variable], null, "\t"));
 	}
 	$type.change();
+	this._type = $type.val();
 };
 
+/**
+ * Moves editor - binds move events
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Editor.prototype._onDragStart = function(e) {
 	this._dragging = true;
 	this._moved = false;
@@ -146,6 +175,12 @@ Editor.prototype._onDragStart = function(e) {
 	});
 };
 
+/**
+ * Moves editor
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Editor.prototype._onDragOver = function(e) {
 	if (this._dragging) {
 		var left = e.clientX - this._cursor.x;
@@ -161,6 +196,12 @@ Editor.prototype._onDragOver = function(e) {
 	}
 };
 
+/**
+ * Moves editor - unbinds move events
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Editor.prototype._onDragEnd = function(e) {
 	// wait to prevent closing editor from onClick event
 	var that = this;
@@ -170,18 +211,43 @@ Editor.prototype._onDragEnd = function(e) {
 	$('body').off('mousemove.block-editor mouseup.block-editor');
 };
 
+/**
+ * Changes type of current variable
+ * used as on click handler
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Editor.prototype._changeType = function(e) {
 	var type = this._types[e.target.value];
-	this.$container.find('textarea').css('display', type[0] ? 'block' : 'none');
 	this.$container.find('div.' + this._namespace + '-desc').html(type[2]);
+	this.$container.find('textarea').css('display', type[0] ? 'block' : 'none').focus();
 };
 
+/**
+ * Saves new variable value, hides editor
+ *
+ * @returns {boolean}
+ * @private
+ */
 Editor.prototype._save = function() {
 	var type = this.$container.find('select').val();
 	var text = this.$container.find('textarea').val();
 	var selector = '.' + BlockEditor._namespace + '-block-input';
 	selector += '[data-variable="' + this._variable + '"]';
 	var def = false;
+	var redraw = false;
+
+	// remove any old connection - it will be overwritten anyway
+	if (this._variable in this.block.connections) {
+		delete this.block.connections[this._variable];
+		redraw = true;
+	}
+
+	if (this._type === 'connection') { // was connection -> remove old value
+		delete this.block.connections[this._variable];
+		this.block.$container.find(selector).removeClass('missing').removeAttr('title');
+	}
 
 	switch (type) {
 		case 'default':
@@ -212,7 +278,7 @@ Editor.prototype._save = function() {
 				def = true;
 			}
 
-			this.editor.canvas.redraw();
+			redraw = true;
 			break;
 
 		case 'bool':
@@ -248,17 +314,27 @@ Editor.prototype._save = function() {
 		$(selector, this.block.$container).removeClass('default');
 	}
 
+	if (redraw) {
+		this.editor.canvas.redraw();
+	}
+
 	this._close();
 	this.editor.onChange();
 
 	return false;
 };
 
-Editor.prototype.getNewName = function() {
+/**
+ * Gets new variable name
+ *
+ * @param {boolean} [output] - Prompt for input or output variable name?
+ * @returns {?string}
+ */
+Editor.prototype.getNewName = function(output) {
 	var old = this.id;
 	var name = null;
 	while (name === null) {
-		name = window.prompt(_('New input name:'), old);
+		name = window.prompt(_('New ' + (output ? 'output' : 'input') + ' name:'), old);
 
 		if (name === null) {
 			return name;
@@ -266,7 +342,7 @@ Editor.prototype.getNewName = function() {
 			alert(_('Only letters, numbers and underscore are allowed in variable name and the first character must be a letter.'));
 			old = name;
 			name = null;
-		} else if (name === 'enable' || name in this.block.values) {
+		} else if (!output && (name === 'enable' || name in this.block.values)) {
 			alert(_('This name is already taken by another variable.'));
 			old = name;
 			name = null;
@@ -276,6 +352,13 @@ Editor.prototype.getNewName = function() {
 	return name;
 };
 
+/**
+ * Checks whether string is valid JSON string
+ *
+ * @param {string} str
+ * @returns {boolean}
+ * @private
+ */
 Editor.prototype._isValidJson = function(str) {
 	try {
 		JSON.parse(str);
@@ -283,4 +366,54 @@ Editor.prototype._isValidJson = function(str) {
 		return false;
 	}
 	return true;
+};
+
+/**
+ * Keydown handler that allows adding tab keys
+ *
+ * @param {KeyboardEvent} e - Event
+ * @returns {boolean}
+ * @private
+ */
+Editor.prototype._fixTabs = function(e) {
+	if (e.keyCode === 9) { // tab
+		var pos, r, re, rc;
+		// get caret position
+		if (this.selectionStart) {
+			pos = this.selectionStart;
+		} else if (document.selection) {
+			r = document.selection.createRange();
+			if (r === null) {
+				return true;
+			}
+			re = this.createTextRange();
+			rc = re.duplicate();
+			re.moveToBookmark(r.getBookmark());
+			rc.setEndPoint('EndToStart', re);
+
+			pos = rc.text.length;
+		}
+		var str = $(this).val();
+		if (e.shiftKey) { // shift + tab -> remove current tab
+			// no tab here -> ignore
+			if (str.slice(pos - 1, pos) !== '\t') {
+				return false;
+			}
+			str = str.slice(0, pos - 1) + str.slice(pos);
+			pos -= 1;
+		} else {
+			str = str.slice(0, pos) + '\t' + str.slice(pos);
+			pos += 1;
+		}
+		$(this).val(str);
+		// set caret position
+		if (this.selectionStart) {
+			this.selectionStart = pos;
+			this.selectionEnd = pos;
+		} else if (document.selection) {
+			var start = offsetToRangeCharacterMove(this, pos);
+			re.move("character", start);
+		}
+		return false;
+	}
 };

@@ -1,17 +1,37 @@
-/*
+/**
  * canvas class
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
+ *
+ * @param {BlockEditor} editor - reference to plugin instance
+ * @class
  */
 var Canvas = function(editor) {
 	this.editor = editor;
 	this.options = this.editor.options;
-	this.width = this.options.canvasWidth;
-	this.height = this.options.canvasHeight;
 	this.controls = {};
+};
+
+/**
+ * Renders canvas and its container, computes width and height based on diagram bounding box
+
+ * @param {object} box
+ */
+Canvas.prototype.render = function(box) {
+	this.width = box.maxX - box.minX + 2 * this.options.canvasExtraWidth;
+	this.height = box.maxY - box.minY + 2 * this.options.canvasExtraHeight;
 	this._create();
 };
 
+/**
+ * Draws straight line to this canvas
+ *
+ * @param {number} fromX
+ * @param {number} fromY
+ * @param {number} toX
+ * @param {number} toY
+ * @private
+ */
 Canvas.prototype._drawLine = function(fromX, fromY, toX, toY) {
 	this.context.save();
 	this.context.beginPath();
@@ -23,6 +43,10 @@ Canvas.prototype._drawLine = function(fromX, fromY, toX, toY) {
 	this.context.restore();
 };
 
+/**
+ * Draws canvas background
+ * @private
+ */
 Canvas.prototype._drawBackground = function() {
 	$(this.canvas).css('background', this.options.canvasBackgroundColor);
 	this.context.strokeStyle = this.options.canvasBackgroundLineColor;
@@ -32,18 +56,22 @@ Canvas.prototype._drawBackground = function() {
 	// vertical lines
 	var max = this.width / step;
 	for (var i = 0; i < max; i++) {
-		this._drawLine(i * step, 0, i * step, this.width);
+		this._drawLine(i * step, 0, i * step, this.height);
 	}
 
 	// horizontal lines
 	max = this.height / step;
 	for (var i = 0; i < max; i++) {
-		this._drawLine(0, i * step, this.height, i * step);
+		this._drawLine(0, i * step, this.width, i * step);
 	}
 
 	this.context.fillStyle = '#000';
 };
 
+/**
+ * Creates container and canvas element
+ * @private
+ */
 Canvas.prototype._create = function() {
 	// create canvas element
 	this.canvas = $('<canvas>')[0];
@@ -62,16 +90,38 @@ Canvas.prototype._create = function() {
 	this.$container.on({
 		mousedown: this._onMouseDown.bind(this),
 		mouseup: this._onMouseUp.bind(this),
-		mousemove: this._onMouseMove.bind(this)
+		mousemove: this._onMouseMove.bind(this),
+		scroll: this._onScroll.bind(this)
 	});
 	// disable text selection, forces default cursor when selecting
 	this.$container[0].onselectstart = function() {
 		return false;
 	};
-	this.$container.append(this.canvas);
+
+	// create inner container - used to scale transformation (zoom)
+	this.$containerInner = $('<div>');
+	this.$containerInner.css('width', this.width);
+	this.$containerInner.css('height', this.height);
+	this.$containerInner.attr('class', BlockEditor._namespace + '-container-inner');
+	this.$containerInner.append(this.canvas);
+	this.$container.append(this.$containerInner);
 	this.editor.$container.append(this.$container);
+
+	// save initial center position of viewport
+	var $c = this.$container;
+	this._center = {
+		x: ($c.scrollLeft() + $c.width() / 2),
+		y: ($c.scrollTop() + $c.height() / 2)
+	};
 };
 
+/**
+ * Move canvas or start making selection
+ * used as mouse down handler
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Canvas.prototype._onMouseDown = function(e) {
 	if ((e.metaKey || e.ctrlKey) && $(e.target).is('canvas')) { // selecting blocks
 		this._cursor = {
@@ -89,7 +139,8 @@ Canvas.prototype._onMouseDown = function(e) {
 
 	var block = $(e.target).closest('table.' + BlockEditor._namespace + '-block')[0];
 	if (!block) {
-		var speed = this.options.canvasSpeed;
+		var zoom = this.getZoom();
+		var speed = this.options.canvasSpeed / zoom;
 		this._moving = true;
 		this._cursor = {
 			x: (this.canvas.width - speed * e.pageX) - this.$container.scrollLeft(),
@@ -98,10 +149,18 @@ Canvas.prototype._onMouseDown = function(e) {
 	}
 };
 
+/**
+ * Moves canvas - used as mousemove handler
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Canvas.prototype._onMouseMove = function(e) {
+	var $c = this.$container;
+
 	if (this._$selection) {
-		var currX = e.pageX - this.$container.offset().left + this.$container.scrollLeft();
-		var currY = e.pageY - this.$container.offset().top + this.$container.scrollTop();
+		var currX = e.pageX - $c.offset().left + $c.scrollLeft();
+		var currY = e.pageY - $c.offset().top + $c.scrollTop();
 		var width = currX - this._cursor.x;
 		var height = currY - this._cursor.y;
 		this._$selection.css({
@@ -117,18 +176,46 @@ Canvas.prototype._onMouseMove = function(e) {
 	}
 
 	if (this._moving) {
-		var speed = this.options.canvasSpeed;
-		this.$container.scrollLeft((this.canvas.width - speed * e.pageX) - this._cursor.x);
-		this.$container.scrollTop((this.canvas.height - speed * e.pageY) - this._cursor.y);
+		var zoom = this.getZoom();
+		var speed = this.options.canvasSpeed / zoom;
+		$c.scrollLeft((this.canvas.width - speed * e.pageX) - this._cursor.x);
+		$c.scrollTop((this.canvas.height - speed * e.pageY) - this._cursor.y);
 	}
 };
 
+/**
+ * On scroll handler, used to save current center of viewport (used when zooming)
+ *
+ * @param {ScrollEvent} e - Event
+ * @private
+ */
+Canvas.prototype._onScroll = function(e) {
+	// save center of viewport
+	var zoom = this.getZoom();
+	var $c = this.$container;
+	this._center = {
+		x: ($c.scrollLeft() + $c.width() / 2) / zoom,
+		y: ($c.scrollTop() + $c.height() / 2) / zoom
+	};
+};
+
+/**
+ * Completes selection of blocks
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
 Canvas.prototype._onMouseUp = function(e) {
 	if (this._$selection) {
+		var zoom = this.getZoom();
+		this._cursor.x /= zoom;
+		this._cursor.y /= zoom;
 		for (var id in this.editor.blocks) {
 			var b = this.editor.blocks[id];
 			var currX = e.pageX - this.$container.offset().left + this.$container.scrollLeft();
 			var currY = e.pageY - this.$container.offset().top + this.$container.scrollTop();
+			currX /= zoom;
+			currY /= zoom;
 			var blockX = b.position().left;
 			var blockXW = b.position().left + b.$container.width();
 			var blockY = b.position().top;
@@ -156,6 +243,16 @@ Canvas.prototype._onMouseUp = function(e) {
 	this._moving = false;
 };
 
+/**
+ * Draws connection line with arrow pointing to end
+ *
+ * @param {number} fromX
+ * @param {number} fromY
+ * @param {number} toX
+ * @param {number} toY
+ * @param {string} [color='#000'] defaults to black
+ * @private
+ */
 Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
 	// line style
 	color = color || '#000';
@@ -182,12 +279,29 @@ Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
 	this._drawArrow(toX, toY, color);
 };
 
+/**
+ * Computes distance between to points in euclidean space
+ *
+ * @param {number} fromX
+ * @param {number} fromY
+ * @param {number} toX
+ * @param {number} toY
+ * @returns {number}
+ * @private
+ */
 Canvas.prototype._dist = function(fromX, fromY, toX, toY) {
 	var diffX = (toX - fromX) * (toX - fromX);
 	var diffY = (toY - fromY) * (toY - fromY);
 	return Math.sqrt(diffX + diffY);
 };
 
+/**
+ * Draws arrow pointing to the right
+ *
+ * @param {number} x - horizontal position of the peak of arrow
+ * @param {number} y - vertical position of the peak of arrow
+ * @private
+ */
 Canvas.prototype._drawArrow = function(x, y) {
 	this.context.save();
 	this.context.beginPath();
@@ -205,6 +319,14 @@ Canvas.prototype._drawArrow = function(x, y) {
 	this.context.restore();
 };
 
+/**
+ * Writes text to canvas
+ *
+ * @param {string} text
+ * @param {number} x
+ * @param {number} y
+ * @private
+ */
 Canvas.prototype._writeText = function(text, x, y) {
 	this.context.save();
 	this.context.fillStyle = "#690299";
@@ -214,10 +336,31 @@ Canvas.prototype._writeText = function(text, x, y) {
 	this.context.restore();
 };
 
+/**
+ * Redraws canvas
+ */
 Canvas.prototype.redraw = function() {
 	this.context.clearRect(0, 0, this.width, this.height);
 	this._drawBackground();
 	for (var id in this.editor.blocks) {
 		this.editor.blocks[id].renderConnections();
 	}
+};
+
+/**
+ * Gets center of viewport
+ *
+ * @returns {object}
+ */
+Canvas.prototype.getCenter = function() {
+	return this._center;
+};
+
+/**
+ * Gets current zoom
+ *
+ * @returns {object}
+ */
+Canvas.prototype.getZoom = function() {
+	return Math.round(parseFloat(sessionStorage.zoom) * 10) / 10;
 };

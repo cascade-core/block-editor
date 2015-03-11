@@ -1,19 +1,23 @@
-/*
+/**
  * Block Editor 2.0
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
+ *
+ * @param {HTMLElement} el - textarea element
+ * @param {Array} [options]
+ * @class
  */
 var BlockEditor = function(el, options) {
-	// plugin data variable name
+	/** @property {jQuery} $el plugin data variable name */
     this.$el = $(el);
 
-	// default options
+	/** @property {string} defaults default options */
 	this.defaults = {
 		paletteData: '/admin/block-editor-palette.json',
 		historyLimit: 1000, // count of remembered changes,
-		canvasOffset: 500, // px start rendering blocks from top left corner + canvasOffset
-		canvasWidth: 2000,
-		canvasHeight: 2000,
+		canvasOffset: 30, // px start rendering blocks from top left corner of diagram - canvasOffset
+		canvasExtraWidth: 1500, // px added to each side of diagram bounding box
+		canvasExtraHeight: 1500, // px added to each side of diagram bounding box
 		canvasSpeed: 2, // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
 		canvasBackgroundColor: '#fff',
 		canvasBackgroundLineColor: '#eef',
@@ -30,14 +34,17 @@ var BlockEditor = function(el, options) {
     this.$el.data(BlockEditor._namespace, this);
 
 	// init block editor
-	this.init();
+	this._createContainer();
+	this._init();
 };
 
-// plugin namespace
+/** @property {string} _namespace plugin namespace */
 BlockEditor._namespace = 'block-editor';
 
-BlockEditor.prototype.init = function() {
-	// create container
+/**
+ * Creates container
+ */
+BlockEditor.prototype._createContainer = function() {
 	this.$container = $('<div>');
 	this.$container.attr('class', BlockEditor._namespace);
 	this.$container.css({
@@ -45,18 +52,50 @@ BlockEditor.prototype.init = function() {
 		height: this.$el.height()
 	});
 	this.$el.after(this.$container).hide();
-
-	this.canvas = new Canvas(this); // create canvas
-
-	var self = this;
-	$.get(this.options.paletteData).done(function(data) {
-		self.palette = new Palette(self, data, self.$el.data('doc_link')); // create blocks palette
-		self.palette.render();
-		self.processData(); // load and process data from textarea
-		self.render();
-	});
 };
 
+/**
+ * Initialization, loads palette data via AJAX
+ *
+ * @private
+ */
+BlockEditor.prototype._init = function() {
+	// reset undo & redo history when URL changed (new block loaded)
+	if (sessionStorage.url !== location.href) {
+		sessionStorage.url = location.href;
+		sessionStorage.removeItem('undo');
+		sessionStorage.removeItem('redo');
+	}
+
+	// reset zoom
+	sessionStorage.zoom = 1.0;
+
+	// load palette data from cache and trigger reloading
+	var self = this;
+	var callback = function(data) {
+		localStorage.palette = JSON.stringify(data);
+		self.canvas = new Canvas(self); // create canvas
+		self.palette = new Palette(self, data); // create blocks palette
+		self.processData(); // load and process data from textarea
+		self.box = self.getBoundingBox();
+		self.canvas.render(self.box);
+		self.palette.render();
+		self.render();
+		self.canvas.$container.scroll(); // force scroll event to save center of viewport
+	};
+	if (localStorage.palette) {
+		callback(JSON.parse(localStorage.palette)); // load instantly from cache
+		setTimeout(function() {
+			self.palette.toolbar.$reload.click(); // and trigger reloading immediately
+		}, 100);
+	} else {
+		$.get(this.options.paletteData).done(callback);
+	}
+};
+
+/**
+ * Parses textarea data and initializes parent block properties and child blocks
+ */
 BlockEditor.prototype.processData = function() {
 	this.data = JSON.parse(this.$el.val());
 	this.blocks = {};
@@ -77,6 +116,9 @@ BlockEditor.prototype.processData = function() {
 	}
 };
 
+/**
+ * Renders block editor
+ */
 BlockEditor.prototype.render = function() {
 	// render all blocks first to get their offset
 	for (var id in this.blocks) {
@@ -88,11 +130,43 @@ BlockEditor.prototype.render = function() {
 		this.blocks[id].renderConnections();
 	}
 
-	// scroll to relative zero
-	this.canvas.$container.scrollTop(this.options.canvasOffset - 45);
-	this.canvas.$container.scrollLeft(this.options.canvasOffset - 45);
+	// scroll to top left corner of diagram bounding box
+	var top = this.box.minY - this.options.canvasOffset + this.canvas.options.canvasExtraWidth;
+	var left = this.box.minX - this.options.canvasOffset + this.canvas.options.canvasExtraHeight;
+	this.canvas.$container.scrollTop(top);
+	this.canvas.$container.scrollLeft(left);
 };
 
+/**
+ * Finds diagram bounding box
+ *
+ * @param {boolean} [active] - Process all or only active blocks
+ * @returns {{minX: number, maxX: number, minY: number, maxY: number}}
+ */
+BlockEditor.prototype.getBoundingBox = function(active) {
+	var minX = Infinity, maxX = -Infinity;
+	var minY = Infinity, maxY = -Infinity;
+
+	for (var id in this.blocks) {
+		var b = this.blocks[id];
+		if (active && !b.isActive()) {
+			continue;
+		}
+		minX = Math.min(minX, b.x);
+		maxX = Math.max(maxX, b.x + (b.$container ? b.$container.outerWidth() : 100));
+		minY = Math.min(minY, b.y);
+		maxY = Math.max(maxY, b.y + (b.$container ? b.$container.outerHeight() : 100));
+	}
+
+	return {
+		minX: minX, maxX: maxX,
+		minY: minY, maxY: maxY
+	};
+};
+
+/**
+ * Refreshes editor based on textarea data
+ */
 BlockEditor.prototype.refresh = function() {
 	// remove old blocks
 	for (var id in this.blocks) {
@@ -111,12 +185,21 @@ BlockEditor.prototype.refresh = function() {
 	this.canvas.redraw();
 };
 
+/**
+ * Adds new block to this editor instance
+ *
+ * @param {string} id - New block identification
+ * @param {Object} data - JSON object with block data
+ */
 BlockEditor.prototype.addBlock = function(id, data) {
 	this.blocks[id] = new Block(id, data, this);
 	this.blocks[id].render();
 	this.onChange();
 };
 
+/**
+ * On change handler, propagates changes to textarea
+ */
 BlockEditor.prototype.onChange = function() {
 	// normalize string from textarea
 	var oldData = JSON.stringify(JSON.parse(this.$el.val()));
@@ -138,6 +221,11 @@ BlockEditor.prototype.onChange = function() {
 	this.$el.val(newData);
 };
 
+/**
+ * Serializes all blocks and parent block information to JSON string
+ *
+ * @returns {string}
+ */
 BlockEditor.prototype.serialize = function() {
 	var blocks = {};
 	for (var i in this.blocks) {
@@ -156,6 +244,11 @@ BlockEditor.prototype.serialize = function() {
 	return JSON.stringify(ret);
 };
 
+/**
+ * Removes editor instance
+ *
+ * @fixme fails when editor was not properly initialized (e.g. ajax load of palette not done yet)
+ */
 BlockEditor.prototype.destroy = function() {
 	this.$container.remove();
 	delete this.$container;

@@ -1,19 +1,26 @@
 /**
  * palette class
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
  *
+ * @param {BlockEditor} editor - plugin instance
+ * @class
  * @todo autocomplete filter vedle selectu
  * @todo dummy block bez typy na zacatek palety - zvyraznit pokud ma neexistujici typ
  */
-var Palette = function(editor, blocks, docLink) {
+var Palette = function(editor, blocks) {
 	this.editor = editor;
 	this.canvas = editor.canvas;
 	this.blocks = blocks;
-	this.docLink = docLink;
-	this.toolbar = new Toolbar(editor);
+	this.toolbar = new Toolbar(editor, this);
 };
 
+/**
+ * Creates palette filter
+ *
+ * @returns {jQuery}
+ * @private
+ */
 Palette.prototype._createFilter = function() {
 	this.$filter = $('<select>');
 
@@ -28,24 +35,29 @@ Palette.prototype._createFilter = function() {
 		this.$filter.append($option);
 	}
 
-	className = BlockEditor._namespace + '-filter';
+	var className = BlockEditor._namespace + '-filter';
 	this.$filter.addClass(className);
 	$(document).off('change.palette', 'select.' + className).on('change.palette', 'select.' + className, this._filter.bind(this));
 	return this.$filter;
 };
 
+/**
+ * Renders palette
+ */
 Palette.prototype.render = function() {
+	if (this.$container) {
+		this.$container.remove();
+	}
+
 	this.$container = $('<div>');
 	this.$container.addClass(BlockEditor._namespace + '-palette');
 
 	// toolbar
-	var $toolbar = this.toolbar.render(this.$container);
-	var $divider = $('<div>').addClass(BlockEditor._namespace + '-toolbar-divider');
-	$toolbar.append($divider.clone());
+	this.toolbar.render(this.editor.$container);
 
 	// filter
 	var $filter = this._createFilter();
-	$toolbar.append($filter);
+	this.$container.append($filter);
 
 	// blocks
 	for (var id in this.blocks) {
@@ -57,6 +69,13 @@ Palette.prototype.render = function() {
 	this.editor.$container.append(this.$container);
 };
 
+/**
+ * Filters blocks inside palette
+ *
+ * @param {MouseEvent} e - Event
+ * @returns {boolean}
+ * @private
+ */
 Palette.prototype._filter = function(e) {
 	if ($(e.target).val() === '*') {
 		var className = BlockEditor._namespace + '-block';
@@ -68,4 +87,20 @@ Palette.prototype._filter = function(e) {
 	this.$container.find('.' + className).show();
 
 	return false;
+};
+
+/**
+ * Reloads palette data via AJAX
+ *
+ * @param {function} callback - triggered when loading done
+ */
+Palette.prototype.reload = function(callback) {
+	var self = this;
+	$.get(this.editor.options.paletteData).done(function(data) {
+		if (localStorage.palette !== JSON.stringify(data)) {
+			self.blocks = data;
+			self.render();
+		}
+		callback.call(data);
+	});
 };

@@ -1,14 +1,34 @@
 /**
  * Toolbar class
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
+ *
+ * @param {BlockEditor} editor - reference to plugin instance
+ * @class
  */
-var Toolbar = function(editor) {
+var Toolbar = function(editor, palette) {
 	this.editor = editor;
+	this.palette = palette;
 	this.canvas = editor.canvas;
+	this._zoom = this.canvas.getZoom();
+	this._zoomStep = 0.1;
+	this._zoomMax = 3.0;
+	this._zoomMin = 0.3;
 };
 
+/**
+ * Renders toolbar
+ *
+ * @param {jQuery} $container
+ * @returns {jQuery}
+ */
 Toolbar.prototype.render = function($container) {
+	if (this._rendered) {
+		// prevent multiple rendering
+		return false;
+	}
+
+	this._rendered = true;
 	this.$container = $container;
 	this.$toolbar = $('<div>');
 	this.$toolbar.addClass(BlockEditor._namespace + '-toolbar');
@@ -33,6 +53,16 @@ Toolbar.prototype.render = function($container) {
 	this.$parent.addClass(className);
 	$(document).on('click', 'a.' + className, this._toggleParentProperties.bind(this));
 	this.$toolbar.append(this.$parent);
+
+	// palette refresh button
+	this.$reload = $('<a>');
+	className = BlockEditor._namespace + '-palette-reload';
+	this.$reload.html('<i class="fa fa-fw fa-refresh"></i> R');
+	this.$reload.attr('title', 'Reload palette data [Ctrl + Shift + R]');
+	this.$reload.attr('href', '#reload-palette');
+	this.$reload.addClass(className);
+	$(document).on('click', 'a.' + className, this._reloadPalette.bind(this));
+	this.$toolbar.append(this.$reload);
 
 	this.$toolbar.append($divider.clone());
 
@@ -90,18 +120,53 @@ Toolbar.prototype.render = function($container) {
 
 	this.$toolbar.append($divider.clone());
 
+	// zoom in button
+	this.$zoomIn = $('<a>').addClass('disabled');
+	className = BlockEditor._namespace + '-zoom-in';
+	this.$zoomIn.html('<i class="fa fa-fw fa-search-plus"></i> +');
+	this.$zoomIn.attr('title', 'Zoom in [+ / =]');
+	this.$zoomIn.attr('href', '#zoom-in');
+	this.$zoomIn.addClass(className);
+	$(document).on('click', 'a.' + className, this._zoomIn.bind(this));
+	this.$toolbar.append(this.$zoomIn);
+
+	// zoom out button
+	this.$zoomOut = $('<a>').addClass('disabled');
+	className = BlockEditor._namespace + '-zoom-out';
+	this.$zoomOut.html('<i class="fa fa-fw fa-search-minus"></i> -');
+	this.$zoomOut.attr('title', 'Zoom out [-]');
+	this.$zoomOut.attr('href', '#zoom-out');
+	this.$zoomOut.addClass(className);
+	$(document).on('click', 'a.' + className, this._zoomOut.bind(this));
+	this.$toolbar.append(this.$zoomOut);
+
+	// zoom reset button
+	this.$zoomReset = $('<a>').addClass('disabled');
+	className = BlockEditor._namespace + '-zoom-reset';
+	this.$zoomReset.html('<i class="fa fa-fw fa-desktop"></i> 0');
+	this.$zoomReset.attr('title', 'Reset zoom [0]');
+	this.$zoomReset.attr('href', '#zoom-reset');
+	this.$zoomReset.addClass(className);
+	$(document).on('click', 'a.' + className, this._zoomReset.bind(this));
+	this.$toolbar.append(this.$zoomReset);
+
 	$(document).off('keydown.toolbar').on('keydown.toolbar', this._keydown.bind(this));
 
 	// disable selection
 	$(document).off('click.disable-selection', this.canvas.$container)
 			   .on('click.disable-selection', this.canvas.$container, this.disableSelection.bind(this));
 
-	this.editor.$container.append(this.$toolbar);
+	this.$container.append(this.$toolbar);
 	this.updateDisabledClasses();
 
 	return this.$toolbar;
 };
 
+/**
+ * Disables block selection, used as on click handler
+ *
+ * @param {MouseEvent} [e] - Event
+ */
 Toolbar.prototype.disableSelection = function(e) {
 	if (!e || ($(e.target).is('canvas') && !this.canvas.selection)) {
 		for (var id in this.editor.blocks) {
@@ -111,6 +176,32 @@ Toolbar.prototype.disableSelection = function(e) {
 	this.canvas.selection = false;
 };
 
+/**
+ * Reloads palette data via ajax
+ *
+ * @private
+ */
+Toolbar.prototype._reloadPalette = function() {
+	if (this.$reload.hasClass('disabled')) {
+		return false;
+	}
+	this.$reload.addClass('disabled');
+	this.$reload.find('i.fa').addClass('fa-spin');
+	var self = this;
+	this.palette.reload(function() {
+		self.$reload.find('i.fa').removeClass('fa-spin');
+		self.$reload.removeClass('disabled');
+	});
+	return false;
+};
+
+/**
+ * Keydown handler, binds keyboard shortcuts
+ *
+ * @param {KeyboardEvent} e - Event
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._keydown = function(e) {
 	// set timeout for loosing hover
 	setTimeout(function() {
@@ -148,10 +239,17 @@ Toolbar.prototype._keydown = function(e) {
 		this.$fullscreen.addClass('hover');
 		this._toggleFullScreen();
 		return false;
+	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 82) { // ctrl + shift + r => reload palette data
+		this.$reload.addClass('hover');
+		this._reloadPalette();
+		return false;
 	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 80) { // ctrl + shift + p => parent block properties
 		this.$parent.addClass('hover');
 		this._toggleParentProperties();
-	} else if (code === 8 || ((e.metaKey || e.ctrlKey) && code === 46)) { // del / ctrl + backspace => remove selection
+	} else if (code === 46 || ((e.metaKey || e.ctrlKey) && code === 8)) { // del / ctrl + backspace => remove selection
+		if (!window.confirm(_('Do you realy want to delete selected blocks?'))) {
+			return false;
+		}
 		for (var id in this.editor.blocks) {
 			if (this.editor.blocks[id].isActive()) {
 				this.editor.blocks[id].remove();
@@ -162,9 +260,21 @@ Toolbar.prototype._keydown = function(e) {
 		for (var id in this.editor.blocks) {
 			this.editor.blocks[id].deactivate();
 		}
+	} else if (code === 48) { // 0 => reset zoom
+		this._zoomReset();
+	} else if (code === 189) { // - => zoom out
+		this._zoomOut();
+	} else if (code === 187) { // = / + => zoom in
+		this._zoomIn();
 	}
 };
 
+/**
+ * Toggles fullscreen mode
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._toggleFullScreen = function() {
 	var shift = this.editor.$container[0].getBoundingClientRect();
 	var position = [this.canvas.$container.scrollLeft(), this.canvas.$container.scrollTop()];
@@ -203,6 +313,12 @@ Toolbar.prototype._toggleFullScreen = function() {
 	return false;
 };
 
+/**
+ * Toggles parent block properties editor
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._toggleParentProperties = function() {
 	var editor = new ParentEditor(this.editor);
 	editor.render();
@@ -210,6 +326,12 @@ Toolbar.prototype._toggleParentProperties = function() {
 	return false;
 };
 
+/**
+ * Undo last action
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._undo = function() {
 	if (sessionStorage.undo && JSON.parse(sessionStorage.undo).length) {
 		// save current state to redo
@@ -231,6 +353,12 @@ Toolbar.prototype._undo = function() {
 	return false;
 };
 
+/**
+ * Redo last reverted action
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._redo = function() {
 	if (sessionStorage.redo && JSON.parse(sessionStorage.redo).length) {
 		// save current state to undo
@@ -252,12 +380,23 @@ Toolbar.prototype._redo = function() {
 	return false;
 };
 
+/**
+ * Copies active block(s)
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._copy = function() {
 	var ret = {};
+	var box = this.editor.getBoundingBox(true);
+	var midX = box.minX + (box.maxX - box.minX) / 2;
+	var midY = box.minY + (box.maxY - box.minY) / 2;
 	for (var i in this.editor.blocks) {
 		var b = this.editor.blocks[i];
 		if (b.isActive()) {
 			ret[b.id] = b.serialize();
+			ret[b.id].x -= midX + this.canvas.options.canvasExtraWidth;
+			ret[b.id].y -= midY + this.canvas.options.canvasExtraHeight;
 		}
 	}
 	if (ret) {
@@ -268,25 +407,45 @@ Toolbar.prototype._copy = function() {
 	return false;
 };
 
+/**
+ * Cuts active block(s)
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._cut = function() {
 	var ret = {};
+	var box = this.editor.getBoundingBox(true);
+	var midX = box.minX + (box.maxX - box.minX) / 2;
+	var midY = box.minY + (box.maxY - box.minY) / 2;
 	for (var id in this.editor.blocks) {
 		var b = this.editor.blocks[id];
 		if (b.isActive()) {
 			ret[b.id] = b.remove();
+			ret[b.id].x -= midX + this.canvas.options.canvasExtraWidth;
+			ret[b.id].y -= midY + this.canvas.options.canvasExtraHeight;
 		}
 	}
 	if (ret) {
 		localStorage.clipboard = JSON.stringify(ret);
 		this.canvas.redraw();
+		this.updateDisabledClasses();
 	}
 
 	return false;
 };
 
+/**
+ * Pastes blocks from clipboard
+ *
+ * @returns {boolean}
+ * @private
+ */
 Toolbar.prototype._paste = function() {
-	if (localStorage.clipboard && JSON.parse(localStorage.clipboard)) {
-		var blocks = JSON.parse(localStorage.clipboard);
+	var blocks;
+	if (localStorage.clipboard && (blocks = JSON.parse(localStorage.clipboard))) {
+		var center = this.canvas.getCenter();
+		this.disableSelection();
 		for (var id in blocks) {
 			var b = blocks[id];
 			var exists = id in this.editor.blocks;
@@ -304,29 +463,23 @@ Toolbar.prototype._paste = function() {
 				b.x += 10;
 				b.y += 10;
 			}
+			block.x += center.x;
+			block.y += center.y;
 			block.render();
+			block.activate();
 		}
 		localStorage.clipboard = JSON.stringify(blocks);
 		this.canvas.redraw();
 		this.editor.onChange();
+		this.updateDisabledClasses();
 	}
 
 	return false;
 };
 
-Toolbar.prototype._filter = function(e) {
-	if ($(e.target).val() === '*') {
-		var className = BlockEditor._namespace + '-block';
-	} else {
-		var className = BlockEditor._namespace + '-filter-' + $(e.target).val();
-	}
-
-	this.$container.find('.' + BlockEditor._namespace + '-block').hide();
-	this.$container.find('.' + className).show();
-
-	return false;
-};
-
+/**
+ * Updates disable state of all buttons inside toolbar
+ */
 Toolbar.prototype.updateDisabledClasses = function() {
 	// set disabled class to toolbar buttons
 	var active = false;
@@ -355,6 +508,24 @@ Toolbar.prototype.updateDisabledClasses = function() {
 		this.$paste.addClass('disabled');
 	}
 
+	if (this._zoom < this._zoomMax) {
+		this.$zoomIn.removeClass('disabled');
+	} else {
+		this.$zoomIn.addClass('disabled');
+	}
+
+	if (this._zoom > this._zoomMin) {
+		this.$zoomOut.removeClass('disabled');
+	} else {
+		this.$zoomOut.addClass('disabled');
+	}
+
+	if (this._zoom !== 1.0) {
+		this.$zoomReset.removeClass('disabled');
+	} else {
+		this.$zoomReset.addClass('disabled');
+	}
+
 	if (active) {
 		this.$copy.removeClass('disabled');
 		this.$cut.removeClass('disabled');
@@ -362,4 +533,68 @@ Toolbar.prototype.updateDisabledClasses = function() {
 		this.$copy.addClass('disabled');
 		this.$cut.addClass('disabled');
 	}
+};
+
+/**
+ * Zooms to given scale
+ *
+ * @param {number} scale
+ * @private
+ */
+Toolbar.prototype._zoomTo = function(scale) {
+	// 0.1 precision
+	scale = Math.round(scale * 10) / 10;
+	sessionStorage.zoom = this._zoom = scale;
+	var centerX = this.canvas.getCenter().x * scale;
+	var centerY = this.canvas.getCenter().y * scale;
+	this.canvas.$containerInner.css({
+		'transform': 'scale(' + this._zoom + ')',
+		'width': (this._zoom * 100) + '%',
+		'height': (this._zoom * 100) + '%'
+	});
+
+	// compensate scroll to preserve center point
+	var $c = this.canvas.$container;
+	this.canvas.$container.scrollLeft(centerX - $c.width() / 2);
+	this.canvas.$container.scrollTop(centerY - $c.height() / 2);
+
+	// force browser to re-render inner container
+	var inner = this.canvas.$containerInner.detach();
+	this.canvas.$container.append(inner);
+	this.canvas.redraw();
+
+	this.updateDisabledClasses();
+};
+
+/**
+ * Zooms in
+ *
+ * @private
+ */
+Toolbar.prototype._zoomIn = function() {
+	if (this._zoom < this._zoomMax) {
+		this._zoomTo(this._zoom + this._zoomStep);
+	}
+	return false;
+};
+
+/**
+ * Zooms out
+ *
+ * @private
+ */
+Toolbar.prototype._zoomOut = function() {
+	if (this._zoom > this._zoomMin) {
+		this._zoomTo(this._zoom - this._zoomStep);
+	}
+	return false;
+};
+/**
+ * Resets zoom
+ *
+ * @private
+ */
+Toolbar.prototype._zoomReset = function() {
+	this._zoomTo(1);
+	return false;
 };

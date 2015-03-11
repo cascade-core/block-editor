@@ -1,7 +1,7 @@
 /*
  * Block Editor Widget 2.0
  *
- * Copyright (c) 2014, Martin Adamek <adamek@projectisimo.com>
+ * Copyright (c) 2015, Martin Adamek <adamek@projectisimo.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,12 @@
 (function($) {
 	"use strict";
 
+	/**
+	 * Registers block editor plugin to jQuery
+	 *
+	 * @param {Array} [options]
+	 * @returns {jQuery} provides fluent interface
+	 */
 	$.fn.blockEditor = function(options) {
 		return this.each(function() {
 			var editor = $(this).data(BlockEditor._namespace);
