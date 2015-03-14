@@ -61,10 +61,10 @@ ParentEditor.prototype._create = function() {
 	var $tabs = $('<div>').addClass(this._namespace + '-tabs');
 	var $textarea = $('<textarea></textarea>');
 	// allow tabs inside textarea
-	$textarea.on('keydown', this._fixTabs);
+	$textarea.on('keydown', this._keydown);
 	$textarea.prop('autofocus', true);
-	var $save = $('<input type="submit">').val(_('Save'));
-	$close = $('<input type="button">').val(_('Close'));
+	var $save = $('<input type="submit">').val(_('Set properties'));
+	$close = $('<input type="button">').val(_('Cancel'));
 	$close.on('click', this._close.bind(this));
 	this.$container.append($tabs);
 	this.$container.append($textarea);
