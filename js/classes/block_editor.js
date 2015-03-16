@@ -15,6 +15,7 @@ var BlockEditor = function(el, options) {
 	this.defaults = {
 		paletteData: '/admin/block-editor-palette.json',
 		historyLimit: 1000, // count of remembered changes,
+		splineTension: 0.5, // used to render connections, more means higher elasticity of connections
 		canvasOffset: 30, // px start rendering blocks from top left corner of diagram - canvasOffset
 		canvasExtraWidth: 1500, // px added to each side of diagram bounding box
 		canvasExtraHeight: 1500, // px added to each side of diagram bounding box

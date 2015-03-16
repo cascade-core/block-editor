@@ -77,6 +77,24 @@ Block.prototype.position = function() {
 };
 
 /**
+ * Gets current block container bounding box
+ *
+ * @returns {?Object} with bounding box points
+ */
+Block.prototype.getBoundingBox = function() {
+	if (!this.$container) {
+		return null;
+	}
+	var $c = this.$container;
+	return {
+		'topLeft': new Point($c[0].offsetLeft, $c[0].offsetTop),
+		'topRight': new Point($c[0].offsetLeft + $c.outerWidth(), $c[0].offsetTop),
+		'bottomLeft': new Point($c[0].offsetLeft, $c[0].offsetTop + $c.outerHeight()),
+		'bottomRight': new Point($c[0].offsetLeft + $c.outerWidth(), $c[0].offsetTop + $c.outerHeight())
+	};
+};
+
+/**
  * Removes block from canvas
  *
  * @returns {Object} Block data in JSON object
