@@ -102,16 +102,41 @@ var Line = function(from, to) {
 	this.to = to;
 };
 
+/**
+ * Smooth curved line
+ *
+ * @param {Array} points
+ * @param {number} tension
+ * @param {CanvasRenderingContext2D} context
+ * @constructor
+ */
 var Spline = function(points, tension, context) {
 	this.points = points;
 	this.tension = tension;
 	this.context = context;
 };
 
+/**
+ * Computes vector from two points
+ *
+ * @param {Point} p1
+ * @param {Point} p2
+ * @returns {Point}
+ * @private
+ */
 Spline.prototype._vector = function(p1, p2) {
 	return new Point(p2.x - p1.x, p2.y - p1.y);
 };
 
+/**
+ * Computes bezier curve control points based on 3 following points
+ *
+ * @param {Point} p1
+ * @param {Point} p2
+ * @param {Point} p3
+ * @returns {[{Point}, {Point}]}
+ * @private
+ */
 Spline.prototype._controlPoints = function(p1, p2, p3) {
 	var t = this.tension;
 	var v = this._vector(p1, p3);
@@ -124,6 +149,9 @@ Spline.prototype._controlPoints = function(p1, p2, p3) {
 	];
 };
 
+/**
+ * Renders curve to canvas
+ */
 Spline.prototype.render = function() {
 	var cps = []; // control points
 	for (var i = 0; i < this.points.length - 2; i++) {
@@ -131,33 +159,20 @@ Spline.prototype.render = function() {
 	}
 	this._drawCurvedPath(cps);
 	return;
-
-
-
-	var points = this.points;
-	this.context.moveTo(points[0].x, points[0].y);
-	for (var i = 1; i < points.length; i++) {
-		// control points based on x-diff
-		var diffX = Math.abs(points[i].x - points[i - 1].x) / 2;
-		var cp1X = points[i - 1].x + diffX;
-		var cp1Y = points[i - 1].y;
-		var cp2X = points[i].x - diffX;
-		var cp2Y = points[i].y;
-
-		//this.context.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, points[i].x, points[i].y);
-		this.context.lineTo(points[i].x, points[i].y);
-	}
-	this.context.stroke();
-	this.context.closePath();
 };
 
+/**
+ * Internal rendering method
+ *
+ * @param {Array} cps - Control points
+ * @private
+ */
 Spline.prototype._drawCurvedPath = function(cps) {
 	var len = this.points.length;
 	if (len < 2) {
 		return;
 	}
 	var ctx = this.context;
-	//console.log(len, cps.length, cps);
 	if (len === 2) {
 		ctx.beginPath();
 		ctx.moveTo(this.points[0].x, this.points[0].y);
@@ -169,13 +184,9 @@ Spline.prototype._drawCurvedPath = function(cps) {
 		ctx.quadraticCurveTo(cps[0].x, cps[0].y, this.points[1].x, this.points[1].y);
 		for (var i = 2; i < len - 1; i += 1) {
 			var k = 2 * (i - 1);
-			//console.log(i, k - 1, k);
 			ctx.bezierCurveTo(cps[k - 1].x, cps[k - 1].y, cps[k].x, cps[k].y, this.points[i].x, this.points[i].y);
 		}
-		//console.log(i, k);
 		ctx.quadraticCurveTo(cps[k + 1].x, cps[k + 1].y, this.points[i].x, this.points[i].y);
 		ctx.stroke();
-
 	}
 };
-

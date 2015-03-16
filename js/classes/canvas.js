@@ -333,11 +333,11 @@ Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
 	this.context.lineWidth = 1.4;
 
 	// line points with starting point
-	var points = [new Point(fromX + 10, fromY)];
+	var points = [new Point(fromX + 15, fromY)];
 
 	// find intersections with other blocks
 	for (var id in this.editor.blocks) {
-		var intersections = this._getIntersections(id, fromX + 10, fromY, toX - 10, toY);
+		var intersections = this._getIntersections(id, fromX + 15, fromY, toX - 15, toY);
 		if (intersections.length) {
 			// find block border points to avoid
 			var b = this.editor.blocks[id];
@@ -347,17 +347,15 @@ Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
 		}
 	}
 
-	points.push(new Point(toX - 10, toY));
-	//console.log(points);
+	points.push(new Point(toX - 15, toY));
 	points = this._sortPoints(points);
-	//console.log(points);
 
 	// add original start & end points
 	points.unshift(new Point(fromX, fromY));
 	points.push(new Point(toX, toY));
 
 	// draw curved line
-	var path = new Spline(points, 0.5, this.context);
+	var path = new Spline(points, this.options.splineTension, this.context);
 	path.render();
 
 	// draw arrow in the end point
@@ -433,8 +431,8 @@ Canvas.prototype._findPointsToFollow = function(box, inters, from, to) {
 			if (d < min) {
 				min = d;
 				point = new Point(box[p].x, box[p].y); // copy
-				point.x += 10 * (p.indexOf('Left') > -1 ? -1 : 1);
-				point.y += 10 * (p.indexOf('top') > -1 ? -1 : 1);
+				point.x += 20 * (p.indexOf('Left') > -1 ? -1 : 1);
+				point.y += 20 * (p.indexOf('top') > -1 ? -1 : 1);
 				point.placement = p;
 			}
 		}
