@@ -357,16 +357,27 @@ Canvas.prototype._improvePath = function(points) {
 		var ac = new Line(points[i - 1], points[i + 1]);
 		if (ab + bc > ac) { // try to remove point B and look for intersections in AC
 			var collisions = 0;
+			var add = [];
 			for (var id in this.editor.blocks) {
 				var intersections = this._getIntersections(id, ac);
-				if (intersections.length > 0) {
+				var box = this.editor.blocks[id].getBoundingBox();
+				intersections = this._findPointsToFollow(box, intersections, points[i - 1], points[i + 1]);
+				if (intersections.length > 1) { // single intersection is ok
 					collisions++;
 					break;
+				}
+				if (intersections.length === 1) { // add border point of intersection to path
+					add.push(intersections[0]);
 				}
 			}
 			// point b is useless, remove it
 			if (!collisions) {
 				points.splice(i, 1);
+			}
+			if (add.length > 0) {
+				for (var p in add) {
+					points.splice(i, 0, add[p]);
+				}
 			}
 		}
 	}

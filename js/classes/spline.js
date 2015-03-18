@@ -10,6 +10,8 @@ var Spline = function(points, tension, context) {
 	this.points = points;
 	this.tension = tension;
 	this.context = context;
+	this.showPoints = false; // for debugging
+	this.showControlPoints = false; // for debugging
 };
 
 /**
@@ -70,20 +72,28 @@ Spline.prototype._drawCurvedPath = function(cps) {
 	}
 
 	// render points
-	//for (var i in this.points) {
-	//	ctx.beginPath();
-	//	ctx.arc(this.points[i].x, this.points[i].y, 5, 0, 2 * Math.PI);
-	//	ctx.closePath();
-	//	ctx.stroke();
-	//}
-	//for (var i in cps) {
-	//	ctx.beginPath();
-	//	ctx.strokeStyle = 'red';
-	//	ctx.arc(cps[i].x, cps[i].y, 5, 0, 2 * Math.PI);
-	//	ctx.closePath();
-	//	ctx.stroke();
-	//}
-	//ctx.strokeStyle = 'black';
+	if (this.showPoints) {
+		for (var i in this.points) {
+			ctx.beginPath();
+			ctx.arc(this.points[i].x, this.points[i].y, 5, 0, 2 * Math.PI);
+			ctx.closePath();
+			ctx.stroke();
+		}
+	}
+	if (this.showControlPoints) {
+		for (var i in cps) {
+			ctx.beginPath();
+			ctx.strokeStyle = 'red';
+			ctx.arc(cps[i].x, cps[i].y, 5, 0, 2 * Math.PI);
+			if (i > 0 && i % 2 === 1) {
+				ctx.moveTo(cps[i - 1].x, cps[i - 1].y);
+				ctx.lineTo(cps[i].x, cps[i].y);
+			}
+			ctx.closePath();
+			ctx.stroke();
+		}
+	}
+	ctx.strokeStyle = 'black';
 
 	if (len === 2) {
 		ctx.beginPath();
