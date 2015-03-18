@@ -541,7 +541,7 @@ Toolbar.prototype.updateDisabledClasses = function() {
 /**
  * Zooms to given scale
  *
- * @param {number} scale
+ * @param {Number} scale
  * @private
  */
 Toolbar.prototype._zoomTo = function(scale) {

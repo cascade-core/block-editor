@@ -26,10 +26,10 @@ Canvas.prototype.render = function(box) {
 /**
  * Draws straight line to this canvas
  *
- * @param {number} fromX
- * @param {number} fromY
- * @param {number} toX
- * @param {number} toY
+ * @param {Number} fromX
+ * @param {Number} fromY
+ * @param {Number} toX
+ * @param {Number} toY
  * @private
  */
 Canvas.prototype._drawLine = function(fromX, fromY, toX, toY) {
@@ -244,42 +244,39 @@ Canvas.prototype._onMouseUp = function(e) {
 };
 
 /**
- * Does line intersect with any block?
+ * Does line intersect with given block?
  *
  * @param {string} id - block id
- * @param {number} fromX
- * @param {number} fromY
- * @param {number} toX
- * @param {number} toY
+ * @param {Line} line
  * @returns {Array}
  * @private
  */
-Canvas.prototype._getIntersections = function(id, fromX, fromY, toX, toY) {
+Canvas.prototype._getIntersections = function(id, line) {
 	var b = this.editor.blocks[id];
 	var box = b.getBoundingBox();
 	var ret = [], intersection;
 
 	// top line intersection
-	intersection = this._lineIntersects(new Line(box.topLeft, box.topRight), fromX, fromY, toX, toY);
-	if (intersection) {
+	intersection = new Line(box.topLeft, box.topRight).intersection(line);
+	if (intersection && (!ret[0] || !ret[0].equals(intersection))) {
 		ret.push(intersection);
 	}
 
 	// bottom line intersection
-	intersection = this._lineIntersects(new Line(box.bottomLeft, box.bottomRight), fromX, fromY, toX, toY);
-	if (intersection) {
+	intersection = new Line(box.bottomLeft, box.bottomRight).intersection(line);
+	if (intersection && (!ret[0] || !ret[0].equals(intersection))) {
 		ret.push(intersection);
 	}
 
 	// left line intersection
-	intersection = this._lineIntersects(new Line(box.topLeft, box.bottomLeft), fromX, fromY, toX, toY);
-	if (intersection) {
+	intersection = new Line(box.topLeft, box.bottomLeft).intersection(line);
+	if (intersection && (!ret[0] || !ret[0].equals(intersection))) {
 		ret.push(intersection);
 	}
 
 	// right line intersection
-	intersection = this._lineIntersects(new Line(box.topRight, box.bottomRight), fromX, fromY, toX, toY);
-	if (intersection) {
+	intersection = new Line(box.topRight, box.bottomRight).intersection(line);
+	if (intersection && (!ret[0] || !ret[0].equals(intersection))) {
 		ret.push(intersection);
 	}
 
@@ -287,44 +284,19 @@ Canvas.prototype._getIntersections = function(id, fromX, fromY, toX, toY) {
 };
 
 /**
- * Do lines intersects with each other?
- *
- * @param {Line} line
- * @param {number} fromX
- * @param {number} fromY
- * @param {number} toX
- * @param {number} toY
- * @private
- */
-Canvas.prototype._lineIntersects = function(line, fromX, fromY, toX, toY) {
-	var s1X = toX - fromX;
-	var s1Y = toY - fromY;
-	var s2X = line.to.x - line.from.x;
-	var s2Y = line.to.y - line.from.y;
-	var s = (-s1Y * (fromX - line.from.x) + s1X * (fromY - line.from.y)) / (-s2X * s1Y + s1X * s2Y);
-	var t = ( s2X * (fromY - line.from.y) - s2Y * (fromX - line.from.x)) / (-s2X * s1Y + s1X * s2Y);
-
-	// Collision detected
-	if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
-		var intX = fromX + (t * s1X);
-		var intY = fromY + (t * s1Y);
-		return new Point(intX, intY);
-	}
-
-	return null; // No collision
-};
-
-/**
  * Draws connection line with arrow pointing to end
  *
- * @param {number} fromX
- * @param {number} fromY
- * @param {number} toX
- * @param {number} toY
+ * @param {Number} fromX
+ * @param {Number} fromY
+ * @param {Number} toX
+ * @param {Number} toY
  * @param {string} [color='#000'] defaults to black
  * @private
  */
 Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
+	var from = new Point(fromX, fromY);
+	var to = new Point(toX, toY);
+
 	// line style
 	color = color || '#000';
 	this.context.save();
@@ -333,33 +305,74 @@ Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
 	this.context.lineWidth = 1.4;
 
 	// line points with starting point
-	var points = [new Point(fromX + 15, fromY)];
+	var points = [new Point(from.x + 15, from.y)];
 
 	// find intersections with other blocks
 	for (var id in this.editor.blocks) {
-		var intersections = this._getIntersections(id, fromX + 15, fromY, toX - 15, toY);
+		var intersections = this._getIntersections(id, new Line(points[0], new Point(to.x - 15, to.y)));
 		if (intersections.length) {
 			// find block border points to avoid
 			var b = this.editor.blocks[id];
 			var box = b.getBoundingBox();
-			var follow = this._findPointsToFollow(box, intersections, new Point(fromX, fromY), new Point(toX, toY));
+			var follow = this._findPointsToFollow(box, intersections, from, to);
 			points = points.concat(follow);
 		}
 	}
 
-	points.push(new Point(toX - 15, toY));
+	points.push(new Point(to.x - 15, to.y));
 	points = this._sortPoints(points);
 
+	// adjust start & end point position based on angle
+	var l = points.length;
+	var maxAngle = 2.3; // rad
+	if (Utils.angle(from, points[0], points[1]) < maxAngle) {
+		points[0].y += 5 * (from.y < points[1].y ? 1 : -1);
+	}
+	if (Utils.angle(to, points[l - 1], points[l - 2]) < maxAngle) {
+		points[l - 1].y += 5 * (to.y < points[l - 2].y ? 1 : -1);
+	}
+
+	// remove useless points & add extra points to smoothen line
+	this._improvePath(points);
+
 	// add original start & end points
-	points.unshift(new Point(fromX, fromY));
-	points.push(new Point(toX, toY));
+	points.unshift(from);
+	points.push(to);
 
 	// draw curved line
 	var path = new Spline(points, this.options.splineTension, this.context);
 	path.render();
 
 	// draw arrow in the end point
-	this._drawArrow(toX, toY, color);
+	this._drawArrow(to.x, to.y, color);
+};
+
+/**
+ * Removes useless points & adds extra points to smoothen line
+ *
+ * @param {Array} points
+ * @private
+ */
+Canvas.prototype._improvePath = function(points) {
+	for (var i = 1; i < points.length - 1; i++) {
+		var ab = new Line(points[i - 1], points[i]);
+		var bc = new Line(points[i], points[i + 1]);
+		var ac = new Line(points[i - 1], points[i + 1]);
+		if (ab + bc > ac) { // try to remove point B and look for intersections in AC
+			var collisions = 0;
+			for (var id in this.editor.blocks) {
+				var intersections = this._getIntersections(id, ac);
+				if (intersections.length > 0) {
+					collisions++;
+					break;
+				}
+			}
+			// point b is useless, remove it
+			if (!collisions) {
+				points.splice(i, 1);
+			}
+		}
+	}
 };
 
 /**
@@ -398,7 +411,6 @@ Canvas.prototype._sortPoints = function(points) {
 				minI = i;
 			}
 		}
-		//console.log(curr, path, dist[curr][minI]);
 		curr = minI;
 	} while (path.length < points.length);
 
@@ -431,16 +443,19 @@ Canvas.prototype._findPointsToFollow = function(box, inters, from, to) {
 			if (d < min) {
 				min = d;
 				point = new Point(box[p].x, box[p].y); // copy
-				point.x += 20 * (p.indexOf('Left') > -1 ? -1 : 1);
-				point.y += 20 * (p.indexOf('top') > -1 ? -1 : 1);
+				point.x += 10 * (p.indexOf('Left') > -1 ? -1 : 1);
+				point.y += 10 * (p.indexOf('top') > -1 ? -1 : 1);
 				point.placement = p;
 			}
 		}
-		ret.push(point);
+		// add only unique points
+		if (point && (!ret[0] || !ret[0].equals(point))) {
+			ret.push(point);
+		}
 	}
 
 	// check for diagonal through box
-	if (inters.length === 2) {
+	if (ret.length === 2) {
 		var p1 = ret[ret.length - 2];
 		var p2 = ret[ret.length - 1];
 		var p1p = p1.placement;
@@ -465,8 +480,8 @@ Canvas.prototype._findPointsToFollow = function(box, inters, from, to) {
 /**
  * Draws arrow pointing to the right
  *
- * @param {number} x - horizontal position of the peak of arrow
- * @param {number} y - vertical position of the peak of arrow
+ * @param {Number} x - horizontal position of the peak of arrow
+ * @param {Number} y - vertical position of the peak of arrow
  * @private
  */
 Canvas.prototype._drawArrow = function(x, y) {
@@ -490,8 +505,8 @@ Canvas.prototype._drawArrow = function(x, y) {
  * Writes text to canvas
  *
  * @param {string} text
- * @param {number} x
- * @param {number} y
+ * @param {Number} x
+ * @param {Number} y
  * @private
  */
 Canvas.prototype._writeText = function(text, x, y) {

@@ -64,8 +64,8 @@ Storage.prototype.reset = function(key) {
 /**
  * Point representation in 2D space
  *
- * @param {number} x
- * @param {number} y
+ * @param {Number} x
+ * @param {Number} y
  * @constructor
  * @class
  */
@@ -74,6 +74,45 @@ var Point = function(x, y) {
 	this.y = y;
 };
 
+/**
+ * @param {Point} p
+ * @returns {boolean}
+ */
+Point.prototype.equals = function(p) {
+	return this.x === p.x && this.y === p.y;
+};
+
+/**
+ * @param {Point} p
+ * @returns {Point}
+ */
+Point.prototype.plus = function(p) {
+	return new Point(this.x + p.x, this.y + p.y);
+};
+
+/**
+ * @param {Point} p
+ * @returns {Point}
+ */
+Point.prototype.minus = function(p) {
+	return new Point(this.x - p.x, this.y - p.y);
+};
+
+/**
+ * Calculates the cross product of the two points.
+ *
+ * @param {Point} p
+ * @returns {Number} cross product
+ */
+Point.prototype.dot = function(p) {
+	return this.x * p.y - this.y * p.x;
+};
+
+/**
+ * Utility functions
+ *
+ * @type {Object}
+ */
 var Utils = {};
 
 /**
@@ -81,12 +120,26 @@ var Utils = {};
  *
  * @param {Point} from
  * @param {Point} to
- * @returns {number}
+ * @returns {Number}
  */
 Utils.dist = function(from, to) {
 	var diffX = (to.x - from.x) * (to.x - from.x);
 	var diffY = (to.y - from.y) * (to.y - from.y);
 	return Math.sqrt(diffX + diffY);
+};
+
+/**
+ * Calculates the angle ABC (in radians)
+ *
+ * @param {Point} a
+ * @param {Point} b
+ * @param {Point} c
+ */
+Utils.angle = function(a, b, c) {
+	var ab = Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
+	var bc = Math.sqrt(Math.pow(b.x - c.x,2) + Math.pow(b.y - c.y, 2));
+	var ac = Math.sqrt(Math.pow(c.x - a.x,2) + Math.pow(c.y - a.y, 2));
+	return Math.acos((bc * bc + ab * ab - ac * ac) / (2 * bc * ab));
 };
 
 /**
@@ -103,10 +156,47 @@ var Line = function(from, to) {
 };
 
 /**
+ * Computes line length
+ *
+ * @returns {Number}
+ */
+Line.prototype.length = function() {
+	return Utils.dist(this.from, this.to);
+};
+
+/**
+ * Do lines intersects with each other?
+ *
+ * @param {Line} line
+ * @private
+ */
+Line.prototype.intersection = function(line) {
+	var r = this.to.minus(this.from);
+	var s = line.to.minus(line.from);
+	var w = line.from.minus(this.from);
+
+	var product1 = w.dot(r);
+	var product2 = r.dot(s);
+
+	if (product2 === 0) { // lines are parallel
+		return false;
+	}
+
+	var u = product1 / product2;
+	var t = w.dot(s) / product2;
+
+	if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+		return this.from.plus(new Point(t * r.x, t * r.y));
+	} else {
+		return false;
+	}
+};
+
+/**
  * Smooth curved line
  *
  * @param {Array} points
- * @param {number} tension
+ * @param {Number} tension
  * @param {CanvasRenderingContext2D} context
  * @constructor
  */
@@ -169,10 +259,27 @@ Spline.prototype.render = function() {
  */
 Spline.prototype._drawCurvedPath = function(cps) {
 	var len = this.points.length;
+	var ctx = this.context;
 	if (len < 2) {
 		return;
 	}
-	var ctx = this.context;
+
+	// render points
+	//for (var i in this.points) {
+	//	ctx.beginPath();
+	//	ctx.arc(this.points[i].x, this.points[i].y, 5, 0, 2 * Math.PI);
+	//	ctx.closePath();
+	//	ctx.stroke();
+	//}
+	//for (var i in cps) {
+	//	ctx.beginPath();
+	//	ctx.strokeStyle = 'red';
+	//	ctx.arc(cps[i].x, cps[i].y, 5, 0, 2 * Math.PI);
+	//	ctx.closePath();
+	//	ctx.stroke();
+	//}
+	//ctx.strokeStyle = 'black';
+
 	if (len === 2) {
 		ctx.beginPath();
 		ctx.moveTo(this.points[0].x, this.points[0].y);
