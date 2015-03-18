@@ -329,7 +329,7 @@ Block.prototype._onDragOverFromInput = function(e, $target) {
 	}
 
 	this.canvas.redraw();
-	this.canvas._drawConnection(x, y, x2, y2, '#c60');
+	this.canvas.drawConnection(new Point(x, y), new Point(x2, y2), '#c60');
 };
 
 /**
@@ -819,7 +819,7 @@ Block.prototype._renderConnection = function(id, source, x2, y2, color) {
 				+ 7			// center of row
 				+ block.$container.find(query).position().top / zoom; // add position of variable
 		var color = color || (missing ? '#f00' : '#000');
-		this.canvas._drawConnection(x1, y1, x2, yy2, color);
+		this.canvas.drawConnection(new Point(x1, y1), new Point(x2, yy2), color);
 	} else {
 		// block outside of this scope or not exists
 		this.$container.find(query).addClass('missing').attr('title', _('Source of this connection may be invalid'));

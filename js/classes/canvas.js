@@ -9,12 +9,11 @@
 var Canvas = function(editor) {
 	this.editor = editor;
 	this.options = this.editor.options;
-	this.controls = {};
 };
 
 /**
  * Renders canvas and its container, computes width and height based on diagram bounding box
-
+ *
  * @param {object} box
  */
 Canvas.prototype.render = function(box) {
@@ -216,19 +215,16 @@ Canvas.prototype._onMouseUp = function(e) {
 			var currY = e.pageY - this.$container.offset().top + this.$container.scrollTop();
 			currX /= zoom;
 			currY /= zoom;
-			var blockX = b.position().left;
-			var blockXW = b.position().left + b.$container.width();
-			var blockY = b.position().top;
-			var blockYH = b.position().top + b.$container.height();
+			var box = b.getBoundingBox();
 
 			if (currX - this._cursor.x < 0) { // right to left selection => allow selecting just part of block
-				if (currX < blockXW && this._cursor.x > blockX &&
-					((currY > blockY && this._cursor.y < blockYH) || (this._cursor.y > blockY && currY < blockYH))) {
+				if (currX < box.topRight.x && this._cursor.x > box.topLeft.x &&
+					((currY > box.topLeft.y && this._cursor.y < box.bottomLeft.y) || (this._cursor.y > box.topLeft.y && currY < box.bottomLeft.y))) {
 					b.activate();
 				}
 			} else { // left to right selection => select only whole block
-				if (currX > blockXW && this._cursor.x < blockX &&
-					((currY > blockYH && this._cursor.y < blockY) || this._cursor.y > blockYH && currY < blockY)) {
+				if (currX > box.topRight.x && this._cursor.x < box.topLeft.x &&
+					((currY > box.bottomLeft.y && this._cursor.y < box.topLeft.y) || this._cursor.y > box.bottomLeft.y && currY < box.topLeft.y)) {
 					b.activate();
 				}
 			}
@@ -286,17 +282,12 @@ Canvas.prototype._getIntersections = function(id, line) {
 /**
  * Draws connection line with arrow pointing to end
  *
- * @param {Number} fromX
- * @param {Number} fromY
- * @param {Number} toX
- * @param {Number} toY
+ * @param {Point} from
+ * @param {Point} to
  * @param {string} [color='#000'] defaults to black
  * @private
  */
-Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
-	var from = new Point(fromX, fromY);
-	var to = new Point(toX, toY);
-
+Canvas.prototype.drawConnection = function(from, to, color) {
 	// line style
 	color = color || '#000';
 	this.context.save();
