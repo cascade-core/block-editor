@@ -77,6 +77,24 @@ Block.prototype.position = function() {
 };
 
 /**
+ * Gets current block container bounding box
+ *
+ * @returns {?Object} with bounding box points
+ */
+Block.prototype.getBoundingBox = function() {
+	if (!this.$container) {
+		return null;
+	}
+	var $c = this.$container;
+	return {
+		'topLeft': new Point($c[0].offsetLeft, $c[0].offsetTop),
+		'topRight': new Point($c[0].offsetLeft + $c.outerWidth(), $c[0].offsetTop),
+		'bottomLeft': new Point($c[0].offsetLeft, $c[0].offsetTop + $c.outerHeight()),
+		'bottomRight': new Point($c[0].offsetLeft + $c.outerWidth(), $c[0].offsetTop + $c.outerHeight())
+	};
+};
+
+/**
  * Removes block from canvas
  *
  * @returns {Object} Block data in JSON object
@@ -389,8 +407,8 @@ Block.prototype._onDragEnd = function(e) {
 /**
  * Updates current block position
  *
- * @param {number} dx - horizontal difference in px
- * @param {number} dy - vertical difference in px
+ * @param {Number} dx - horizontal difference in px
+ * @param {Number} dy - vertical difference in px
  */
 Block.prototype.updatePosition = function(dx, dy) {
 	this.x -= dx;
@@ -764,8 +782,8 @@ Block.prototype.renderConnections = function() {
  *
  * @param {string} id - input variable name
  * @param {Array} source - source block id and variable
- * @param {number} x2 - target base x position
- * @param {number} y2 - target base y position
+ * @param {Number} x2 - target base x position
+ * @param {Number} y2 - target base y position
  * @param {string} [color] - css color string starting with #
  * @returns {boolean}
  * @private

@@ -26,10 +26,10 @@ Canvas.prototype.render = function(box) {
 /**
  * Draws straight line to this canvas
  *
- * @param {number} fromX
- * @param {number} fromY
- * @param {number} toX
- * @param {number} toY
+ * @param {Number} fromX
+ * @param {Number} fromY
+ * @param {Number} toX
+ * @param {Number} toY
  * @private
  */
 Canvas.prototype._drawLine = function(fromX, fromY, toX, toY) {
@@ -244,62 +244,244 @@ Canvas.prototype._onMouseUp = function(e) {
 };
 
 /**
+ * Does line intersect with given block?
+ *
+ * @param {string} id - block id
+ * @param {Line} line
+ * @returns {Array}
+ * @private
+ */
+Canvas.prototype._getIntersections = function(id, line) {
+	var b = this.editor.blocks[id];
+	var box = b.getBoundingBox();
+	var ret = [], intersection;
+
+	// top line intersection
+	intersection = new Line(box.topLeft, box.topRight).intersection(line);
+	if (intersection && (!ret[0] || !ret[0].equals(intersection))) {
+		ret.push(intersection);
+	}
+
+	// bottom line intersection
+	intersection = new Line(box.bottomLeft, box.bottomRight).intersection(line);
+	if (intersection && (!ret[0] || !ret[0].equals(intersection))) {
+		ret.push(intersection);
+	}
+
+	// left line intersection
+	intersection = new Line(box.topLeft, box.bottomLeft).intersection(line);
+	if (intersection && (!ret[0] || !ret[0].equals(intersection))) {
+		ret.push(intersection);
+	}
+
+	// right line intersection
+	intersection = new Line(box.topRight, box.bottomRight).intersection(line);
+	if (intersection && (!ret[0] || !ret[0].equals(intersection))) {
+		ret.push(intersection);
+	}
+
+	return ret;
+};
+
+/**
  * Draws connection line with arrow pointing to end
  *
- * @param {number} fromX
- * @param {number} fromY
- * @param {number} toX
- * @param {number} toY
+ * @param {Number} fromX
+ * @param {Number} fromY
+ * @param {Number} toX
+ * @param {Number} toY
  * @param {string} [color='#000'] defaults to black
  * @private
  */
 Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
+	var from = new Point(fromX, fromY);
+	var to = new Point(toX, toY);
+
 	// line style
 	color = color || '#000';
 	this.context.save();
-	this.context.beginPath();
 	this.context.fillStyle = color;
 	this.context.strokeStyle = color;
 	this.context.lineWidth = 1.4;
 
-	// control points based on x-diff
-	var diffX = Math.abs(toX - fromX) / 2;
-	var cp1X = fromX + diffX;
-	var cp1Y = fromY;
-	var cp2X = toX - diffX;
-	var cp2Y = toY;
+	// line points with starting point
+	var points = [new Point(from.x + 15, from.y)];
+
+	// find intersections with other blocks
+	for (var id in this.editor.blocks) {
+		var intersections = this._getIntersections(id, new Line(points[0], new Point(to.x - 15, to.y)));
+		if (intersections.length) {
+			// find block border points to avoid
+			var b = this.editor.blocks[id];
+			var box = b.getBoundingBox();
+			var follow = this._findPointsToFollow(box, intersections, from, to);
+			points = points.concat(follow);
+		}
+	}
+
+	points.push(new Point(to.x - 15, to.y));
+	points = this._sortPoints(points);
+
+	// adjust start & end point position based on angle
+	var l = points.length;
+	var maxAngle = 2.3; // rad
+	if (Utils.angle(from, points[0], points[1]) < maxAngle) {
+		points[0].y += 5 * (from.y < points[1].y ? 1 : -1);
+	}
+	if (Utils.angle(to, points[l - 1], points[l - 2]) < maxAngle) {
+		points[l - 1].y += 5 * (to.y < points[l - 2].y ? 1 : -1);
+	}
+
+	// remove useless points & add extra points to smoothen line
+	this._improvePath(points);
+
+	// add original start & end points
+	points.unshift(from);
+	points.push(to);
 
 	// draw curved line
-	this.context.moveTo(fromX, fromY);
-	this.context.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, toX, toY);
-	this.context.stroke();
-	this.context.closePath();
+	var path = new Spline(points, this.options.splineTension, this.context);
+	path.render();
 
 	// draw arrow in the end point
-	this._drawArrow(toX, toY, color);
+	this._drawArrow(to.x, to.y, color);
 };
 
 /**
- * Computes distance between to points in euclidean space
+ * Removes useless points & adds extra points to smoothen line
  *
- * @param {number} fromX
- * @param {number} fromY
- * @param {number} toX
- * @param {number} toY
- * @returns {number}
+ * @param {Array} points
  * @private
  */
-Canvas.prototype._dist = function(fromX, fromY, toX, toY) {
-	var diffX = (toX - fromX) * (toX - fromX);
-	var diffY = (toY - fromY) * (toY - fromY);
-	return Math.sqrt(diffX + diffY);
+Canvas.prototype._improvePath = function(points) {
+	for (var i = 1; i < points.length - 1; i++) {
+		var ab = new Line(points[i - 1], points[i]);
+		var bc = new Line(points[i], points[i + 1]);
+		var ac = new Line(points[i - 1], points[i + 1]);
+		if (ab + bc > ac) { // try to remove point B and look for intersections in AC
+			var collisions = 0;
+			for (var id in this.editor.blocks) {
+				var intersections = this._getIntersections(id, ac);
+				if (intersections.length > 0) {
+					collisions++;
+					break;
+				}
+			}
+			// point b is useless, remove it
+			if (!collisions) {
+				points.splice(i, 1);
+			}
+		}
+	}
+};
+
+/**
+ * Topologically sorts given points to path using modified Floyd Warshall algorithm
+ * preserves first and last point
+ *
+ * @param {Array} points - array of points
+ * @returns {Array} sorted path (array of points)
+ * @private
+ */
+Canvas.prototype._sortPoints = function(points) {
+	// create distance matrix
+	var dist = [];
+	var infimum = this.width + this.height; // bigger than potential maximum
+	for (var i in points) {
+		var row = [];
+		for (var j in points) {
+			if (i == points.length - 1 || j == points.length - 1) {
+				row[j] = infimum;
+			} else {
+				row[j] = Utils.dist(points[i], points[j]);
+			}
+		}
+		dist[i] = row;
+	}
+
+	// find path
+	var curr = '0'; // js indexes array with string numbers
+	var path = [];
+	do {
+		path.push(curr);
+		var min = Infinity, minI = '-1';
+		for (var i in dist) {
+			if (min > dist[curr][i] && i !== curr && path.indexOf(i) === -1) {
+				min = dist[curr][i];
+				minI = i;
+			}
+		}
+		curr = minI;
+	} while (path.length < points.length);
+
+	for (var i in path) {
+		path[i] = points[path[i]];
+	}
+
+	// find path
+	return path;
+};
+
+/**
+ * Finds points that should be followed to avoid box
+ *
+ * @param {Object} box
+ * @param {Array} inters - intersections
+ * @param {Point} from
+ * @param {Point} to
+ * @returns {Array}
+ * @private
+ */
+Canvas.prototype._findPointsToFollow = function(box, inters, from, to) {
+	var ret = [];
+
+	// find nearest border points of box
+	for (var i in inters) {
+		var min = Infinity, point = null;
+		for (var p in box) {
+			var d = Utils.dist(inters[i], box[p]);
+			if (d < min) {
+				min = d;
+				point = new Point(box[p].x, box[p].y); // copy
+				point.x += 10 * (p.indexOf('Left') > -1 ? -1 : 1);
+				point.y += 10 * (p.indexOf('top') > -1 ? -1 : 1);
+				point.placement = p;
+			}
+		}
+		// add only unique points
+		if (point && (!ret[0] || !ret[0].equals(point))) {
+			ret.push(point);
+		}
+	}
+
+	// check for diagonal through box
+	if (ret.length === 2) {
+		var p1 = ret[ret.length - 2];
+		var p2 = ret[ret.length - 1];
+		var p1p = p1.placement;
+		var p2p = p2.placement;
+		if (!(
+			(p1p.indexOf('top') === 0 		&& p2p.indexOf('top') === 0) ||
+			(p1p.indexOf('bottom') === 0	&& p2p.indexOf('bottom') === 0) ||
+			(p1p.indexOf('Left') > 0 		&& p2p.indexOf('Left') > 0) ||
+			(p1p.indexOf('Right') > 0 		&& p2p.indexOf('Right') > 0)
+		)) {
+			if (Math.abs(p1.y - from.y) < Math.abs(p2.y - to.y)) {
+				p2.y = p1.y;
+			} else {
+				p1.y = p2.y;
+			}
+		}
+	}
+
+	return ret;
 };
 
 /**
  * Draws arrow pointing to the right
  *
- * @param {number} x - horizontal position of the peak of arrow
- * @param {number} y - vertical position of the peak of arrow
+ * @param {Number} x - horizontal position of the peak of arrow
+ * @param {Number} y - vertical position of the peak of arrow
  * @private
  */
 Canvas.prototype._drawArrow = function(x, y) {
@@ -323,8 +505,8 @@ Canvas.prototype._drawArrow = function(x, y) {
  * Writes text to canvas
  *
  * @param {string} text
- * @param {number} x
- * @param {number} y
+ * @param {Number} x
+ * @param {Number} y
  * @private
  */
 Canvas.prototype._writeText = function(text, x, y) {
