@@ -325,10 +325,10 @@ Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
 	// adjust start & end point position based on angle
 	var l = points.length;
 	var maxAngle = 2.3; // rad
-	if (Utils.angle(from, points[0], points[1]) < maxAngle) {
+	if (Point.angle(from, points[0], points[1]) < maxAngle) {
 		points[0].y += 5 * (from.y < points[1].y ? 1 : -1);
 	}
-	if (Utils.angle(to, points[l - 1], points[l - 2]) < maxAngle) {
+	if (Point.angle(to, points[l - 1], points[l - 2]) < maxAngle) {
 		points[l - 1].y += 5 * (to.y < points[l - 2].y ? 1 : -1);
 	}
 
@@ -393,7 +393,7 @@ Canvas.prototype._sortPoints = function(points) {
 			if (i == points.length - 1 || j == points.length - 1) {
 				row[j] = infimum;
 			} else {
-				row[j] = Utils.dist(points[i], points[j]);
+				row[j] = points[i].dist(points[j]);
 			}
 		}
 		dist[i] = row;
@@ -439,7 +439,7 @@ Canvas.prototype._findPointsToFollow = function(box, inters, from, to) {
 	for (var i in inters) {
 		var min = Infinity, point = null;
 		for (var p in box) {
-			var d = Utils.dist(inters[i], box[p]);
+			var d = inters[i].dist(box[p]);
 			if (d < min) {
 				min = d;
 				point = new Point(box[p].x, box[p].y); // copy
