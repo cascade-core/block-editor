@@ -7,7 +7,6 @@
  * @param {BlockEditor} editor - plugin instance
  * @param {string} target - variable name to edit
  * @class
- * @todo select na prvni radek nebo pred popisek
  */
 var Editor = function(block, editor, target) {
 	this.block = block;
@@ -44,8 +43,11 @@ Editor.prototype.render = function() {
 	}
 
 	// create new editor element
-	this._create();
+	this.$type = this._create();
 	this.editor.$container.append(this.$container);
+	if (this.$type) {
+		this.$type.focus();
+	}
 };
 
 /**
@@ -67,7 +69,8 @@ Editor.prototype._close = function() {
 Editor.prototype._bind = function() {
 	// close on escape
 	$(document).off('keydown.editor').on('keydown.editor', $.proxy(function(e) {
-		if (e.keyCode === 27) {
+		var code = e.keyCode ? e.keyCode : e.which;
+		if (code === 27) {
 			return this._close();
 		} else {
 			return true;
@@ -86,6 +89,7 @@ Editor.prototype._bind = function() {
 
 /**
  * Creates variable editor container
+ * @returns {jQuery} - type element to focus when appended to DOM
  * @private
  */
 Editor.prototype._create = function() {
@@ -93,24 +97,25 @@ Editor.prototype._create = function() {
 	this.$container = $('<div class="' + this._namespace + '">');
 
 	var $title = $('<div class="' + this._namespace + '-title">');
-	// make it draggable
-	$title.on('mousedown', this._onDragStart.bind(this));
+	$title.text(this.block.id + ':' + this._variable);
+	$title.on('mousedown', this._onDragStart.bind(this)); // make it draggable
 
 	var $close = $('<a href="#">&times;</a>');
 	$close.addClass(this._namespace + '-close');
 	$close.on('click', this._close.bind(this));
-	$title.text(this.block.id + ':' + this._variable);
+
 	$title.append($close);
 	this.$container.append($title);
 
-	var $type = $('<select autofocus="autofocus"></select>');
-	var $textarea = $('<textarea></textarea>');
-	$textarea.on('keydown', this._fixTabs);
-	$textarea.prop('autofocus', true);
+	var id = BlockEditor._namespace + '-type';
+	var $type = $('<select>').attr('id', id);
+	var $typeLabel = $('<label>').attr('for', id).text(_('Type:'));
+	var $textarea = $('<textarea>').on('keydown', this._keydown.bind(this));
 	var $desc = $('<div></div>').addClass(this._namespace + '-desc');
-	var $save = $('<input type="submit">').val(_('Save'));
-	$close = $('<input type="button">').val(_('Close'));
+	var $save = $('<input type="submit">').val(_('Set input'));
+	$close = $('<input type="button">').val(_('Cancel'));
 	$close.on('click', this._close.bind(this));
+	this.$container.append($typeLabel);
 	this.$container.append($type);
 	this.$container.append($desc);
 	this.$container.append($textarea);
@@ -153,6 +158,7 @@ Editor.prototype._create = function() {
 	}
 	$type.change();
 	this._type = $type.val();
+	return $type;
 };
 
 /**
@@ -219,9 +225,13 @@ Editor.prototype._onDragEnd = function(e) {
  * @private
  */
 Editor.prototype._changeType = function(e) {
+	var code = e.keyCode ? e.keyCode : e.which;
 	var type = this._types[e.target.value];
 	this.$container.find('div.' + this._namespace + '-desc').html(type[2]);
-	this.$container.find('textarea').css('display', type[0] ? 'block' : 'none').focus();
+	// ignore shift and tab keys when focusing to allow other handlers to focus other elements
+	if ($.inArray(code, [9, 16]) === -1 && !e.shiftKey) {
+		this.$container.find('textarea').css('display', type[0] ? 'block' : 'none').focus();
+	}
 };
 
 /**
@@ -369,51 +379,67 @@ Editor.prototype._isValidJson = function(str) {
 };
 
 /**
- * Keydown handler that allows adding tab keys
+ * Keydown handler that allows adding tab keys and sending form with CTRL + enter
+ *
+ * @param {KeyboardEvent} e - Event
+ * @returns {boolean}
+ * @private
+ */
+Editor.prototype._keydown = function(e) {
+	var code = e.keyCode ? e.keyCode : e.which;
+	if (!e.shiftKey && code === 9) { // tab without shift => allow adding tabs to textarea
+		return this._fixTabs(e);
+	} else if ((e.metaKey || e.ctrlKey) && code === 13) { // ctrl + enter => save form
+		return this._save();
+	} else if (e.shiftKey && code === 9) { // shift + tab => focus type select
+		var $type = this.$type;
+		// wait for other events to propagate (changeType event focuses textarea, we need to focus after that)
+		setTimeout(function() {
+			$type.focus();
+		}, 0);
+		return false;
+	}
+};
+
+/**
+ * Allows sending tabs to textarea
  *
  * @param {KeyboardEvent} e - Event
  * @returns {boolean}
  * @private
  */
 Editor.prototype._fixTabs = function(e) {
-	if (e.keyCode === 9) { // tab
-		var pos, r, re, rc;
-		// get caret position
-		if (this.selectionStart) {
-			pos = this.selectionStart;
-		} else if (document.selection) {
-			r = document.selection.createRange();
-			if (r === null) {
-				return true;
-			}
-			re = this.createTextRange();
-			rc = re.duplicate();
-			re.moveToBookmark(r.getBookmark());
-			rc.setEndPoint('EndToStart', re);
-
-			pos = rc.text.length;
+	// get caret position
+	var pos, r, re, rc;
+	if (e.target.selectionStart) {
+		pos = e.target.selectionStart;
+	} else if (document.selection) {
+		r = document.selection.createRange();
+		if (r === null) {
+			return true;
 		}
-		var str = $(this).val();
-		if (e.shiftKey) { // shift + tab -> remove current tab
-			// no tab here -> ignore
-			if (str.slice(pos - 1, pos) !== '\t') {
-				return false;
-			}
-			str = str.slice(0, pos - 1) + str.slice(pos);
-			pos -= 1;
-		} else {
-			str = str.slice(0, pos) + '\t' + str.slice(pos);
-			pos += 1;
-		}
-		$(this).val(str);
-		// set caret position
-		if (this.selectionStart) {
-			this.selectionStart = pos;
-			this.selectionEnd = pos;
-		} else if (document.selection) {
-			var start = offsetToRangeCharacterMove(this, pos);
-			re.move("character", start);
-		}
-		return false;
+		re = e.target.createTextRange();
+		rc = re.duplicate();
+		re.moveToBookmark(r.getBookmark());
+		rc.setEndPoint('EndToStart', re);
+		pos = rc.text.length;
+	} else {
+		pos = 0;
 	}
+
+	// update value
+	var str = $(e.target).val();
+	str = str.slice(0, pos) + '\t' + str.slice(pos);
+	pos += 1;
+	$(e.target).val(str);
+
+	// set caret position
+	if (e.target.selectionStart) {
+		e.target.selectionStart = pos;
+		e.target.selectionEnd = pos;
+	} else if (document.selection) {
+		var start = offsetToRangeCharacterMove(e.target, pos);
+		re.move("character", start);
+	}
+	return false;
 };

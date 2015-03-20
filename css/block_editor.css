@@ -351,6 +351,17 @@
 	outline: none;
 }
 
+.block-editor-variable-editor label {
+	width: 78px;
+	font-size: 12px;
+	text-align: left;
+	padding: 7px 10px;
+}
+
+.block-editor-variable-editor select {
+	width: 300px;
+}
+
 .block-editor-variable-editor-tabs {
 	text-align: left;
 	margin: 2px 10px 10px;
@@ -395,7 +406,7 @@
 
 .block-editor-variable-editor textarea {
 	width: 380px;
-	height: 170px !important;
+	height: 160px !important;
 	margin: 0 9px;
 }
 

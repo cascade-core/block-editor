@@ -15,6 +15,7 @@ var BlockEditor = function(el, options) {
 	this.defaults = {
 		paletteData: '/admin/block-editor-palette.json',
 		historyLimit: 1000, // count of remembered changes,
+		splineTension: 0.3, // used to render connections, more means higher elasticity of connections
 		canvasOffset: 30, // px start rendering blocks from top left corner of diagram - canvasOffset
 		canvasExtraWidth: 1500, // px added to each side of diagram bounding box
 		canvasExtraHeight: 1500, // px added to each side of diagram bounding box
@@ -23,6 +24,10 @@ var BlockEditor = function(el, options) {
 		canvasBackgroundLineColor: '#eef',
 		canvasBackgroundLineStep: 10 // px
 	};
+
+	// create namespaced storages
+	this.session = new Storage(sessionStorage, BlockEditor._namespace);
+	this.storage = new Storage(localStorage, BlockEditor._namespace);
 
 	// options stored in data attribute
 	var meta = this.$el.data(this._namespace + '-opts');
@@ -57,19 +62,19 @@ BlockEditor.prototype._createContainer = function() {
  */
 BlockEditor.prototype._init = function() {
 	// reset undo & redo history when URL changed (new block loaded)
-	if (sessionStorage.url !== location.href) {
-		sessionStorage.url = location.href;
-		sessionStorage.removeItem('undo');
-		sessionStorage.removeItem('redo');
+	if (this.session.get('url') !== location.href) {
+		this.session.set('url', location.href);
+		this.session.reset('undo');
+		this.session.reset('redo');
 	}
 
 	// reset zoom
-	sessionStorage.zoom = 1.0;
+	this.session.set('zoom', 1.0);
 
 	// load palette data from cache and trigger reloading
 	var self = this;
 	var callback = function(data) {
-		localStorage.palette = JSON.stringify(data);
+		self.storage.set('palette', data, true);
 		self.canvas = new Canvas(self); // create canvas
 		self.palette = new Palette(self, data); // create blocks palette
 		self.processData(); // load and process data from textarea
@@ -79,8 +84,9 @@ BlockEditor.prototype._init = function() {
 		self.render();
 		self.canvas.$container.scroll(); // force scroll event to save center of viewport
 	};
-	if (localStorage.palette) {
-		callback(JSON.parse(localStorage.palette)); // load instantly from cache
+	var palette = this.storage.get('palette', true);
+	if (palette) {
+		callback(palette); // load instantly from cache
 		setTimeout(function() {
 			self.palette.toolbar.$reload.click(); // and trigger reloading immediately
 		}, 100);
@@ -202,13 +208,14 @@ BlockEditor.prototype.onChange = function() {
 	var newData = this.serialize();
 	if (oldData !== newData) {
 		// save new history state
-		var undo = sessionStorage.undo ? JSON.parse(sessionStorage.undo) : [];
+		var undo = this.session.get('undo', true);
+		undo = undo || [];
 		undo.push(oldData);
 		if (undo.length > this.options.historyLimit) {
 			undo.splice(0, undo.length - this.options.historyLimit);
 		}
-		sessionStorage.undo = JSON.stringify(undo);
-		sessionStorage.removeItem('redo');
+		this.session.set('undo', undo, true);
+		this.session.reset('redo');
 	}
 
 	this.palette.toolbar.updateDisabledClasses();

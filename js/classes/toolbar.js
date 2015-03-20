@@ -325,17 +325,17 @@ Toolbar.prototype._toggleParentProperties = function() {
  * @private
  */
 Toolbar.prototype._undo = function() {
-	if (sessionStorage.undo && JSON.parse(sessionStorage.undo).length) {
+	var undo = this.editor.session.get('undo', true) || [];
+	if (undo.length) {
 		// save current state to redo
 		var oldData = JSON.stringify(JSON.parse(this.editor.$el.val()));
-		var redo = sessionStorage.redo ? JSON.parse(sessionStorage.redo) : [];
-		var undo = JSON.parse(sessionStorage.undo);
+		var redo = this.editor.session.get('redo', true) || [];
 		var prev = undo.pop();
 		redo.push(oldData);
 		this.editor.$el.val(prev);
 
-		sessionStorage.undo = JSON.stringify(undo);
-		sessionStorage.redo = JSON.stringify(redo);
+		this.editor.session.set('undo', undo, true);
+		this.editor.session.set('redo', redo, true);
 
 		this.editor.refresh();
 
@@ -352,19 +352,19 @@ Toolbar.prototype._undo = function() {
  * @private
  */
 Toolbar.prototype._redo = function() {
-	if (sessionStorage.redo && JSON.parse(sessionStorage.redo).length) {
+	var redo = this.editor.session.get('redo', true) || [];
+	if (redo.length) {
 		// save current state to undo
 		var oldData = JSON.stringify(JSON.parse(this.editor.$el.val()));
-		var undo = sessionStorage.undo ? JSON.parse(sessionStorage.undo) : [];
-		var redo = JSON.parse(sessionStorage.redo);
+		var undo = this.editor.session.get('undo', true) || [];
 		var next = redo.pop();
 		undo.push(oldData);
 
 		this.editor.$el.val(next);
 		this.editor.refresh();
 
-		sessionStorage.undo = JSON.stringify(undo);
-		sessionStorage.redo = JSON.stringify(redo);
+		this.editor.session.set('undo', undo, true);
+		this.editor.session.set('redo', redo, true);
 
 		this.updateDisabledClasses();
 	}
@@ -392,7 +392,7 @@ Toolbar.prototype._copy = function() {
 		}
 	}
 	if (ret) {
-		localStorage.clipboard = JSON.stringify(ret);
+		this.editor.storage.set('clipboard', ret, true);
 		this.updateDisabledClasses();
 	}
 
@@ -419,7 +419,7 @@ Toolbar.prototype._cut = function() {
 		}
 	}
 	if (ret) {
-		localStorage.clipboard = JSON.stringify(ret);
+		this.editor.storage.set('clipboard', ret, true);
 		this.canvas.redraw();
 		this.updateDisabledClasses();
 	}
@@ -434,8 +434,8 @@ Toolbar.prototype._cut = function() {
  * @private
  */
 Toolbar.prototype._paste = function() {
-	var blocks;
-	if (localStorage.clipboard && (blocks = JSON.parse(localStorage.clipboard))) {
+	var blocks = this.editor.storage.get('clipboard', true);
+	if (blocks) {
 		var center = this.canvas.getCenter();
 		this.disableSelection();
 		for (var id in blocks) {
@@ -460,7 +460,7 @@ Toolbar.prototype._paste = function() {
 			block.render();
 			block.activate();
 		}
-		localStorage.clipboard = JSON.stringify(blocks);
+		this.editor.storage.set('clipboard', blocks, true);
 		this.canvas.redraw();
 		this.editor.onChange();
 		this.updateDisabledClasses();
@@ -482,19 +482,22 @@ Toolbar.prototype.updateDisabledClasses = function() {
 		}
 	}
 
-	if (sessionStorage.undo && JSON.parse(sessionStorage.undo).length) {
+	var undo = this.editor.session.get('undo', true);
+	if (undo && undo.length) {
 		this.$undo.removeClass('disabled');
 	} else {
 		this.$undo.addClass('disabled');
 	}
 
-	if (sessionStorage.redo && JSON.parse(sessionStorage.redo).length) {
+	var redo = this.editor.session.get('redo', true);
+	if (redo && redo.length) {
 		this.$redo.removeClass('disabled');
 	} else {
 		this.$redo.addClass('disabled');
 	}
 
-	if (localStorage.clipboard && JSON.parse(localStorage.clipboard)) {
+	var clipboard = this.editor.storage.get('clipboard', true);
+	if (clipboard) {
 		this.$paste.removeClass('disabled');
 	} else {
 		this.$paste.addClass('disabled');
@@ -530,13 +533,14 @@ Toolbar.prototype.updateDisabledClasses = function() {
 /**
  * Zooms to given scale
  *
- * @param {number} scale
+ * @param {Number} scale
  * @private
  */
 Toolbar.prototype._zoomTo = function(scale) {
 	// 0.1 precision
 	scale = Math.round(scale * 10) / 10;
-	sessionStorage.zoom = this._zoom = scale;
+	this._zoom = scale;
+	this.editor.session.set('zoom', scale);
 	var centerX = this.canvas.getCenter().x * scale;
 	var centerY = this.canvas.getCenter().y * scale;
 	this.canvas.$containerInner.css({
