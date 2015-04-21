@@ -27,10 +27,10 @@ Grid.prototype.avoidBlocks = function(blocks) {
 		var b = blocks[i];
 		var box = b.getBoundingBox();
 		var fromX = Math.ceil((box.topLeft.x - this._offset.x) / this._segment);
-		var maxX = fromX + Math.ceil(b.$container.outerWidth() / this._segment);
+		var maxX = Math.ceil((box.topLeft.x - this._offset.x + b.$container.outerWidth()) / this._segment);
 		for (var x = fromX; x < maxX; x++) {
 			var fromY = Math.ceil((box.topLeft.y - this._offset.y) / this._segment);
-			var maxY = fromY + Math.ceil(b.$container.outerHeight() / this._segment);
+			var maxY = Math.ceil((box.topLeft.y - this._offset.y + b.$container.outerHeight()) / this._segment);
 			for (var y = fromY; y < maxY; y++) {
 				this._grid[x][y] = 0;
 			}
@@ -56,7 +56,7 @@ Grid.prototype._renderPoint = function(context, x, y, color) {
 	context.save();
 	context.strokeStyle = 'red';
 	context.beginPath();
-	context.arc(this._offset.x + x * this._segment, this._offset.y + y * this._segment, 5, 0, 2 * Math.PI);
+	context.arc(this._offset.x + x * this._segment, this._offset.y + y * this._segment, 2, 0, 2 * Math.PI);
 	context.closePath();
 	context.stroke();
 	if (color || this._grid[x][y] === 0) {

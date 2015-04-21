@@ -252,6 +252,11 @@ Canvas.prototype._getIntersections = function(id, line) {
 	var box = b.getBoundingBox();
 	var ret = [], intersection;
 
+	// first check whether block lies in line bounding box
+	if (!this._insideBoundingBox(box, line)) {
+		return [];
+	}
+
 	// top line intersection
 	intersection = new Line(box.topLeft, box.topRight).intersection(line);
 	if (intersection && (!ret[0] || !ret[0].equals(intersection))) {
@@ -277,6 +282,18 @@ Canvas.prototype._getIntersections = function(id, line) {
 	}
 
 	return ret;
+};
+
+Canvas.prototype._insideBoundingBox = function(box, line) {
+	// create line bounding box
+	var lineBox = [
+		Math.min(line.from.x, line.to.x), Math.min(line.from.y, line.to.y), // topLeft
+		Math.max(line.from.x, line.to.x), Math.max(line.from.y, line.to.y) // bottomRight
+	];
+	return box.topLeft.x < lineBox[2]
+		&& box.bottomRight.x > lineBox[0]
+		&& box.topLeft.y < lineBox[3]
+		&& box.bottomRight.y > lineBox[1];
 };
 
 Canvas.prototype.createGrid = function() {
@@ -349,29 +366,18 @@ Canvas.prototype._improvePath = function(points) {
 		var ab = new Line(points[i - 1], points[i]);
 		var bc = new Line(points[i], points[i + 1]);
 		var ac = new Line(points[i - 1], points[i + 1]);
-		if (ab + bc > ac) { // try to remove point B and look for intersections in AC
+		if (ab.length() + bc.length() > ac.length()) { // try to remove point B and look for intersections in AC
 			var collisions = 0;
-			var add = [];
 			for (var id in this.editor.blocks) {
 				var intersections = this._getIntersections(id, ac);
-				var box = this.editor.blocks[id].getBoundingBox();
-				intersections = this._findPointsToFollow(box, intersections, points[i - 1], points[i + 1]);
-				if (intersections.length > 1) { // single intersection is ok
+				if (intersections.length > 0) {
 					collisions++;
 					break;
-				}
-				if (intersections.length === 1) { // add border point of intersection to path
-					add.push(intersections[0]);
 				}
 			}
 			// point b is useless, remove it
 			if (!collisions) {
 				points.splice(i, 1);
-			}
-			if (add.length > 0) {
-				for (var p in add) {
-					points.splice(i, 0, add[p]);
-				}
 			}
 		}
 	}
