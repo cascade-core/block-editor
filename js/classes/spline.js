@@ -74,8 +74,9 @@ Spline.prototype._drawCurvedPath = function(cps) {
 	// render points
 	if (this.showPoints) {
 		for (var i in this.points) {
+			ctx.strokeStyle = 'darkviolet';
 			ctx.beginPath();
-			ctx.arc(this.points[i].x, this.points[i].y, 5, 0, 2 * Math.PI);
+			ctx.arc(this.points[i].x, this.points[i].y, 3, 0, 2 * Math.PI);
 			ctx.closePath();
 			ctx.stroke();
 		}
@@ -84,7 +85,7 @@ Spline.prototype._drawCurvedPath = function(cps) {
 		for (var i in cps) {
 			ctx.beginPath();
 			ctx.strokeStyle = 'red';
-			ctx.arc(cps[i].x, cps[i].y, 5, 0, 2 * Math.PI);
+			ctx.arc(cps[i].x, cps[i].y, 3, 0, 2 * Math.PI);
 			if (i > 0 && i % 2 === 1) {
 				ctx.moveTo(cps[i - 1].x, cps[i - 1].y);
 				ctx.lineTo(cps[i].x, cps[i].y);

@@ -9,6 +9,7 @@
 var Canvas = function(editor) {
 	this.editor = editor;
 	this.options = this.editor.options;
+	this.debug = false;
 };
 
 /**
@@ -298,8 +299,11 @@ Canvas.prototype._insideBoundingBox = function(box, line) {
 
 Canvas.prototype.createGrid = function() {
 	var box = this.editor.getBoundingBox();
-	var offset = new Point(this.options.canvasExtraWidth + box.minX, this.options.canvasExtraHeight + box.minY);
-	var grid = new Grid(this.editor.blocks, box.maxX - box.minX, box.maxY - box.minY, 20, offset);
+	var segment = 30;
+	var offset = new Point(this.options.canvasExtraWidth + box.minX - segment, this.options.canvasExtraHeight + box.minY - segment);
+	offset.x = Math.floor(offset.x / segment) * segment; // round to multiple of segment
+	offset.y = Math.floor(offset.y / segment) * segment;
+	var grid = new Grid(this.editor.blocks, box.maxX - box.minX + 2 * segment, box.maxY - box.minY + 2 * segment, segment, offset);
 	//grid.render(this.context);
 	var graph = new Graph(grid.toArray(), { diagonal: true });
 	this.grid = grid;
@@ -326,22 +330,43 @@ Canvas.prototype.drawConnection = function(from, to, color) {
 		this.createGrid();
 	}
 	var grid = this.graph.grid;
-	var start = this.grid.getPoint(grid, from.x + 10, from.y, true);
-	var end = this.grid.getPoint(grid, to.x - 10, to.y, true);
+	var start = this.grid.getPoint(grid, from.x, from.y, true);
+	var end = this.grid.getPoint(grid, to.x, to.y, true);
 	var path = astar.search(this.graph, start, end);
 	//this.grid.renderPath(this.context, path);
 
-	var correction = 5 / Math.min(Math.max(from.dist(to) / 200, -5), 5);
+	var correction = Math.log(from.dist(to) / 5);
 	var points = [new Point(from.x + 10, from.y)];
-	for (var p in path) {
-		points.push(this.grid.getPointObject(path[p].x, path[p].y));
-		points[points.length - 1].x += correction * (from.x % 2 ? 1 : -1);
-		points[points.length - 1].y += correction * (from.y % 2 ? 1 : -1);
+	// ignore first and last point in found path
+	for (var i = 1, j = 1; i < path.length - 1; i++, j++) {
+		points.push(this.grid.getPointObject(path[i].x, path[i].y));
+		points[points.length - 1].x += correction;
+		points[points.length - 1].y += correction;
+
+		// remove last point if there are three points with same vertical or horizontal position
+		if (points.length > 2) {
+			// check horizontal position
+			var xeq = points[j - 2].x === points[j - 1].x && points[j - 1].x === points[j].x;
+			// check vertical position
+			var yeq = points[j - 2].y === points[j - 1].y && points[j - 1].y === points[j].y;
+			// check diagonals
+			var xyeq = points[j - 2].y === points[j - 1].y && points[j - 1].y === points[j].y;
+			var yxeq = points[j - 2].y === points[j - 1].y && points[j - 1].y === points[j].y;
+			if (xeq || yeq || xyeq || yxeq) {
+				points.splice(j - 1, 1);
+				j--;
+			}
+		}
 	}
 	points.push(new Point(to.x - 10, to.y));
 
 	// remove useless points & add extra points to smoothen line
+	var t0 = performance.now();
 	this._improvePath(points);
+	if (this.debug) {
+		var t1 = performance.now();
+		console.log("canvas.improvePath: " + (t1 - t0) + " ms");
+	}
 
 	// add original start & end points
 	points.unshift(from);
@@ -366,7 +391,7 @@ Canvas.prototype._improvePath = function(points) {
 		var ab = new Line(points[i - 1], points[i]);
 		var bc = new Line(points[i], points[i + 1]);
 		var ac = new Line(points[i - 1], points[i + 1]);
-		if (ab.length() + bc.length() > ac.length()) { // try to remove point B and look for intersections in AC
+		if (ab.length() + bc.length() >= ac.length()) { // try to remove point B and look for intersections in AC
 			var collisions = 0;
 			for (var id in this.editor.blocks) {
 				var intersections = this._getIntersections(id, ac);
@@ -378,6 +403,7 @@ Canvas.prototype._improvePath = function(points) {
 			// point b is useless, remove it
 			if (!collisions) {
 				points.splice(i, 1);
+				i--;
 			}
 		}
 	}
@@ -530,11 +556,20 @@ Canvas.prototype._writeText = function(text, x, y) {
  * Redraws canvas
  */
 Canvas.prototype.redraw = function() {
+	var t0 = performance.now();
 	this.context.clearRect(0, 0, this.width, this.height);
 	this._drawBackground();
 	this.createGrid();
+	if (this.debug) {
+		var t1 = performance.now();
+		console.log("canvas.createGrid: " + (t1 - t0) + " ms");
+	}
 	for (var id in this.editor.blocks) {
 		this.editor.blocks[id].renderConnections();
+	}
+	if (this.debug) {
+		var t2 = performance.now();
+		console.log("canvas.redraw: " + (t2 - t0) + " ms");
 	}
 };
 

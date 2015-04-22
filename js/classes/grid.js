@@ -23,14 +23,15 @@ var Grid = function(blocks, width, height, segment, offset) {
 };
 
 Grid.prototype.avoidBlocks = function(blocks) {
+	var offset = this._segment / 3;
 	for (var i in blocks) {
 		var b = blocks[i];
 		var box = b.getBoundingBox();
-		var fromX = Math.ceil((box.topLeft.x - this._offset.x) / this._segment);
-		var maxX = Math.ceil((box.topLeft.x - this._offset.x + b.$container.outerWidth()) / this._segment);
+		var fromX = Math.ceil((box.topLeft.x - this._offset.x - offset) / this._segment);
+		var maxX = Math.ceil((box.topLeft.x - this._offset.x + b.$container.outerWidth() + offset) / this._segment);
 		for (var x = fromX; x < maxX; x++) {
-			var fromY = Math.ceil((box.topLeft.y - this._offset.y) / this._segment);
-			var maxY = Math.ceil((box.topLeft.y - this._offset.y + b.$container.outerHeight()) / this._segment);
+			var fromY = Math.ceil((box.topLeft.y - this._offset.y - offset) / this._segment);
+			var maxY = Math.ceil((box.topLeft.y - this._offset.y + b.$container.outerHeight() + offset) / this._segment);
 			for (var y = fromY; y < maxY; y++) {
 				this._grid[x][y] = 0;
 			}
@@ -79,6 +80,7 @@ Grid.prototype.getPoint = function(grid, x, y, clear) {
 	y = Math.round((y - this._offset.y) / this._segment);
 	if (clear) {
 		this._grid[x][y] = 1;
+		grid[x][y].weight = 1;
 	}
 	return grid[x][y];
 };

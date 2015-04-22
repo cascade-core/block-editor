@@ -132,9 +132,12 @@ BlockEditor.prototype.render = function() {
 	}
 
 	// then render connections
+	var t0 = performance.now();
 	for (var id in this.blocks) {
 		this.blocks[id].renderConnections();
 	}
+	var t1 = performance.now();
+	console.log("initial connections rendering: " + (t1 - t0) + " ms");
 
 	// scroll to top left corner of diagram bounding box
 	var top = this.box.minY - this.options.canvasOffset + this.canvas.options.canvasExtraWidth;
