@@ -20,10 +20,11 @@
 function TPL_html5__block_editor__html_head($t, $id, $d, $so)
 {
 	echo "\t<!-- Block Editor plugin -->\n",
-		"\t<link rel=\"stylesheet\" href=\"//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css\" type=\"text/css\">\n",
+		"\t<link rel=\"stylesheet\" href=\"/plugin/block_editor/external/font-awesome-4.3.0/css/font-awesome.min.css\" type=\"text/css\">\n",
 		"\t<link rel=\"stylesheet\" href=\"/plugin/block_editor/css/block_editor.css\" type=\"text/css\">\n",
-		"\t<script type=\"text/javascript\" src=\"https://code.jquery.com/jquery-2.1.1.js\"></script>\n",
-		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/jquery/gettext.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/external/jquery.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/external/gettext.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/external/c2s.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/classes/storage.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/classes/geometry.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/block_editor/js/classes/grid.js\"></script>\n",

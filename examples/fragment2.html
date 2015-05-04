@@ -1,0 +1,76 @@
+<html>
+<head>
+	<!-- Block Editor plugin -->
+	<link rel="stylesheet" href="../external/font-awesome-4.3.0/css/font-awesome.min.css" type="text/css">
+	<link rel="stylesheet" href="../css/block_editor.css" type="text/css">
+	<script type="text/javascript" src="../external/jquery.js"></script>
+	<script type="text/javascript" src="../external/gettext.js"></script>
+	<script type="text/javascript" src="../external/c2s.js"></script>
+	<script type="text/javascript" src="../js/classes/storage.js"></script>
+	<script type="text/javascript" src="../js/classes/geometry.js"></script>
+	<script type="text/javascript" src="../js/classes/grid.js"></script>
+	<script type="text/javascript" src="../js/classes/astar.js"></script>
+	<script type="text/javascript" src="../js/classes/spline.js"></script>
+	<script type="text/javascript" src="../js/classes/block.js"></script>
+	<script type="text/javascript" src="../js/classes/placeholder.js"></script>
+	<script type="text/javascript" src="../js/classes/editor.js"></script>
+	<script type="text/javascript" src="../js/classes/parent_editor.js"></script>
+	<script type="text/javascript" src="../js/classes/block_editor.js"></script>
+	<script type="text/javascript" src="../js/classes/canvas.js"></script>
+	<script type="text/javascript" src="../js/classes/toolbar.js"></script>
+	<script type="text/javascript" src="../js/classes/palette.js"></script>
+	<script type="text/javascript" src="../js/block_editor.js"></script>
+	<script type="text/javascript" src="../js/init.js"></script>
+
+	<style>
+		body, div, td, th, p, h1, h2, h3, h4, h5, h6, li, dd, dt, a, label { font-family: "DejaVu Sans", "Verdana", sans-serif; }
+		a { text-decoration: underline; color: #228; }
+		a:visited { color: #336; }
+		h1, h2, h3, h4, h5, h6 {
+			color: #258;
+			font-weight: normal;
+			text-shadow: 1px 1px 1px #aaa;
+		}
+
+		h1 a, h2 a, h3 a, h4 a, h5 a, h6 a,
+		h1 a:visited, h2 a:visited, h3 a:visited, h4 a:visited, h5 a:visited, h6 a:visited {
+			color: #258;
+			text-decoration: none;
+		}
+
+		h1 {
+			font-size: 2.5em;
+			font-weight: normal;
+			text-decoration: none;
+			font-variant: small-caps;
+			margin: 0em;
+			padding: 0em;
+		}
+
+		h2 {
+			font-size: 1.6em;
+			margin: 1.4em 0em 1em 0em;
+		}
+
+		h3 {
+			font-size: 1.3em;
+			margin: 1.7em 0em 1em 0em;
+		}
+
+		h4 {
+			font-size: 1.1em;
+			margin: 1.9em 0em 1em 0em;
+		}
+	</style>
+</head>
+<body>
+
+	<h1>Block Editor Examples</h1>
+
+	<h2>Cascade Fragment #2</h2>
+
+	<textarea name="cfg" class="block_editor_widget" rows="25" cols="80" style="display: block; width: 900px; height: 600px;"data-doc_link="/admin/doc/block/{block}" data-edit_link="/admin/block-editor/{block}">
+		{"_":"<?php printf('_%c%c}%c',34,10,10);__halt_compiler();?>","blocks":{"slot_footer":{"block":"core/out/slot","x":164,"y":436,"in_con":{"slot":["slot_holder","name"]},"in_val":{"slot_weight":90,"name":"footer"}},"message_queue":{"block":"core/out/message_queue","x":342,"y":209,"in_con":{"slot":["slot_default","name"]},"in_val":{"slot_weight":1}},"footer_version":{"block":"git/version","x":96,"y":198,"in_con":{"slot":["slot_footer","name"]},"in_val":{"link":"/admin/devel/version","slot_weight":60}}},"outputs":{"done":1,"title":"Cascade skeleton"}}
+	</textarea>
+</body>
+</html>
