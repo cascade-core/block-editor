@@ -49,13 +49,16 @@ Grid.prototype.render = function(context) {
 
 Grid.prototype.renderPath = function(context, path) {
 	for (var p in path) {
-		this._renderPoint(context, path[p].x, path[p].y, 'green');
+		this._renderPoint(context, path[p].x, path[p].y, '#4dff4d');
 	}
 };
 
 Grid.prototype._renderPoint = function(context, x, y, color) {
 	context.save();
-	context.strokeStyle = 'red';
+	if (this._grid[x][y] === 0) {
+		color = 'black';
+	}
+	context.strokeStyle = color || 'red';
 	context.beginPath();
 	context.arc(this._offset.x + x * this._segment, this._offset.y + y * this._segment, 2, 0, 2 * Math.PI);
 	context.closePath();

@@ -9,7 +9,7 @@
 var Canvas = function(editor) {
 	this.editor = editor;
 	this.options = this.editor.options;
-	this.debug = false;
+	this.debug = editor.debug;
 };
 
 /**
@@ -44,41 +44,23 @@ Canvas.prototype._drawLine = function(fromX, fromY, toX, toY) {
 };
 
 /**
- * Draws canvas background
- * @private
- */
-Canvas.prototype._drawBackground = function() {
-	$(this.canvas).css('background', this.options.canvasBackgroundColor);
-	this.context.strokeStyle = this.options.canvasBackgroundLineColor;
-	this.context.lineWidth = 1;
-	var step = this.options.canvasBackgroundLineStep;
-
-	// vertical lines
-	var max = this.width / step;
-	for (var i = 0; i < max; i++) {
-		this._drawLine(i * step, 0, i * step, this.height);
-	}
-
-	// horizontal lines
-	max = this.height / step;
-	for (var i = 0; i < max; i++) {
-		this._drawLine(0, i * step, this.width, i * step);
-	}
-
-	this.context.fillStyle = '#000';
-};
-
-/**
  * Creates container and canvas element
  * @private
  */
 Canvas.prototype._create = function() {
 	// create canvas element
-	this.canvas = $('<canvas>')[0];
+	var $el = $('<canvas>');
+	if (!this.options.viewOnly) {
+		$el.addClass('block-editor-bg');
+	}
+	this.canvas = $el[0];
 	this.canvas.width = this.width;
 	this.canvas.height = this.height;
-	this.context = this.canvas.getContext('2d');
-	this._drawBackground();
+	if (this.options.viewOnly && 'C2S' in window) {
+		this.context = new C2S(this.width, this.height);
+	} else {
+		this.context = this.canvas.getContext('2d');
+	}
 
 	// create scroll container
 	this.$container = $('<div>');
@@ -362,7 +344,7 @@ Canvas.prototype.drawConnection = function(from, to, color) {
 
 	// remove useless points & add extra points to smoothen line
 	var t0 = performance.now();
-	this._improvePath(points);
+	//this._improvePath(points);
 	if (this.debug) {
 		var t1 = performance.now();
 		console.log("canvas.improvePath: " + (t1 - t0) + " ms");
@@ -556,9 +538,12 @@ Canvas.prototype._writeText = function(text, x, y) {
  * Redraws canvas
  */
 Canvas.prototype.redraw = function() {
-	var t0 = performance.now();
+	var t00 = performance.now();
 	this.context.clearRect(0, 0, this.width, this.height);
-	this._drawBackground();
+	var t0 = performance.now();
+	if (this.debug) {
+		console.log("canvas.clear: " + (t0 - t00) + " ms");
+	}
 	this.createGrid();
 	if (this.debug) {
 		var t1 = performance.now();
@@ -570,6 +555,13 @@ Canvas.prototype.redraw = function() {
 	if (this.debug) {
 		var t2 = performance.now();
 		console.log("canvas.redraw: " + (t2 - t0) + " ms");
+	}
+	if (this.options.viewOnly && 'C2S' in window) {
+		var svg = this.context.getSerializedSvg(true); //true here will replace any named entities with numbered ones.
+		this.$containerInner.find('svg, canvas').remove();
+		this.$containerInner.append(svg);
+		this.$containerInner.find('svg rect').remove();
+		this.context = new C2S(this.width, this.height);
 	}
 };
 

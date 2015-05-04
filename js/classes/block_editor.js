@@ -10,9 +10,11 @@
 var BlockEditor = function(el, options) {
 	/** @property {jQuery} $el plugin data variable name */
     this.$el = $(el);
+	this.debug = false;
 
 	/** @property {string} defaults default options */
 	this.defaults = {
+		viewOnly: false,
 		paletteData: '/admin/block-editor-palette.json',
 		historyLimit: 1000, // count of remembered changes,
 		splineTension: 0.3, // used to render connections, more means higher elasticity of connections
@@ -41,6 +43,10 @@ var BlockEditor = function(el, options) {
 	// init block editor
 	this._createContainer();
 	this._init();
+
+	if (this.options.viewOnly && 'C2S' in window) {
+		this.canvas.redraw();
+	}
 };
 
 /** @property {string} _namespace plugin namespace */
@@ -137,7 +143,9 @@ BlockEditor.prototype.render = function() {
 		this.blocks[id].renderConnections();
 	}
 	var t1 = performance.now();
-	console.log("initial connections rendering: " + (t1 - t0) + " ms");
+	if (this.debug) {
+		console.log("initial connections rendering: " + (t1 - t0) + " ms");
+	}
 
 	// scroll to top left corner of diagram bounding box
 	var top = this.box.minY - this.options.canvasOffset + this.canvas.options.canvasExtraWidth;

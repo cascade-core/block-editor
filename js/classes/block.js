@@ -533,7 +533,7 @@ Block.prototype._createHeader = function() {
 	$type.text(this.type);
 	$type.on('dblclick', this._changeType.bind(this));
 
-	var $removeButton = $('<a href="#remove" class="' + BlockEditor._namespace + '-block-remove"><i class="fa fa-fw fa-trash"></i> ×</a>');
+	var $removeButton = $('<a href="#remove" class="' + BlockEditor._namespace + '-block-remove"><i class="fa fa-fw fa-trash"></i> &times;</a>');
 	$removeButton.on('click', this._remove.bind(this));
 	$removeButton.attr('title', 'Remove block');
 	if (this.editor.$el.data('doc_link')) {
