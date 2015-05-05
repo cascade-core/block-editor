@@ -185,7 +185,7 @@ Block.prototype.addConnection = function(source, target) {
  */
 Block.prototype._onDragStart = function(e) {
 	var $target = $(e.target);
-	if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
+	if ($(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
 		$target.addClass('selecting');
 		$('body').on({
 			'mousemove.block-editor': $.proxy(function(e) {
@@ -195,7 +195,7 @@ Block.prototype._onDragStart = function(e) {
 				this._onDragEndFromOutput.call(this, e, $target);
 			}, this)
 		});
-	} else if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(BlockEditor._namespace + '-block-input')) {
+	} else if ($(e.target).hasClass(BlockEditor._namespace + '-block-input')) {
 		$target.addClass('selecting');
 		$('body').on({
 			'mousemove.block-editor': $.proxy(function(e) {
@@ -207,7 +207,7 @@ Block.prototype._onDragStart = function(e) {
 				return false;
 			}, this)
 		});
-	} else {
+	} else if ($(e.target).closest('.' + BlockEditor._namespace + '-block-header')[0]) {
 		var zoom = this.canvas.getZoom();
 		this._cursor = {
 			x: e.clientX / zoom - this.position().left,
@@ -426,7 +426,7 @@ Block.prototype.updatePosition = function(dx, dy) {
  * @private
  */
 Block.prototype._onClick = function(e) {
-	if (!(e.metaKey || e.ctrlKey) && !this._moved) {
+	if ((e.metaKey || e.ctrlKey) && !this._moved) {
 		this.palette.toolbar.disableSelection();
 	}
 	if (!this._moved && !$(e.target).is('a')) {

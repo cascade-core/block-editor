@@ -147,6 +147,7 @@
 }
 
 .block-editor-block-header {
+	cursor: move;
 	background: rgba(238, 238, 238, 0.7);
 	padding: 3px 1em;
 	border-bottom: 1px solid #333;
@@ -230,7 +231,15 @@
 }
 
 .block-editor-block-input {
-	display: block;
+	float: left;
+	clear: left;
+	display: inline-block;
+}
+
+.block-editor-block-output {
+	float: right;
+	clear: right;
+	display: inline-block;
 }
 
 .block-editor-block-input.default {
