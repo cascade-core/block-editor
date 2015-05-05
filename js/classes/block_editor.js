@@ -262,6 +262,35 @@ BlockEditor.prototype.serialize = function() {
 	return JSON.stringify(ret);
 };
 
+BlockEditor.prototype._createHelp = function() {
+	var html = '<h2>Block Editor Help</h2>';
+	html += '<ul>';
+	html += '<li>Hold <kbd>ctrl</kbd> and drag canvas with mouse to move around</li>';
+	html += '<li>To append new blocks to this fragment, move mouse cursor to the left side of editor to show palette; then drag block from palette to canvas</li>';
+	html += '<li>To change block name or type, double click on it</li>';
+	html += '</ul>';
+	this.$help = $('<div>').addClass(BlockEditor._namespace + '-help-modal');
+	this.$help.html(html);
+	var $close = $('<a href="#close">&times;</a>');
+	$close.addClass(BlockEditor._namespace + '-close');
+	$close.on('click', function() {
+		this.$help.remove();
+		delete this.$help;
+		return false;
+	}.bind(this));
+	this.$help.append($close);
+	this.$container.append(this.$help);
+};
+
+BlockEditor.prototype.toggleHelp = function() {
+	if (this.$help) {
+		this.$help.remove();
+		delete this.$help;
+	} else {
+		this._createHelp();
+	}
+};
+
 /**
  * Removes editor instance
  *
