@@ -46,7 +46,7 @@ Palette.prototype._createFilter = function() {
  */
 Palette.prototype.render = function() {
 	if (this.$container) {
-		this.$container.remove();
+		this.$container.parent().remove();
 	}
 
 	this.$container = $('<div>');
@@ -66,7 +66,12 @@ Palette.prototype.render = function() {
 		this.$container.append(b.$container);
 	}
 
-	this.editor.$container.append(this.$container);
+	var $wrap = $('<div>').addClass(BlockEditor._namespace + '-palette-container');
+	$wrap.append(this.$container);
+	var $handle = $('<div>').addClass(BlockEditor._namespace + '-handle');
+	$handle.html('&raquo;');
+	$wrap.append($handle);
+	this.editor.$container.append($wrap);
 };
 
 /**
