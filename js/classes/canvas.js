@@ -326,6 +326,7 @@ Canvas.prototype.drawConnection = function(from, to, color) {
 	var points = [new Point(from.x + 10, from.y)];
 	// ignore first and last point in found path
 	for (var i = 1, j = 1; i < path.length - 1; i++, j++) {
+		path[i].weight += 1;
 		points.push(this.grid.getPointObject(path[i].x, path[i].y));
 		points[points.length - 1].x += correction;
 		points[points.length - 1].y += correction;
