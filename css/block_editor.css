@@ -53,9 +53,9 @@
 .block-editor-palette-container {
 	position: absolute;
 	top: 24px;
-	left: -280px;
+	left: -256px;
 	bottom: 0;
-	width: 300px;
+	width: 276px;
 	overflow: hidden;
 
 	-webkit-transition: all 0.2s ease-in-out;
@@ -89,9 +89,9 @@
 	height: 50px;
 	margin-top: -25px;
 	padding: 13px 0 0 3px;
-	color: #666;
+	color: #eee;
 	font-size: 130%;
-	background: #eee;
+	background: #666;
 	border-top: 1px solid #aaa;
 	border-bottom: 1px solid #aaa;
 	border-right: 1px solid #aaa;
@@ -100,6 +100,14 @@
 	top: 50%;
 	right: 1px;
 	cursor: e-resize;
+}
+
+.block-editor-palette-container:hover .block-editor-handle {
+	right: -20px;
+	-webkit-transition: all 0.2s ease-in-out;
+	-moz-transition: all 0.2s ease-in-out;
+	-o-transition: all 0.2s ease-in-out;
+	transition: all 0.2s ease-in-out;
 }
 
 .block-editor-toolbar:hover + .block-editor-palette,

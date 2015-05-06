@@ -314,7 +314,11 @@ Canvas.prototype.drawConnection = function(from, to, color) {
 	}
 	var grid = this.graph.grid;
 	var start = this.grid.getPoint(grid, from.x, from.y, true);
-	var end = this.grid.getPoint(grid, to.x, to.y, true);
+	try {
+		var end = this.grid.getPoint(grid, to.x, to.y, true);
+	} catch (e) { // point may be outside of precomputed grid
+		var end = to;
+	}
 	var path = astar.search(this.graph, start, end);
 	//this.grid.renderPath(this.context, path);
 

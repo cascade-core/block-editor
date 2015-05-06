@@ -267,7 +267,9 @@ BlockEditor.prototype._createHelp = function() {
 	html += '<ul>';
 	html += '<li>Hold <kbd>ctrl</kbd> and drag canvas with mouse to move around</li>';
 	html += '<li>To append new blocks to this fragment, move mouse cursor to the left side of editor to show palette; then drag block from palette to canvas</li>';
+	html += '<li>To move block on canvas, drag it on its header</li>';
 	html += '<li>To change block name or type, double click on it</li>';
+	html += '<li>When selecting multiple blocks, selection from left to right will select only fully overlapping blocks. Selection from right to left will also select partially overlapping blocks. </li>';
 	html += '</ul>';
 	this.$help = $('<div>').addClass(BlockEditor._namespace + '-help-modal');
 	this.$help.html(html);

@@ -203,6 +203,10 @@ Toolbar.prototype._keydown = function(e) {
 			this.editor.blocks[id].activate();
 		}
 		return false;
+	} else if ((e.metaKey || e.ctrlKey) && code === 72) { // ctrl + c => copy
+		this.$help.addClass('hover');
+		this._toggleHelp();
+		return false;
 	} else if ((e.metaKey || e.ctrlKey) && code === 67) { // ctrl + c => copy
 		this.$copy.addClass('hover');
 		this._copy();
@@ -370,19 +374,20 @@ Toolbar.prototype._redo = function() {
  * @private
  */
 Toolbar.prototype._copy = function() {
-	var ret = {};
+	var ret = {}, found = false;
 	var box = this.editor.getBoundingBox(true);
 	var midX = box.minX + (box.maxX - box.minX) / 2;
 	var midY = box.minY + (box.maxY - box.minY) / 2;
 	for (var i in this.editor.blocks) {
 		var b = this.editor.blocks[i];
 		if (b.isActive()) {
+			found = true;
 			ret[b.id] = b.serialize();
 			ret[b.id].x -= midX + this.canvas.options.canvasExtraWidth;
 			ret[b.id].y -= midY + this.canvas.options.canvasExtraHeight;
 		}
 	}
-	if (ret) {
+	if (found) {
 		this.editor.storage.set('clipboard', ret, true);
 		this.updateDisabledClasses();
 	}
@@ -397,19 +402,20 @@ Toolbar.prototype._copy = function() {
  * @private
  */
 Toolbar.prototype._cut = function() {
-	var ret = {};
+	var ret = {}, found = false;
 	var box = this.editor.getBoundingBox(true);
 	var midX = box.minX + (box.maxX - box.minX) / 2;
 	var midY = box.minY + (box.maxY - box.minY) / 2;
 	for (var id in this.editor.blocks) {
 		var b = this.editor.blocks[id];
 		if (b.isActive()) {
+			found = true;
 			ret[b.id] = b.remove();
 			ret[b.id].x -= midX + this.canvas.options.canvasExtraWidth;
 			ret[b.id].y -= midY + this.canvas.options.canvasExtraHeight;
 		}
 	}
-	if (ret) {
+	if (found) {
 		this.editor.storage.set('clipboard', ret, true);
 		this.canvas.redraw();
 		this.updateDisabledClasses();

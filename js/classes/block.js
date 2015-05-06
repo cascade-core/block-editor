@@ -426,7 +426,7 @@ Block.prototype.updatePosition = function(dx, dy) {
  * @private
  */
 Block.prototype._onClick = function(e) {
-	if ((e.metaKey || e.ctrlKey) && !this._moved) {
+	if (!(e.metaKey || e.ctrlKey) && !this._moved) {
 		this.palette.toolbar.disableSelection();
 	}
 	if (!this._moved && !$(e.target).is('a')) {
