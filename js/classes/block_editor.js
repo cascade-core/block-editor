@@ -87,7 +87,7 @@ BlockEditor.prototype._init = function() {
 		self.storage.set('palette', data, true);
 		self.canvas = new Canvas(self); // create canvas
 		self.palette = new Palette(self, data); // create blocks palette
-		self.processData(); // load and process data from textarea
+		self.processData(); // load and process data from <textarea>
 		self.box = self.getBoundingBox();
 		self.canvas.render(self.box);
 		self.palette.render();
@@ -106,7 +106,7 @@ BlockEditor.prototype._init = function() {
 };
 
 /**
- * Parses textarea data and initializes parent block properties and child blocks
+ * Parses <textarea> data and initializes parent block properties and child blocks
  */
 BlockEditor.prototype.processData = function() {
 	this.data = JSON.parse(this.$el.val());
@@ -182,7 +182,7 @@ BlockEditor.prototype.getBoundingBox = function(active) {
 };
 
 /**
- * Refreshes editor based on textarea data
+ * Refreshes editor based on <textarea> data
  */
 BlockEditor.prototype.refresh = function() {
 	// remove old blocks
@@ -215,7 +215,7 @@ BlockEditor.prototype.addBlock = function(id, data) {
 };
 
 /**
- * On change handler, propagates changes to textarea
+ * On change handler, propagates changes to <textarea>
  */
 BlockEditor.prototype.onChange = function() {
 	// normalize string from textarea
@@ -262,6 +262,11 @@ BlockEditor.prototype.serialize = function() {
 	return JSON.stringify(ret);
 };
 
+/**
+ * Creates help modal window
+ *
+ * @private
+ */
 BlockEditor.prototype._createHelp = function() {
 	var html = '<h2>Block Editor Help</h2>';
 	html += '<ul>';
