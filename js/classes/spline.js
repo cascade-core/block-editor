@@ -1,5 +1,5 @@
 /**
- * Smooth curved line
+ * Smooth curved line, uses Cardinal Spline for rendering
  *
  * @param {Array} points
  * @param {Number} tension
@@ -27,7 +27,7 @@ Spline.prototype._vector = function(p1, p2) {
 };
 
 /**
- * Computes bezier curve control points based on 3 following points
+ * Computes Bezier curve control points based on 3 following points
  *
  * @param {Point} p1
  * @param {Point} p2

@@ -1,11 +1,11 @@
 /**
- * variable editor
+ * Input editor
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
  *
  * @param {Block} block - block to edit
  * @param {BlockEditor} editor - plugin instance
- * @param {string} target - variable name to edit
+ * @param {string} target - input name to edit
  * @class
  */
 var Editor = function(block, editor, target) {
@@ -26,13 +26,13 @@ var Editor = function(block, editor, target) {
 };
 
 /**
- * Renders variable editor
+ * Renders input editor
  */
 Editor.prototype.render = function() {
 	// remove existing editors
 	$('div.' + this._namespace).remove();
 
-	// create new variable
+	// create new input
 	if (this._variable === '*') {
 		this._variable = this.getNewName();
 		if (this._variable === null) {
@@ -88,7 +88,7 @@ Editor.prototype._bind = function() {
 };
 
 /**
- * Creates variable editor container
+ * Creates input editor container
  * @returns {jQuery} - type element to focus when appended to DOM
  * @private
  */
@@ -218,7 +218,7 @@ Editor.prototype._onDragEnd = function(e) {
 };
 
 /**
- * Changes type of current variable
+ * Changes type of current input,
  * used as on click handler
  *
  * @param {MouseEvent} e - Event
@@ -235,7 +235,7 @@ Editor.prototype._changeType = function(e) {
 };
 
 /**
- * Saves new variable value, hides editor
+ * Saves new input value, hides editor
  *
  * @returns {boolean}
  * @private
@@ -244,7 +244,7 @@ Editor.prototype._save = function() {
 	var type = this.$container.find('select').val();
 	var text = this.$container.find('textarea').val();
 	var selector = '.' + BlockEditor._namespace + '-block-input';
-	selector += '[data-variable="' + this._variable + '"]';
+	selector += '[data-input="' + this._variable + '"]';
 	var def = false;
 	var redraw = false;
 
@@ -335,9 +335,9 @@ Editor.prototype._save = function() {
 };
 
 /**
- * Gets new variable name
+ * Gets new input name
  *
- * @param {boolean} [output] - Prompt for input or output variable name?
+ * @param {boolean} [output] - Prompt for input or output input name?
  * @returns {?string}
  */
 Editor.prototype.getNewName = function(output) {
@@ -349,11 +349,11 @@ Editor.prototype.getNewName = function(output) {
 		if (name === null) {
 			return name;
 		} else if (!name.match(/^[a-zA-Z][a-zA-Z0-9_]*$/)) {
-			alert(_('Only letters, numbers and underscore are allowed in variable name and the first character must be a letter.'));
+			alert(_('Only letters, numbers and underscore are allowed in input name and the first character must be a letter.'));
 			old = name;
 			name = null;
 		} else if (!output && (name === 'enable' || name in this.block.values)) {
-			alert(_('This name is already taken by another variable.'));
+			alert(_('This name is already taken by another input.'));
 			old = name;
 			name = null;
 		}

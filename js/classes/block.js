@@ -177,8 +177,8 @@ Block.prototype.addConnection = function(source, target) {
 };
 
 /**
- * Drag start handler - used on mousedown event
- * when CTRL is pressed, creates new connections
+ * Drag start handler - used on mousedown event,
+ * when CTRL is pressed, moves block on canvas, otherwise creates new connections
  *
  * @param {MouseEvent} e - Event
  * @private
@@ -224,7 +224,7 @@ Block.prototype._onDragStart = function(e) {
 };
 
 /**
- * Drag over handler - used on mousemove event
+ * Drag over handler - used on mousemove event,
  * renders connection from output of source block to current mouse position
  *
  * @param {MouseEvent} e - Event
@@ -264,7 +264,7 @@ Block.prototype._onDragOverFromOutput = function(e, $target) {
 };
 
 /**
- * Drag end handler - used on mouseup event
+ * Drag end handler - used on mouseup event,
  * creates connection from output of source block to target
  *
  * @param {MouseEvent} e - Event
@@ -289,7 +289,7 @@ Block.prototype._onDragEndFromOutput = function(e, $target) {
 };
 
 /**
- * Drag over handler - used on mousemove event
+ * Drag over handler - used on mousemove event,
  * renders connection from output of source block to current mouse position
  *
  * @param {MouseEvent} e - Event
@@ -333,7 +333,7 @@ Block.prototype._onDragOverFromInput = function(e, $target) {
 };
 
 /**
- * Drag end handler - used on mouseup event
+ * Drag end handler - used on mouseup event,
  * creates connection from output of source block
  *
  * @param {MouseEvent} e - Event
@@ -357,7 +357,7 @@ Block.prototype._onDragEndFromInput = function(e, $target) {
 };
 
 /**
- * Drag over handler - used on mousemove event
+ * Drag over handler - used on mousemove event,
  * moves block over canvas
  *
  * @param {MouseEvent} e - Event
@@ -390,7 +390,7 @@ Block.prototype._onDragOver = function(e) {
 };
 
 /**
- * Drag end handler - used on mouseup event
+ * Drag end handler - used on mouseup event,
  * saves new block position
  *
  * @param {MouseEvent} e - Event
@@ -480,6 +480,7 @@ Block.prototype.deactivate = function() {
 
 /**
  * Creates HTML container for current block
+ *
  * @private
  */
 Block.prototype._create = function() {
@@ -566,7 +567,7 @@ Block.prototype._createHeader = function() {
 };
 
 /**
- * Adds input variable
+ * Adds input variable to this block
  *
  * @param {string} variable
  */
@@ -588,7 +589,7 @@ Block.prototype.addInput = function(variable) {
 };
 
 /**
- * Adds output variable
+ * Adds output variable to this block
  *
  * @param {string} variable
  */
@@ -605,7 +606,7 @@ Block.prototype.addOutput = function (variable) {
 };
 
 /**
- * Toggles input variable editor
+ * Toggles input variable editor,
  * used as on click handler for input variables
  *
  * @param {MouseEvent} e - Event
@@ -673,7 +674,7 @@ Block.prototype.getNewAggregationFunc = function() {
 };
 
 /**
- * Changes current block id
+ * Changes current block id,
  * used as on click handler
  *
  * @returns {boolean}
@@ -694,7 +695,7 @@ Block.prototype._changeId = function() {
 };
 
 /**
- * Changes current block type
+ * Changes current block type,
  * used as on click handler
  *
  * @returns {boolean}
@@ -732,7 +733,7 @@ Block.prototype._changeType = function() {
 };
 
 /**
- * Removes current block
+ * Removes current block,
  * used as on click handler
  *
  * @returns {boolean}

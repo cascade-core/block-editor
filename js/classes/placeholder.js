@@ -1,5 +1,5 @@
 /**
- * Creates new placeholder instance
+ * Creates new Block Placeholder instance, used inside Palette
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
  *
@@ -27,10 +27,9 @@ Placeholder.prototype.constructor = Placeholder;
 /**
  * Creates HTML container
  *
- * @param e
  * @private
  */
-Placeholder.prototype._create = function(e) {
+Placeholder.prototype._create = function() {
 	Block.prototype._create.call(this);
 	var t = this.type.replace(/\/[^\/]*$/, '').replace(/\//g, '-');
 	this.$container.addClass(BlockEditor._namespace + '-filter-' + t);
@@ -38,7 +37,7 @@ Placeholder.prototype._create = function(e) {
 };
 
 /**
- * Moves block placeholder to editor canvas - binds move events
+ * Moves block placeholder to editor canvas - binds move events,
  * used as mousedown handler
  *
  * @param {MouseEvent} e - Event
@@ -65,7 +64,7 @@ Placeholder.prototype._onDragStart = function(e) {
 };
 
 /**
- * Moves block placeholder to editor canvas
+ * Moves block placeholder to editor canvas,
  * used as mousemove handler
  *
  * @param {MouseEvent} e - Event
@@ -90,7 +89,7 @@ Placeholder.prototype._onDragOver = function(e) {
 };
 
 /**
- * Moves block placeholder to editor canvas - create block instance from placeholder
+ * Moves block placeholder to editor canvas - create block instance from placeholder,
  * used as mouseup handler
  *
  * @private

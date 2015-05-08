@@ -1,5 +1,5 @@
 /**
- * grid representation
+ * Grid representation for A* path finding
  *
  * @param {Array} blocks - blocks to avoid when planning the path
  * @param {Number} width - bounding box width
@@ -22,6 +22,11 @@ var Grid = function(blocks, width, height, segment, offset) {
 	this.avoidBlocks(blocks);
 };
 
+/**
+ * Sets walls in grid based on blocks' coordinates
+ *
+ * @param {Object} blocks
+ */
 Grid.prototype.avoidBlocks = function(blocks) {
 	var offset = this._segment / 3;
 	for (var i in blocks) {
@@ -39,6 +44,11 @@ Grid.prototype.avoidBlocks = function(blocks) {
 	}
 };
 
+/**
+ * Renders grid control points, used for debugging
+ *
+ * @param {CanvasRenderingContext2D} context
+ */
 Grid.prototype.render = function(context) {
 	for (var x in this._grid) {
 		for (var y in this._grid[x]) {
@@ -47,12 +57,27 @@ Grid.prototype.render = function(context) {
 	}
 };
 
+/**
+ * Renders given path, used for debugging
+ *
+ * @param {CanvasRenderingContext2D} context
+ * @param {Array} path
+ */
 Grid.prototype.renderPath = function(context, path) {
 	for (var p in path) {
 		this._renderPoint(context, path[p].x, path[p].y, '#4dff4d');
 	}
 };
 
+/**
+ * Renders single point, used for debugging
+ *
+ * @param {CanvasRenderingContext2D} context
+ * @param {Number} x
+ * @param {Number} y
+ * @param {String} color
+ * @private
+ */
 Grid.prototype._renderPoint = function(context, x, y, color) {
 	context.save();
 	if (this._grid[x][y] === 0) {
@@ -70,14 +95,35 @@ Grid.prototype._renderPoint = function(context, x, y, color) {
 	context.restore();
 };
 
+/**
+ * Returns this grid's array
+ *
+ * @returns {Array}
+ */
 Grid.prototype.toArray = function() {
 	return this._grid;
 };
 
+/**
+ * Creates canvas point instance based on relative grid coordinates
+ *
+ * @param {Number} x
+ * @param {Number} y
+ * @returns {Point}
+ */
 Grid.prototype.getPointObject = function(x, y) {
 	return new Point(this._offset.x + x * this._segment, this._offset.y + y * this._segment);
 };
 
+/**
+ * Gets grid node with given relative coordinates
+ *
+ * @param {Object} grid
+ * @param {Number} x
+ * @param {Number} y
+ * @param {Boolean} clear
+ * @returns {*}
+ */
 Grid.prototype.getPoint = function(grid, x, y, clear) {
 	x = Math.round((x - this._offset.x) / this._segment);
 	y = Math.round((y - this._offset.y) / this._segment);

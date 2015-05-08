@@ -12,15 +12,19 @@ var Point = function(x, y) {
 };
 
 /**
- * @param {Point} p
- * @returns {boolean}
+ * Is given point equal to this point?
+ *
+ * @param {Point} p - other point
+ * @returns {Boolean}
  */
 Point.prototype.equals = function(p) {
 	return this.x === p.x && this.y === p.y;
 };
 
 /**
- * @param {Point} p
+ * Adds points together, returns new Point instance
+ *
+ * @param {Point} p - other point
  * @returns {Point}
  */
 Point.prototype.plus = function(p) {
@@ -28,7 +32,9 @@ Point.prototype.plus = function(p) {
 };
 
 /**
- * @param {Point} p
+ * Subtracts points, returns new Point instance
+ *
+ * @param {Point} p - other point
  * @returns {Point}
  */
 Point.prototype.minus = function(p) {
@@ -38,7 +44,7 @@ Point.prototype.minus = function(p) {
 /**
  * Calculates the cross product of the two points.
  *
- * @param {Point} p
+ * @param {Point} p - other points
  * @returns {Number} cross product
  */
 Point.prototype.dot = function(p) {
@@ -48,7 +54,7 @@ Point.prototype.dot = function(p) {
 /**
  * Computes distance between to points in euclidean space
  *
- * @param {Point} p
+ * @param {Point} p - other point
  * @returns {Number}
  */
 Point.prototype.dist = function(p) {
@@ -73,7 +79,7 @@ Point.angle = function(a, b, c) {
 };
 
 /**
- * Line representation in 2D space
+ * Line segment representation in 2D space
  *
  * @param {Point} from
  * @param {Point} to
@@ -86,7 +92,7 @@ var Line = function(from, to) {
 };
 
 /**
- * Computes line length
+ * Computes line segment length
  *
  * @returns {Number}
  */
@@ -95,7 +101,7 @@ Line.prototype.length = function() {
 };
 
 /**
- * Do lines intersects with each other?
+ * Do line segments intersect with each other?
  *
  * @param {Line} line
  * @private

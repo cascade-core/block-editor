@@ -1,5 +1,5 @@
 /**
- * palette class
+ * Palette of blocks
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
  *
@@ -16,7 +16,7 @@ var Palette = function(editor, blocks) {
 };
 
 /**
- * Creates palette filter
+ * Creates palette filter <select> element
  *
  * @returns {jQuery}
  * @private
