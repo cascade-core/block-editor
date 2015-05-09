@@ -15,6 +15,8 @@ var BlockEditor = function(el, options) {
 	/** @property {string} defaults default options */
 	this.defaults = {
 		viewOnly: false,
+		scrollLeft: 0, // px to scroll from left - used for view only mode
+		scrollTop: 0, // px to scroll from top - used for view only mode
 		paletteData: '/admin/block-editor-palette.json',
 		historyLimit: 1000, // count of remembered changes,
 		splineTension: 0.3, // used to render connections, more means higher elasticity of connections
@@ -32,7 +34,7 @@ var BlockEditor = function(el, options) {
 	this.storage = new Storage(localStorage, BlockEditor._namespace);
 
 	// options stored in data attribute
-	var meta = this.$el.data(this._namespace + '-opts');
+	var meta = this.$el.data(BlockEditor._namespace + '-opts');
 
 	// merge all options together
 	this.options = $.extend(this.defaults, options, meta);
@@ -63,6 +65,10 @@ BlockEditor.prototype._createContainer = function() {
 		height: this.$el.height()
 	});
 	this.$el.after(this.$container).hide();
+
+	if (this.options.viewOnly) {
+		this.$container.addClass(BlockEditor._namespace + '-view-only');
+	}
 };
 
 /**
@@ -97,9 +103,11 @@ BlockEditor.prototype._init = function() {
 	var palette = this.storage.get('palette', true);
 	if (palette) {
 		callback(palette); // load instantly from cache
-		setTimeout(function() {
-			self.palette.toolbar.$reload.click(); // and trigger reloading immediately
-		}, 100);
+		if (!this.options.viewOnly) {
+			setTimeout(function() {
+				self.palette.toolbar.$reload.click(); // and trigger reloading immediately
+			}, 100);
+		}
 	} else {
 		$.get(this.options.paletteData).done(callback);
 	}
@@ -148,8 +156,14 @@ BlockEditor.prototype.render = function() {
 	}
 
 	// scroll to top left corner of diagram bounding box
-	var top = this.box.minY - this.options.canvasOffset + this.canvas.options.canvasExtraWidth;
-	var left = this.box.minX - this.options.canvasOffset + this.canvas.options.canvasExtraHeight;
+	var top = this.box.minY
+		- this.options.canvasOffset
+		+ this.canvas.options.canvasExtraWidth
+		- this.canvas.options.scrollTop;
+	var left = this.box.minX
+		- this.options.canvasOffset
+		+ this.canvas.options.canvasExtraHeight
+		- this.canvas.options.scrollLeft;
 	this.canvas.$container.scrollTop(top);
 	this.canvas.$container.scrollLeft(left);
 };

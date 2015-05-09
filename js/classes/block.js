@@ -487,9 +487,11 @@ Block.prototype._create = function() {
 	// create table container
 	this.$container = $('<table class="' + BlockEditor._namespace + '-block">');
 
-	// make it draggable
-	this.$container.on('click', this._onClick.bind(this));
-	this.$container.on('mousedown', this._onDragStart.bind(this));
+	if (!this.editor.options.viewOnly) {
+		// make it draggable
+		this.$container.on('click', this._onClick.bind(this));
+		this.$container.on('mousedown', this._onDragStart.bind(this));
+	}
 
 	// header with block id and block type
 	var $header = this._createHeader();
@@ -529,31 +531,34 @@ Block.prototype._create = function() {
  */
 Block.prototype._createHeader = function() {
 	var $id = $('<div class="' + BlockEditor._namespace + '-block-id">');
-	$id.on('dblclick', this._changeId.bind(this));
 	var $type = $('<div class="' + BlockEditor._namespace + '-block-type">');
 	$type.text(this.type);
-	$type.on('dblclick', this._changeType.bind(this));
 
-	var $removeButton = $('<a href="#remove" class="' + BlockEditor._namespace + '-block-remove"><i class="fa fa-fw fa-trash"></i> &times;</a>');
-	$removeButton.on('click', this._remove.bind(this));
-	$removeButton.attr('title', 'Remove block');
-	if (this.editor.$el.data('doc_link')) {
-		var $docButton = $('<a class="' + BlockEditor._namespace + '-block-doc"><i class="fa fa-fw fa-list-alt"></i> o</a>');
-		$docButton.attr('href', this.editor.$el.data('doc_link').replace('{block}', this.type));
-		$docButton.attr('target', '_blank');
-		$docButton.attr('title', 'Block documentation');
-	} else if (!this.editor._missingDocLinkErrorPrinted) {
-		this.editor._missingDocLinkErrorPrinted = true;
-		console.error(_('data-doc_link parameter missing on textarea element!'));
-	}
-	if (this.editor.$el.data('edit_link')) {
-		var $editButton = $('<a href="#edit" class="' + BlockEditor._namespace + '-block-edit"><i class="fa fa-fw fa-pencil"></i> e</a>');
-		$editButton.attr('href', this.editor.$el.data('edit_link').replace('{block}', this.type));
-		$editButton.attr('target', '_blank');
-		$editButton.attr('title', 'Edit block in new window');
-	} else if (!this.editor._missingEditLinkErrorPrinted) {
-		this.editor._missingEditLinkErrorPrinted = true;
-		console.error(_('data-edit_link parameter missing on textarea element!'));
+	if (!this.editor.options.viewOnly) {
+		$id.on('dblclick', this._changeId.bind(this));
+		$type.on('dblclick', this._changeType.bind(this));
+
+		var $removeButton = $('<a href="#remove" class="' + BlockEditor._namespace + '-block-remove"><i class="fa fa-fw fa-trash"></i> &times;</a>');
+		$removeButton.on('click', this._remove.bind(this));
+		$removeButton.attr('title', 'Remove block');
+		if (this.editor.$el.data('doc_link')) {
+			var $docButton = $('<a class="' + BlockEditor._namespace + '-block-doc"><i class="fa fa-fw fa-list-alt"></i> o</a>');
+			$docButton.attr('href', this.editor.$el.data('doc_link').replace('{block}', this.type));
+			$docButton.attr('target', '_blank');
+			$docButton.attr('title', 'Block documentation');
+		} else if (!this.editor._missingDocLinkErrorPrinted) {
+			this.editor._missingDocLinkErrorPrinted = true;
+			console.error(_('data-doc_link parameter missing on textarea element!'));
+		}
+		if (this.editor.$el.data('edit_link')) {
+			var $editButton = $('<a href="#edit" class="' + BlockEditor._namespace + '-block-edit"><i class="fa fa-fw fa-pencil"></i> e</a>');
+			$editButton.attr('href', this.editor.$el.data('edit_link').replace('{block}', this.type));
+			$editButton.attr('target', '_blank');
+			$editButton.attr('title', 'Edit block in new window');
+		} else if (!this.editor._missingEditLinkErrorPrinted) {
+			this.editor._missingEditLinkErrorPrinted = true;
+			console.error(_('data-edit_link parameter missing on textarea element!'));
+		}
 	}
 
 	var $header = $('<th colspan="2" class="' + BlockEditor._namespace + '-block-header" />');
@@ -614,7 +619,7 @@ Block.prototype.addOutput = function (variable) {
  * @private
  */
 Block.prototype._toggleInputEditor = function(e) {
-	if (!this._moved) {
+	if (!this.editor.options.viewOnly && !this._moved) {
 		var selector = '.' + BlockEditor._namespace + '-block-input';
 		var editor = new Editor(this, this.editor, $(e.target).closest(selector).data('variable'));
 		editor.render();

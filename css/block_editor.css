@@ -25,12 +25,22 @@
 	background: #fff;
 	color: #000;
 	font-size: 10pt;
+	font-family: "DejaVu Sans", "Verdana", sans-serif;
+}
+
+.block-editor a {
+	text-decoration: underline;
+	color: #228;
+}
+
+.block-editor a:visited {
+	color: #336;
 }
 
 .block-editor canvas.block-editor-bg {
 	background: #fff;
-	background-image: repeating-linear-gradient(0deg, transparent, transparent 9px, #eef 9px, #eef 10px),
-	repeating-linear-gradient(90deg, transparent, transparent 9px, #eef 9px, #eef 10px);
+	background-image: repeating-linear-gradient( 0deg, transparent, transparent 9px, #eef 9px, #eef 10px),
+					  repeating-linear-gradient(90deg, transparent, transparent 9px, #eef 9px, #eef 10px);
 	background-size: 10px 10px;
 	background-position: 1px 0;
 }
@@ -42,6 +52,14 @@
 .block-editor-container {
 	position: relative;
 	overflow: scroll;
+}
+
+.block-editor-view-only .block-editor-container {
+	overflow: hidden;
+}
+
+.block-editor-view-only * {
+	cursor: default !important;
 }
 
 .block-editor-container-inner {
@@ -296,28 +314,28 @@
 	display: inline-block;
 }
 
-.block-editor-block-input.default {
+.block-editor .block-editor-block-input.default {
 	color: #999;
 }
 
-.block-editor-block-input.selecting,
-.block-editor-block-output.selecting {
+.block-editor .block-editor-block-input.selecting,
+.block-editor .block-editor-block-output.selecting {
 	color: #c60;
 }
 
-.block-editor-block-input.missing,
-.block-editor-block-output.missing {
+.block-editor .block-editor-block-input.missing,
+.block-editor .block-editor-block-output.missing {
 	color: #f00;
 	font-style: italic;
 }
 
-.block-editor-block-input.hover-invalid,
-.block-editor-block-output.hover-invalid {
+.block-editor .block-editor-block-input.hover-invalid,
+.block-editor .block-editor-block-output.hover-invalid {
 	color: #f00;
 }
 
-.block-editor-block-input.hover-valid,
-.block-editor-block-output.hover-valid {
+.block-editor .block-editor-block-input.hover-valid,
+.block-editor .block-editor-block-output.hover-valid {
 	color: #0c0;
 }
 

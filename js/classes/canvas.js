@@ -569,6 +569,9 @@ Canvas.prototype.redraw = function() {
 		this.$containerInner.find('svg rect').remove();
 		this.context = new C2S(this.width, this.height);
 	}
+	if (this.debug) {
+		return [t1 - t0, t2 - t1, t2 - t0]; // for speed testing
+	}
 };
 
 /**

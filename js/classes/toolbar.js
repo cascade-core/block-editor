@@ -66,7 +66,7 @@ Toolbar.prototype.render = function($container) {
 	this.$toolbar.append(this.$parent);
 
 	// palette refresh button
-	this.$reload = this._createButton('palette-reload', 'refresh', 'Reload palette data [Ctrl + Shift + R]');
+	this.$reload = this._createButton('palette-reload', 'refresh', 'Reload palette data [Ctrl + Shift + R]', true);
 	$(document).on('click', 'a.' + BlockEditor._namespace + '-palette-reload', this._reloadPalette.bind(this));
 	this.$toolbar.append(this.$reload);
 

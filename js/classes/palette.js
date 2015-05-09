@@ -45,6 +45,10 @@ Palette.prototype._createFilter = function() {
  * Renders palette
  */
 Palette.prototype.render = function() {
+	if (this.editor.options.viewOnly) {
+		return;
+	}
+
 	if (this.$container) {
 		this.$container.parent().remove();
 	}
