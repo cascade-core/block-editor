@@ -164,8 +164,10 @@ BlockEditor.prototype.render = function() {
 		- this.options.canvasOffset
 		+ this.canvas.options.canvasExtraHeight
 		- this.canvas.options.scrollLeft;
-	this.canvas.$container.scrollTop(top);
-	this.canvas.$container.scrollLeft(left);
+	setTimeout(function() {
+		this.canvas.$container.scrollTop(top);
+		this.canvas.$container.scrollLeft(left);
+	}.bind(this), 0);
 };
 
 /**
