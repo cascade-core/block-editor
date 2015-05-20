@@ -157,10 +157,12 @@
 	border-left: 1px solid #aaa;
 }
 
+.block-editor-container,
 .block-editor-block,
 .block-editor-toolbar,
 .block-editor-toolbar-right,
 .block-editor-variable-editor-title,
+.block-editor-palette-container,
 .block-editor-palette {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
