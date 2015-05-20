@@ -1,0 +1,1753 @@
+{
+	"admin/main": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "admin"
+	},
+	"admin/page/doxygen": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "admin"
+	},
+	"admin/page/version": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "admin"
+	},
+	"admin/proxy": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"config": null,
+			"path": null
+		},
+		"connections": {
+			"config": [
+				"config",
+				"admin"
+			],
+			"path": [
+				"router",
+				"path_tail"
+			]
+		},
+		"outputs": {
+			"main_menu": true,
+			"*": true,
+			"done": true
+		},
+		"plugin": "admin"
+	},
+	"admin/scan_doxygen_doc": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": [],
+		"connections": [],
+		"outputs": {
+			"menu": true,
+			"done": true
+		},
+		"plugin": "admin"
+	},
+	"admin_extras": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": ""
+	},
+	"article/accept": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"ref": null
+		},
+		"connections": [],
+		"outputs": {
+			"ref": true,
+			"result": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"article/create": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"ref": null
+		},
+		"connections": [],
+		"outputs": {
+			"ref": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"article/edit": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"ref": null
+		},
+		"connections": [],
+		"outputs": {
+			"ref": true,
+			"result": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"article/hide": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"ref": null
+		},
+		"connections": [],
+		"outputs": {
+			"ref": true,
+			"result": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"article/publish": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"ref": null
+		},
+		"connections": [],
+		"outputs": {
+			"ref": true,
+			"result": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"article/reject": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"ref": null
+		},
+		"connections": [],
+		"outputs": {
+			"ref": true,
+			"result": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"article/return": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"ref": null
+		},
+		"connections": [],
+		"outputs": {
+			"ref": true,
+			"result": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"article/submit": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"ref": null
+		},
+		"connections": [],
+		"outputs": {
+			"ref": true,
+			"result": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"article/withdraw": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"ref": null
+		},
+		"connections": [],
+		"outputs": {
+			"ref": true,
+			"result": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"block_editor/admin/block": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "block_editor"
+	},
+	"block_editor/admin/index": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "block_editor"
+	},
+	"block_editor/admin/palette": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "block_editor"
+	},
+	"block_editor/available_blocks": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": [],
+		"connections": [],
+		"outputs": {
+			"available_blocks": true,
+			"done": true
+		},
+		"plugin": "block_editor"
+	},
+	"block_editor/test": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"block": false,
+			"doc_link": "/admin/doc/block/{block}",
+			"edit_link": "/admin/block-editor/{block}",
+			"back_link": "/admin/block-editor",
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": {
+			"block": true,
+			"message": true,
+			"submitted": true,
+			"done": true
+		},
+		"plugin": "block_editor"
+	},
+	"core/config": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": [],
+		"connections": [],
+		"outputs": {
+			"done": true,
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/devel/doc/everything": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"link": null,
+			"heading_level": 2,
+			"require_description": true,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": {
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/devel/doc/index": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"link": null,
+			"writable_only": false,
+			"heading_level": 2,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": {
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/devel/doc/show": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"block": null,
+			"show_code": false,
+			"require_description": false,
+			"heading_level": 2,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": {
+			"block": []
+		},
+		"outputs": {
+			"title": true,
+			"desc": true,
+			"blocks": true,
+			"composition_slot": true,
+			"graphviz_cfg": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/devel/phpinfo": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": {
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/devel/preview": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"blocks": null,
+			"graphviz_cfg": null,
+			"graphviz_profile": "cascade",
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": {
+			"blocks": [],
+			"graphviz_cfg": [
+				"config",
+				"core.graphviz"
+			]
+		},
+		"outputs": {
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/devel/profiler_stats": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"filename": "var/profiler.stats",
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": {
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/devel/version": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"filename": "{DIR_ROOT}var/version.ini.php",
+			"format": "short",
+			"link": null,
+			"prefix": null,
+			"suffix": null,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": {
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/dummy": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/in/cookie": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": [],
+		"connections": [],
+		"outputs": {
+			"all": true,
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/in/env": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": [],
+		"connections": [],
+		"outputs": {
+			"all": true,
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/in/get": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": [],
+		"connections": [],
+		"outputs": {
+			"all": true,
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/in/path": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": [],
+		"connections": [],
+		"outputs": {
+			"last": true,
+			"depth": true,
+			"path": true,
+			"server": true,
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/in/post": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": [],
+		"connections": [],
+		"outputs": {
+			"all": true,
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/in/request": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": [],
+		"connections": [],
+		"outputs": {
+			"all": true,
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/in/server": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": [],
+		"connections": [],
+		"outputs": {
+			"all": true,
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/ini/cascade_loader": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"items": null
+		},
+		"connections": {
+			"items": []
+		},
+		"outputs": [],
+		"plugin": "core"
+	},
+	"core/ini/load": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"filename": null,
+			"name": null,
+			"process_sections": true,
+			"multi_output": false,
+			"scan_plugins": false
+		},
+		"connections": {
+			"filename": []
+		},
+		"outputs": {
+			"data": true,
+			"filename": true,
+			"error": true,
+			"done": true,
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/ini/proxy": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/ini/router": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"path": null,
+			"config": null,
+			"canonize_path": true
+		},
+		"connections": {
+			"config": []
+		},
+		"outputs": {
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/ini/router_invalidate_cache": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": [],
+		"connections": [],
+		"outputs": {
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/ini/router_links": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"config": null,
+			"flat_list": false,
+			"title_key": "title",
+			"title_fmt": "{title}",
+			"link_key": "link",
+			"link_fmt": "{ROUTE}",
+			"children_key": "children_key",
+			"enable_key": null
+		},
+		"connections": {
+			"config": []
+		},
+		"outputs": {
+			"links": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/logic/and": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"out": true,
+			"not": true
+		},
+		"plugin": "core"
+	},
+	"core/logic/or": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"out": true,
+			"not": true
+		},
+		"plugin": "core"
+	},
+	"core/out/cookie": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "core"
+	},
+	"core/out/header": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"level": 2,
+			"text": null,
+			"img_src": null,
+			"link": null,
+			"anchor": null,
+			"option": null,
+			"slot": "default",
+			"slot_weight": 50,
+			"*": null
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "core"
+	},
+	"core/out/menu": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"items": null,
+			"layout": "tree",
+			"active_uri": null,
+			"title_fmt": null,
+			"class": null,
+			"max_depth": 9223372036854775807,
+			"column_count": 4,
+			"active_only": false,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "core"
+	},
+	"core/out/message": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"type": null,
+			"is_error": null,
+			"is_success": null,
+			"is_warning": null,
+			"is_info": null,
+			"title": null,
+			"text": null,
+			"error_title": null,
+			"error_text": null,
+			"warning_title": null,
+			"warning_text": null,
+			"success_title": null,
+			"success_text": null,
+			"info_title": null,
+			"info_text": null,
+			"redirect_url": null,
+			"allow_redirect": true,
+			"quiet_redirect": false,
+			"http_status_code": null,
+			"http_status_message": null,
+			"hide": false,
+			"slot": "default",
+			"slot_weight": 20,
+			"*": null
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "core"
+	},
+	"core/out/message_error": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"title": null,
+			"text": null,
+			"http_status_code": 400,
+			"slot": "default",
+			"slot_weight": 20,
+			"*": null
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "core"
+	},
+	"core/out/message_queue": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"slot": "default",
+			"slot_weight": 20
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "core"
+	},
+	"core/out/message_simple": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"is_error": null,
+			"is_success": null,
+			"error_title": null,
+			"error_text": null,
+			"success_title": null,
+			"success_text": null,
+			"redirect_url": null,
+			"redirect_anchor": null,
+			"redirect_enabled": true,
+			"error_http_status_code": 400,
+			"slot": "default",
+			"slot_weight": 20,
+			"*": null
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "core"
+	},
+	"core/out/message_success": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"title": null,
+			"text": null,
+			"redirect_url": null,
+			"redirect_anchor": null,
+			"redirect_enabled": true,
+			"slot": "default",
+			"slot_weight": 20,
+			"*": null
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "core"
+	},
+	"core/out/multi_slot": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"slot": "default",
+			"slot_weight": 50,
+			"list": null
+		},
+		"connections": {
+			"list": []
+		},
+		"outputs": {
+			"*": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/out/output": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"template": null,
+			"data": false,
+			"*": null,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": {
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/out/page": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"css_link": null
+		},
+		"connections": [],
+		"outputs": {
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/out/page_options": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"title": null,
+			"title_fmt": null,
+			"type": null
+		},
+		"connections": [],
+		"outputs": {
+			"title": true,
+			"type": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/out/placeholder": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"label": "\u2022\u00a0\u2022\u00a0\u2022",
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": {
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/out/print_r": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"data": null,
+			"title": null,
+			"header_level": 2,
+			"pretty": false,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "core"
+	},
+	"core/out/raw": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"data": null,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "core"
+	},
+	"core/out/set_page_title": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"title": null,
+			"title_fallback": null,
+			"format": null
+		},
+		"connections": [],
+		"outputs": {
+			"title": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/out/set_type": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"type": null,
+			"type_fallback": null
+		},
+		"connections": [],
+		"outputs": {
+			"type": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/out/slot": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"slot": "default",
+			"slot_weight": 50,
+			"name": null,
+			"extra_class": null
+		},
+		"connections": [],
+		"outputs": {
+			"name": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/out/table": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"items": null,
+			"config": null,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": {
+			"items": [],
+			"config": []
+		},
+		"outputs": [],
+		"plugin": "core"
+	},
+	"core/out/text": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"text": null,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "core"
+	},
+	"core/page/doc": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/page/doc_everything": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/page/doc_show": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/page/error": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/page/hello": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/page/profiler": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/page/skeleton": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/prefix/merge": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"out": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/prefix/split": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"in": null
+		},
+		"connections": {
+			"in": []
+		},
+		"outputs": {
+			"*": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/raw/load": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"filename": null,
+			"name": null
+		},
+		"connections": {
+			"filename": []
+		},
+		"outputs": {
+			"data": true,
+			"filename": true,
+			"error": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/router": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"routes": null,
+			"protocol": null,
+			"host": null,
+			"path": null,
+			"*": null
+		},
+		"connections": {
+			"routes": [
+				"config",
+				"routes"
+			]
+		},
+		"outputs": {
+			"*": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/router_links": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"config": null,
+			"flat_list": false,
+			"title_key": "title",
+			"title_fmt": "{title}",
+			"link_key": "link",
+			"link_fmt": "{route}",
+			"children_key": "children_key",
+			"enable_key": "block"
+		},
+		"connections": [],
+		"outputs": {
+			"links": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/session/load": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"key": null
+		},
+		"connections": {
+			"key": []
+		},
+		"outputs": {
+			"key": true,
+			"value": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/session/store": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"key": null,
+			"value": null,
+			"unset": false
+		},
+		"connections": {
+			"key": []
+		},
+		"outputs": {
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/stream/split": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"iter": null,
+			"*": null
+		},
+		"connections": {
+			"iter": []
+		},
+		"outputs": {
+			"done": true,
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/stream/walk": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"array": null,
+			"key_key": false,
+			"done": false
+		},
+		"connections": {
+			"array": []
+		},
+		"outputs": {
+			"iter": true
+		},
+		"plugin": "core"
+	},
+	"core/value/apply": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"function": null,
+			"*": null
+		},
+		"connections": {
+			"function": []
+		},
+		"outputs": {
+			"done": true,
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/value/block_loader": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"id": null,
+			"block": null,
+			"block_fmt": null,
+			"connections": null,
+			"output_forward": "done"
+		},
+		"connections": {
+			"block": []
+		},
+		"outputs": {
+			"*": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/value/cascade_loader": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null,
+			"block_fmt": null,
+			"output_forward": "done"
+		},
+		"connections": [],
+		"outputs": {
+			"*": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/value/combine": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"out": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/value/copy": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"done": true,
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/value/merge": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"out": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"core/value/split": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"in": null,
+			"keys": null
+		},
+		"connections": [],
+		"outputs": {
+			"done": true,
+			"*": true
+		},
+		"plugin": "core"
+	},
+	"core/value/template": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"escaping_fn": null,
+			"*": ""
+		},
+		"connections": [],
+		"outputs": {
+			"*": true,
+			"done": true
+		},
+		"plugin": "core"
+	},
+	"duf/admin/sandbox": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "duf"
+	},
+	"duf/form": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"form_def": [],
+			"action_url": "",
+			"target_form_id": null,
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"form": true,
+			"submitted": true,
+			"done": true,
+			"*": true
+		},
+		"plugin": "duf"
+	},
+	"duf/show": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"form": [],
+			"slot": "default",
+			"slot_weight": 50,
+			"*": null
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "duf"
+	},
+	"duf/show_button": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"link": null,
+			"label": null,
+			"target_form_id": null,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "duf"
+	},
+	"duf/thumbnail": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"filename": null,
+			"width": 512,
+			"height": 512,
+			"resize_mode": "fit",
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"thumbnail_file": true,
+			"done": true
+		},
+		"plugin": "duf"
+	},
+	"duf/view": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"form_def": [],
+			"class": null,
+			"slot": "default",
+			"slot_weight": 50,
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"done": true
+		},
+		"plugin": "duf"
+	},
+	"git/example/version": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "git"
+	},
+	"git/version": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"filename": "{DIR_ROOT}var/version.ini.php",
+			"format": "short",
+			"short_check": false,
+			"link": null,
+			"prefix": null,
+			"suffix": null,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": {
+			"done": true
+		},
+		"plugin": "git"
+	},
+	"item/create": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"item": []
+		},
+		"connections": [],
+		"outputs": {
+			"id": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"item/delete": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"id": []
+		},
+		"connections": [],
+		"outputs": {
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"item/edit": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"id": [],
+			"item": []
+		},
+		"connections": [],
+		"outputs": {
+			"id": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"page/doxygen_links": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": ""
+	},
+	"page/error": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": ""
+	},
+	"page/hello": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": ""
+	},
+	"page/sandbox": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": ""
+	},
+	"skeleton": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": ""
+	},
+	"smalldb/admin/doc_index": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "smalldb"
+	},
+	"smalldb/admin/doc_show": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "smalldb"
+	},
+	"smalldb/build_types_menu": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"link": "/admin/doc/smalldb/{type}"
+		},
+		"connections": [],
+		"outputs": {
+			"items": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"smalldb/describe_machine": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"type": null
+		},
+		"connections": {
+			"type": []
+		},
+		"outputs": {
+			"type": true,
+			"desc": true,
+			"raw_def": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"smalldb/entity_menu": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": [],
+		"plugin": "smalldb"
+	},
+	"smalldb/heading": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"ref": null,
+			"action": null,
+			"level": 2,
+			"anchor": null,
+			"slot": "default",
+			"slot_weight": 10
+		},
+		"connections": [],
+		"outputs": {
+			"title": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"smalldb/listing": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"filters": null,
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"list": true,
+			"properties": true,
+			"filters": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"smalldb/load_ref": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"ref": null,
+			"preload": true
+		},
+		"connections": [],
+		"outputs": {
+			"ref": true,
+			"state": true,
+			"properties": true,
+			"machine": true,
+			"machine_type": true,
+			"actions": true,
+			"*": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"smalldb/raw_api": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"id": null
+		},
+		"connections": [],
+		"outputs": {
+			"result": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"smalldb/router_factory": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"postproc": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"smalldb/session_machine": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": [],
+		"connections": [],
+		"outputs": {
+			"ref": true,
+			"state": true,
+			"properties": true,
+			"*": true,
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"smalldb/show_diagram": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"machine_type": null,
+			"gv_config": null,
+			"gv_profile": "smalldb",
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": {
+			"machine_type": [],
+			"gv_config": [
+				"config",
+				"core.graphviz"
+			]
+		},
+		"outputs": {
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"smalldb/show_properties": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"desc": null,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": {
+			"desc": []
+		},
+		"outputs": {
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"smalldb/show_table": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"list": null,
+			"properties": null,
+			"slot": "default",
+			"slot_weight": 50
+		},
+		"connections": [],
+		"outputs": {
+			"done": true
+		},
+		"plugin": "smalldb"
+	},
+	"smalldb_editor/admin/load_machine_description": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"machine_type": null
+		},
+		"connections": [],
+		"outputs": {
+			"machine_description": true,
+			"done": true
+		},
+		"plugin": "smalldb_editor"
+	},
+	"smalldb_editor/admin/sandbox": {
+		"block": "Cascade\\Core\\Block",
+		"force_exec": false,
+		"inputs": {
+			"*": null
+		},
+		"connections": [],
+		"outputs": {
+			"*": true
+		},
+		"plugin": "smalldb_editor"
+	}
+}

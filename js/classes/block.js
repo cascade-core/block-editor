@@ -177,15 +177,15 @@ Block.prototype.addConnection = function(source, target) {
 };
 
 /**
- * Drag start handler - used on mousedown event
- * when CTRL is pressed, creates new connections
+ * Drag start handler - used on mousedown event,
+ * when CTRL is pressed, moves block on canvas, otherwise creates new connections
  *
  * @param {MouseEvent} e - Event
  * @private
  */
 Block.prototype._onDragStart = function(e) {
 	var $target = $(e.target);
-	if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
+	if ($(e.target).hasClass(BlockEditor._namespace + '-block-output')) {
 		$target.addClass('selecting');
 		$('body').on({
 			'mousemove.block-editor': $.proxy(function(e) {
@@ -195,7 +195,7 @@ Block.prototype._onDragStart = function(e) {
 				this._onDragEndFromOutput.call(this, e, $target);
 			}, this)
 		});
-	} else if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(BlockEditor._namespace + '-block-input')) {
+	} else if ($(e.target).hasClass(BlockEditor._namespace + '-block-input')) {
 		$target.addClass('selecting');
 		$('body').on({
 			'mousemove.block-editor': $.proxy(function(e) {
@@ -207,7 +207,7 @@ Block.prototype._onDragStart = function(e) {
 				return false;
 			}, this)
 		});
-	} else {
+	} else if ($(e.target).closest('.' + BlockEditor._namespace + '-block-header')[0]) {
 		var zoom = this.canvas.getZoom();
 		this._cursor = {
 			x: e.clientX / zoom - this.position().left,
@@ -224,7 +224,7 @@ Block.prototype._onDragStart = function(e) {
 };
 
 /**
- * Drag over handler - used on mousemove event
+ * Drag over handler - used on mousemove event,
  * renders connection from output of source block to current mouse position
  *
  * @param {MouseEvent} e - Event
@@ -264,7 +264,7 @@ Block.prototype._onDragOverFromOutput = function(e, $target) {
 };
 
 /**
- * Drag end handler - used on mouseup event
+ * Drag end handler - used on mouseup event,
  * creates connection from output of source block to target
  *
  * @param {MouseEvent} e - Event
@@ -289,7 +289,7 @@ Block.prototype._onDragEndFromOutput = function(e, $target) {
 };
 
 /**
- * Drag over handler - used on mousemove event
+ * Drag over handler - used on mousemove event,
  * renders connection from output of source block to current mouse position
  *
  * @param {MouseEvent} e - Event
@@ -333,7 +333,7 @@ Block.prototype._onDragOverFromInput = function(e, $target) {
 };
 
 /**
- * Drag end handler - used on mouseup event
+ * Drag end handler - used on mouseup event,
  * creates connection from output of source block
  *
  * @param {MouseEvent} e - Event
@@ -357,7 +357,7 @@ Block.prototype._onDragEndFromInput = function(e, $target) {
 };
 
 /**
- * Drag over handler - used on mousemove event
+ * Drag over handler - used on mousemove event,
  * moves block over canvas
  *
  * @param {MouseEvent} e - Event
@@ -390,7 +390,7 @@ Block.prototype._onDragOver = function(e) {
 };
 
 /**
- * Drag end handler - used on mouseup event
+ * Drag end handler - used on mouseup event,
  * saves new block position
  *
  * @param {MouseEvent} e - Event
@@ -480,15 +480,18 @@ Block.prototype.deactivate = function() {
 
 /**
  * Creates HTML container for current block
+ *
  * @private
  */
 Block.prototype._create = function() {
 	// create table container
 	this.$container = $('<table class="' + BlockEditor._namespace + '-block">');
 
-	// make it draggable
-	this.$container.on('click', this._onClick.bind(this));
-	this.$container.on('mousedown', this._onDragStart.bind(this));
+	if (!this.editor.options.viewOnly) {
+		// make it draggable
+		this.$container.on('click', this._onClick.bind(this));
+		this.$container.on('mousedown', this._onDragStart.bind(this));
+	}
 
 	// header with block id and block type
 	var $header = this._createHeader();
@@ -528,31 +531,34 @@ Block.prototype._create = function() {
  */
 Block.prototype._createHeader = function() {
 	var $id = $('<div class="' + BlockEditor._namespace + '-block-id">');
-	$id.on('dblclick', this._changeId.bind(this));
 	var $type = $('<div class="' + BlockEditor._namespace + '-block-type">');
 	$type.text(this.type);
-	$type.on('dblclick', this._changeType.bind(this));
 
-	var $removeButton = $('<a href="#remove" class="' + BlockEditor._namespace + '-block-remove"><i class="fa fa-fw fa-trash"></i> ×</a>');
-	$removeButton.on('click', this._remove.bind(this));
-	$removeButton.attr('title', 'Remove block');
-	if (this.editor.$el.data('doc_link')) {
-		var $docButton = $('<a class="' + BlockEditor._namespace + '-block-doc"><i class="fa fa-fw fa-list-alt"></i> o</a>');
-		$docButton.attr('href', this.editor.$el.data('doc_link').replace('{block}', this.type));
-		$docButton.attr('target', '_blank');
-		$docButton.attr('title', 'Block documentation');
-	} else if (!this.editor._missingDocLinkErrorPrinted) {
-		this.editor._missingDocLinkErrorPrinted = true;
-		console.error(_('data-doc_link parameter missing on textarea element!'));
-	}
-	if (this.editor.$el.data('edit_link')) {
-		var $editButton = $('<a href="#edit" class="' + BlockEditor._namespace + '-block-edit"><i class="fa fa-fw fa-pencil"></i> e</a>');
-		$editButton.attr('href', this.editor.$el.data('edit_link').replace('{block}', this.type));
-		$editButton.attr('target', '_blank');
-		$editButton.attr('title', 'Edit block in new window');
-	} else if (!this.editor._missingEditLinkErrorPrinted) {
-		this.editor._missingEditLinkErrorPrinted = true;
-		console.error(_('data-edit_link parameter missing on textarea element!'));
+	if (!this.editor.options.viewOnly) {
+		$id.on('dblclick', this._changeId.bind(this));
+		$type.on('dblclick', this._changeType.bind(this));
+
+		var $removeButton = $('<a href="#remove" class="' + BlockEditor._namespace + '-block-remove"><i class="fa fa-fw fa-trash"></i> &times;</a>');
+		$removeButton.on('click', this._remove.bind(this));
+		$removeButton.attr('title', 'Remove block');
+		if (this.editor.$el.data('doc_link')) {
+			var $docButton = $('<a class="' + BlockEditor._namespace + '-block-doc"><i class="fa fa-fw fa-list-alt"></i> o</a>');
+			$docButton.attr('href', this.editor.$el.data('doc_link').replace('{block}', this.type));
+			$docButton.attr('target', '_blank');
+			$docButton.attr('title', 'Block documentation');
+		} else if (!this.editor._missingDocLinkErrorPrinted) {
+			this.editor._missingDocLinkErrorPrinted = true;
+			console.error(_('data-doc_link parameter missing on textarea element!'));
+		}
+		if (this.editor.$el.data('edit_link')) {
+			var $editButton = $('<a href="#edit" class="' + BlockEditor._namespace + '-block-edit"><i class="fa fa-fw fa-pencil"></i> e</a>');
+			$editButton.attr('href', this.editor.$el.data('edit_link').replace('{block}', this.type));
+			$editButton.attr('target', '_blank');
+			$editButton.attr('title', 'Edit block in new window');
+		} else if (!this.editor._missingEditLinkErrorPrinted) {
+			this.editor._missingEditLinkErrorPrinted = true;
+			console.error(_('data-edit_link parameter missing on textarea element!'));
+		}
 	}
 
 	var $header = $('<th colspan="2" class="' + BlockEditor._namespace + '-block-header" />');
@@ -566,7 +572,7 @@ Block.prototype._createHeader = function() {
 };
 
 /**
- * Adds input variable
+ * Adds input variable to this block
  *
  * @param {string} variable
  */
@@ -588,7 +594,7 @@ Block.prototype.addInput = function(variable) {
 };
 
 /**
- * Adds output variable
+ * Adds output variable to this block
  *
  * @param {string} variable
  */
@@ -605,7 +611,7 @@ Block.prototype.addOutput = function (variable) {
 };
 
 /**
- * Toggles input variable editor
+ * Toggles input variable editor,
  * used as on click handler for input variables
  *
  * @param {MouseEvent} e - Event
@@ -613,7 +619,7 @@ Block.prototype.addOutput = function (variable) {
  * @private
  */
 Block.prototype._toggleInputEditor = function(e) {
-	if (!this._moved) {
+	if (!this.editor.options.viewOnly && !this._moved) {
 		var selector = '.' + BlockEditor._namespace + '-block-input';
 		var editor = new Editor(this, this.editor, $(e.target).closest(selector).data('variable'));
 		editor.render();
@@ -673,7 +679,7 @@ Block.prototype.getNewAggregationFunc = function() {
 };
 
 /**
- * Changes current block id
+ * Changes current block id,
  * used as on click handler
  *
  * @returns {boolean}
@@ -694,7 +700,7 @@ Block.prototype._changeId = function() {
 };
 
 /**
- * Changes current block type
+ * Changes current block type,
  * used as on click handler
  *
  * @returns {boolean}
@@ -732,7 +738,7 @@ Block.prototype._changeType = function() {
 };
 
 /**
- * Removes current block
+ * Removes current block,
  * used as on click handler
  *
  * @returns {boolean}

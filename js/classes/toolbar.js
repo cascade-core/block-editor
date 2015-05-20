@@ -17,10 +17,35 @@ var Toolbar = function(editor, palette) {
 };
 
 /**
+ * Creates button element
+ *
+ * @param {String} name
+ * @param {String} icon
+ * @param {String} title
+ * @param {Boolean} [enable=false]
+ * @param {String} [letter]
+ * @returns {jQuery}
+ * @private
+ */
+Toolbar.prototype._createButton = function (name, icon, title, enabled, letter) {
+	var $btn = $('<a>');
+	var className = BlockEditor._namespace + '-' + name;
+	letter = letter || name.charAt(0).toUpperCase();
+	$btn.html('<i class="fa fa-fw fa-' + icon + '"></i> ' + letter);
+	$btn.attr('title', title);
+	$btn.attr('href', '#' + name);
+	$btn.addClass(className);
+	if (!enabled) {
+		$btn.addClass('disabled')
+	}
+	return $btn;
+};
+
+/**
  * Renders toolbar
  *
- * @param {jQuery} $container
- * @returns {jQuery}
+ * @param {jQuery} $container - where to append toolbar
+ * @returns {Array} - left and right toolbar jQuery objects
  */
 Toolbar.prototype.render = function($container) {
 	if (this._rendered) {
@@ -33,121 +58,62 @@ Toolbar.prototype.render = function($container) {
 	this.$toolbar = $('<div>');
 	this.$toolbar.addClass(BlockEditor._namespace + '-toolbar');
 
-	// fullscreen button
 	var $divider = $('<div>').addClass(BlockEditor._namespace + '-toolbar-divider');
-	this.$fullscreen = $('<a>');
-	var className = BlockEditor._namespace + '-fullscreen-toggle';
-	this.$fullscreen.html('<i class="fa fa-fw fa-arrows-alt"></i> F');
-	this.$fullscreen.attr('title', 'Toggle fullscreen [Ctrl + Shift + F]');
-	this.$fullscreen.attr('href', '#fullscreen');
-	this.$fullscreen.addClass(className);
-	$(document).on('click', 'a.' + className, this._toggleFullScreen.bind(this));
-	this.$toolbar.append(this.$fullscreen);
 
 	// parent block properties button
-	this.$parent = $('<a>');
-	className = BlockEditor._namespace + '-parent-properties-toggle';
-	this.$parent.html('<i class="fa fa-fw fa-cogs"></i> P');
-	this.$parent.attr('title', 'Edit parent block properties [Ctrl + Shift + P]');
-	this.$parent.attr('href', '#parent-properties');
-	this.$parent.addClass(className);
-	$(document).on('click', 'a.' + className, this._toggleParentProperties.bind(this));
+	this.$parent = this._createButton('parent-properties-toggle', 'cogs', 'Edit parent block properties [Ctrl + Shift + P]', true);
+	$(document).on('click', 'a.' + BlockEditor._namespace + '-parent-properties-toggle', this._toggleParentProperties.bind(this));
 	this.$toolbar.append(this.$parent);
 
 	// palette refresh button
-	this.$reload = $('<a>');
-	className = BlockEditor._namespace + '-palette-reload';
-	this.$reload.html('<i class="fa fa-fw fa-refresh"></i> R');
-	this.$reload.attr('title', 'Reload palette data [Ctrl + Shift + R]');
-	this.$reload.attr('href', '#reload-palette');
-	this.$reload.addClass(className);
-	$(document).on('click', 'a.' + className, this._reloadPalette.bind(this));
+	this.$reload = this._createButton('palette-reload', 'refresh', 'Reload palette data [Ctrl + Shift + R]', true);
+	$(document).on('click', 'a.' + BlockEditor._namespace + '-palette-reload', this._reloadPalette.bind(this));
 	this.$toolbar.append(this.$reload);
 
 	this.$toolbar.append($divider.clone());
 
 	// undo button
-	this.$undo = $('<a>').addClass('disabled');
-	className = BlockEditor._namespace + '-undo';
-	this.$undo.html('<i class="fa fa-fw fa-undo"></i> &larr;');
-	this.$undo.attr('title', 'Redo [Ctrl + Z]');
-	this.$undo.attr('href', '#undo');
-	this.$undo.addClass(className);
-	$(document).on('click', 'a.' + className, this._undo.bind(this));
+	this.$undo = this._createButton('undo', 'undo', 'Undo [Ctrl + Z]', false, '&larr;');
+	$(document).on('click', 'a.' + BlockEditor._namespace + '-undo', this._undo.bind(this));
 	this.$toolbar.append(this.$undo);
 
 	// redo button
-	this.$redo = $('<a>').addClass('disabled');
-	className = BlockEditor._namespace + '-redo';
-	this.$redo.html('<i class="fa fa-fw fa-repeat"></i> &rarr;');
-	this.$redo.attr('title', 'Undo [Ctrl + Shift + Z]');
-	this.$redo.attr('href', '#redo');
-	this.$redo.addClass(className);
-	$(document).on('click', 'a.' + className, this._redo.bind(this));
+	this.$redo = this._createButton('redo', 'repeat', 'Redo [Ctrl + Shift + Z]', false, '&rarr;');
+	$(document).on('click', 'a.' + BlockEditor._namespace + '-redo', this._redo.bind(this));
 	this.$toolbar.append(this.$redo);
 
 	this.$toolbar.append($divider.clone());
 
 	// copy button
-	this.$copy = $('<a>').addClass('disabled');
-	className = BlockEditor._namespace + '-copy';
-	this.$copy.html('<i class="fa fa-fw fa-copy"></i> C');
-	this.$copy.attr('title', 'Copy active block [Ctrl + C]');
-	this.$copy.attr('href', '#copy');
-	this.$copy.addClass(className);
-	$(document).on('click', 'a.' + className, this._copy.bind(this));
+	this.$copy = this._createButton('copy', 'copy', 'Copy active block [Ctrl + C]');
+	$(document).on('click', 'a.' + BlockEditor._namespace + '-copy', this._copy.bind(this));
 	this.$toolbar.append(this.$copy);
 
 	// cut button
-	this.$cut = $('<a>').addClass('disabled');
-	className = BlockEditor._namespace + '-cut';
-	this.$cut.html('<i class="fa fa-fw fa-cut"></i> X');
-	this.$cut.attr('title', 'Cut active block [Ctrl + X]');
-	this.$cut.attr('href', '#cut');
-	this.$cut.addClass(className);
-	$(document).on('click', 'a.' + className, this._cut.bind(this));
+	this.$cut = this._createButton('cut', 'cut', 'Cut active block [Ctrl + X]', false, 'X');
+	$(document).on('click', 'a.' + BlockEditor._namespace + '-cut', this._cut.bind(this));
 	this.$toolbar.append(this.$cut);
 
 	// paste button
-	this.$paste = $('<a>').addClass('disabled');
-	className = BlockEditor._namespace + '-paste';
-	this.$paste.html('<i class="fa fa-fw fa-paste"></i> P');
-	this.$paste.attr('title', 'Paste block [Ctrl + V]');
-	this.$paste.attr('href', '#paste');
-	this.$paste.addClass(className);
-	$(document).on('click', 'a.' + className, this._paste.bind(this));
+	this.$paste = this._createButton('paste', 'paste', 'Paste block [Ctrl + V]', false, 'V');
+	$(document).on('click', 'a.' + BlockEditor._namespace + '-paste', this._paste.bind(this));
 	this.$toolbar.append(this.$paste);
 
 	this.$toolbar.append($divider.clone());
 
 	// zoom in button
-	this.$zoomIn = $('<a>').addClass('disabled');
-	className = BlockEditor._namespace + '-zoom-in';
-	this.$zoomIn.html('<i class="fa fa-fw fa-search-plus"></i> +');
-	this.$zoomIn.attr('title', 'Zoom in [+ / =]');
-	this.$zoomIn.attr('href', '#zoom-in');
-	this.$zoomIn.addClass(className);
-	$(document).on('click', 'a.' + className, this._zoomIn.bind(this));
+	this.$zoomIn = this._createButton('zoom-in', 'search-plus', 'Zoom in [+ / =]', false, '+');
+	$(document).on('click', 'a.' + BlockEditor._namespace + '-zoom-in', this._zoomIn.bind(this));
 	this.$toolbar.append(this.$zoomIn);
 
 	// zoom out button
-	this.$zoomOut = $('<a>').addClass('disabled');
-	className = BlockEditor._namespace + '-zoom-out';
-	this.$zoomOut.html('<i class="fa fa-fw fa-search-minus"></i> -');
-	this.$zoomOut.attr('title', 'Zoom out [-]');
-	this.$zoomOut.attr('href', '#zoom-out');
-	this.$zoomOut.addClass(className);
-	$(document).on('click', 'a.' + className, this._zoomOut.bind(this));
+	this.$zoomOut = this._createButton('zoom-out', 'search-minus', 'Zoom out [-]', false, '-');
+	$(document).on('click', 'a.' + BlockEditor._namespace + '-zoom-out', this._zoomOut.bind(this));
 	this.$toolbar.append(this.$zoomOut);
 
 	// zoom reset button
-	this.$zoomReset = $('<a>').addClass('disabled');
-	className = BlockEditor._namespace + '-zoom-reset';
-	this.$zoomReset.html('<i class="fa fa-fw fa-desktop"></i> 0');
-	this.$zoomReset.attr('title', 'Reset zoom [0]');
-	this.$zoomReset.attr('href', '#zoom-reset');
-	this.$zoomReset.addClass(className);
-	$(document).on('click', 'a.' + className, this._zoomReset.bind(this));
+	this.$zoomReset = this._createButton('zoom-reset', 'desktop', 'Reset zoom [0]', false, '0');
+	$(document).on('click', 'a.' + BlockEditor._namespace + '-zoom-reset', this._zoomReset.bind(this));
 	this.$toolbar.append(this.$zoomReset);
 
 	$(document).off('keydown.toolbar').on('keydown.toolbar', this._keydown.bind(this));
@@ -157,9 +123,26 @@ Toolbar.prototype.render = function($container) {
 			   .on('click.disable-selection', this.canvas.$container, this.disableSelection.bind(this));
 
 	this.$container.append(this.$toolbar);
+
+	// right toolbar
+	this.$right = $('<div>');
+	this.$right.addClass(BlockEditor._namespace + '-toolbar-right');
+
+	// help button
+	this.$help = this._createButton('help', 'lightbulb-o', 'Help [Ctrl + H]', true);
+	$(document).on('click', 'a.' + BlockEditor._namespace + '-help', this._toggleHelp.bind(this));
+	this.$right.append(this.$help);
+
+	// fullscreen button
+	this.$fullscreen = this._createButton('fullscreen-toggle', 'arrows-alt', 'Toggle fullscreen [Ctrl + Shift + F]', true);
+	$(document).on('click', 'a.' + BlockEditor._namespace + '-fullscreen-toggle', this._toggleFullScreen.bind(this));
+	this.$right.append(this.$fullscreen);
+
+	this.$container.append(this.$toolbar);
+	this.$container.append(this.$right);
 	this.updateDisabledClasses();
 
-	return this.$toolbar;
+	return [this.$toolbar, this.$right];
 };
 
 /**
@@ -219,6 +202,10 @@ Toolbar.prototype._keydown = function(e) {
 		for (var id in this.editor.blocks) {
 			this.editor.blocks[id].activate();
 		}
+		return false;
+	} else if ((e.metaKey || e.ctrlKey) && code === 72) { // ctrl + c => copy
+		this.$help.addClass('hover');
+		this._toggleHelp();
 		return false;
 	} else if ((e.metaKey || e.ctrlKey) && code === 67) { // ctrl + c => copy
 		this.$copy.addClass('hover');
@@ -379,19 +366,20 @@ Toolbar.prototype._redo = function() {
  * @private
  */
 Toolbar.prototype._copy = function() {
-	var ret = {};
+	var ret = {}, found = false;
 	var box = this.editor.getBoundingBox(true);
 	var midX = box.minX + (box.maxX - box.minX) / 2;
 	var midY = box.minY + (box.maxY - box.minY) / 2;
 	for (var i in this.editor.blocks) {
 		var b = this.editor.blocks[i];
 		if (b.isActive()) {
+			found = true;
 			ret[b.id] = b.serialize();
 			ret[b.id].x -= midX + this.canvas.options.canvasExtraWidth;
 			ret[b.id].y -= midY + this.canvas.options.canvasExtraHeight;
 		}
 	}
-	if (ret) {
+	if (found) {
 		this.editor.storage.set('clipboard', ret, true);
 		this.updateDisabledClasses();
 	}
@@ -406,19 +394,20 @@ Toolbar.prototype._copy = function() {
  * @private
  */
 Toolbar.prototype._cut = function() {
-	var ret = {};
+	var ret = {}, found = false;
 	var box = this.editor.getBoundingBox(true);
 	var midX = box.minX + (box.maxX - box.minX) / 2;
 	var midY = box.minY + (box.maxY - box.minY) / 2;
 	for (var id in this.editor.blocks) {
 		var b = this.editor.blocks[id];
 		if (b.isActive()) {
+			found = true;
 			ret[b.id] = b.remove();
 			ret[b.id].x -= midX + this.canvas.options.canvasExtraWidth;
 			ret[b.id].y -= midY + this.canvas.options.canvasExtraHeight;
 		}
 	}
-	if (ret) {
+	if (found) {
 		this.editor.storage.set('clipboard', ret, true);
 		this.canvas.redraw();
 		this.updateDisabledClasses();
@@ -585,6 +574,7 @@ Toolbar.prototype._zoomOut = function() {
 	}
 	return false;
 };
+
 /**
  * Resets zoom
  *
@@ -592,5 +582,15 @@ Toolbar.prototype._zoomOut = function() {
  */
 Toolbar.prototype._zoomReset = function() {
 	this._zoomTo(1);
+	return false;
+};
+
+/**
+ * Toggles help modal
+ *
+ * @private
+ */
+Toolbar.prototype._toggleHelp = function() {
+	this.editor.toggleHelp();
 	return false;
 };

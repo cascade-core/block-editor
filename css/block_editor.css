@@ -16,13 +16,37 @@
  * limitations under the License.
  */
 
+
+
 .block-editor {
+	overflow: hidden;
 	position: relative;
 	border: 1px solid #aaa;
 	background: #fff;
 	color: #000;
 	width: 100%;
 	padding: 10em 0px 40% 0px;
+}
+
+.block-editor a {
+	text-decoration: underline;
+	color: #228;
+}
+
+.block-editor a:visited {
+	color: #336;
+}
+
+.block-editor canvas.block-editor-bg {
+	background: #fff;
+	background-image: repeating-linear-gradient( 0deg, transparent, transparent 9px, #eef 9px, #eef 10px),
+					  repeating-linear-gradient(90deg, transparent, transparent 9px, #eef 9px, #eef 10px);
+	background-size: 10px 10px;
+	background-position: 1px 0;
+}
+
+.block-editor svg {
+	position: absolute;
 }
 
 .block-editor-container {
@@ -34,27 +58,78 @@
 	overflow: scroll;
 }
 
+.block-editor-view-only .block-editor-container {
+	overflow: hidden;
+}
+
+.block-editor-view-only * {
+	cursor: default !important;
+}
+
 .block-editor-container-inner {
 	-webkit-transform-origin: top left;
 	-moz-transform-origin: top left;
 	transform-origin: top left;
 }
 
-.block-editor-palette {
-	display: none;
+.block-editor-palette-container {
 	position: absolute;
 	top: 24px;
-	left: 0;
+	left: -256px;
 	bottom: 0;
-	width: auto;
-	max-width: 300px;
-	background: #fff;
+	width: 276px;
+	overflow: hidden;
+
+	-webkit-transition: all 0.2s ease-in-out;
+	-moz-transition: all 0.2s ease-in-out;
+	-o-transition: all 0.2s ease-in-out;
+	transition: all 0.2s ease-in-out;
+}
+
+.block-editor-palette-container:hover {
+	left: 0;
+}
+
+.block-editor-palette {
+	height: 100%;
 	overflow: hidden;
 	overflow-y: scroll;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 256px;
+	background: #fff;
 	z-index: 100;
 	border: 1px solid #aaa;
 	border-left: 0;
 	padding-top: 28px;
+	margin-right: -20px;
+}
+
+.block-editor-palette-container .block-editor-handle {
+	width: 19px;
+	height: 50px;
+	margin-top: -25px;
+	padding: 13px 0 0 3px;
+	color: #eee;
+	font-size: 130%;
+	background: #666;
+	border-top: 1px solid #aaa;
+	border-bottom: 1px solid #aaa;
+	border-right: 1px solid #aaa;
+	z-index: 20;
+	position: absolute;
+	top: 50%;
+	right: 1px;
+	cursor: e-resize;
+}
+
+.block-editor-palette-container:hover .block-editor-handle {
+	right: -20px;
+	-webkit-transition: all 0.2s ease-in-out;
+	-moz-transition: all 0.2s ease-in-out;
+	-o-transition: all 0.2s ease-in-out;
+	transition: all 0.2s ease-in-out;
 }
 
 .block-editor-toolbar:hover + .block-editor-palette,
@@ -63,7 +138,8 @@
 	border-bottom: 0;
 }
 
-.block-editor-toolbar {
+.block-editor-toolbar,
+.block-editor-toolbar-right {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -76,8 +152,16 @@
 	z-index: 150;
 }
 
+.block-editor-toolbar-right {
+	right: 0;
+	left: auto;
+	border-left: 1px solid #aaa;
+	border-right: 0;
+}
+
 .block-editor-block,
 .block-editor-toolbar,
+.block-editor-toolbar-right,
 .block-editor-variable-editor-title,
 .block-editor-palette {
 	-webkit-touch-callout: none;
@@ -88,7 +172,8 @@
 	user-select: none;
 }
 
-.block-editor-toolbar a {
+.block-editor-toolbar a,
+.block-editor-toolbar-right a {
 	text-align: center;
 }
 
@@ -138,6 +223,7 @@
 }
 
 .block-editor-block-header {
+	cursor: move;
 	background: rgba(238, 238, 238, 0.7);
 	padding: 3px 1em;
 	border-bottom: 1px solid #333;
@@ -159,12 +245,18 @@
 	display: none;
 	color: #000;
 	font-size: 10px;
-	line-height: 17px;
+	line-height: 20px;
 	width: 20px;
 	height: 20px;
 	text-align: center;
 	overflow: hidden;
-	vertical-align: top;
+}
+
+.block-editor-block-doc i,
+.block-editor-block-edit i,
+.block-editor-block-remove i {
+	position: relative;
+	top: -2px;
 }
 
 .block-editor-block-doc:hover,
@@ -215,31 +307,39 @@
 }
 
 .block-editor-block-input {
-	display: block;
+	float: left;
+	clear: left;
+	display: inline-block;
 }
 
-.block-editor-block-input.default {
+.block-editor-block-output {
+	float: right;
+	clear: right;
+	display: inline-block;
+}
+
+.block-editor .block-editor-block-input.default {
 	color: #999;
 }
 
-.block-editor-block-input.selecting,
-.block-editor-block-output.selecting {
+.block-editor .block-editor-block-input.selecting,
+.block-editor .block-editor-block-output.selecting {
 	color: #c60;
 }
 
-.block-editor-block-input.missing,
-.block-editor-block-output.missing {
+.block-editor .block-editor-block-input.missing,
+.block-editor .block-editor-block-output.missing {
 	color: #f00;
 	font-style: italic;
 }
 
-.block-editor-block-input.hover-invalid,
-.block-editor-block-output.hover-invalid {
+.block-editor .block-editor-block-input.hover-invalid,
+.block-editor .block-editor-block-output.hover-invalid {
 	color: #f00;
 }
 
-.block-editor-block-input.hover-valid,
-.block-editor-block-output.hover-valid {
+.block-editor .block-editor-block-input.hover-valid,
+.block-editor .block-editor-block-output.hover-valid {
 	color: #0c0;
 }
 
@@ -256,7 +356,8 @@
 	box-sizing: border-box;
 }
 
-.block-editor-toolbar a {
+.block-editor-toolbar a,
+.block-editor-toolbar-right a {
 	display: inline-block;
 	width: 20px;
 	height: 20px;
@@ -265,7 +366,9 @@
 }
 
 .block-editor-toolbar a.hover,
-.block-editor-toolbar a:hover {
+.block-editor-toolbar a:hover,
+.block-editor-toolbar-right a.hover,
+.block-editor-toolbar-right a:hover {
 	border: 1px solid #666;
 	background: #efe;
 }
@@ -296,16 +399,6 @@
 	height: auto !important;
 	z-index: 1000;
 	box-shadow: 0 2px 10px rgba(0, 0, 0, .2);
-}
-
-.block-editor-fullscreen .block-editor-palette {
-	display: block;
-	width: 150px;
-}
-
-.block-editor-fullscreen .block-editor-palette:hover {
-	width: auto;
-	max-width: 300px;
 }
 
 .block-editor-variable-editor {
@@ -420,8 +513,64 @@
 	border-color: #8B9;
 }
 
-.block-editor-toolbar > * {
+.block-editor-toolbar > *,
+.block-editor-toolbar-right > * {
 	overflow: hidden;
 	vertical-align: top;
 	margin-top: 3px;
+	padding-top: 1px;
+}
+
+.block-editor-help-modal .block-editor-close {
+	float: right;
+	border-left: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+	text-decoration: none;
+	padding-top: 4px;
+	width: 25px;
+	height: 24px;
+	text-align: center;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.block-editor-help-modal .block-editor-close:hover {
+	background: #efe;
+}
+
+.block-editor-help-modal {
+	box-shadow: 0 2px 10px rgba(0, 0, 0, .2);
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 600px;
+	height: 400px;
+	background: #fff;
+	border: 1px solid #ccc;
+	margin: -200px 0 0 -300px;
+	padding: 0 20px;
+	z-index: 100;
+}
+
+.block-editor-help-modal li {
+	margin: 10px 0;
+}
+
+.block-editor kbd {
+	padding: 0 .6em;
+	border: 1px solid #ccc;
+	font-size: 11px;
+	font-family: Arial,Helvetica,sans-serif;
+	background-color: #f7f7f7;
+	color: #333;
+	-moz-box-shadow: 0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
+	-webkit-box-shadow: 0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
+	box-shadow: 0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
+	border-radius: 3px;
+	display: inline-block;
+	margin: 0 .1em;
+	text-shadow: 0 1px 0 #fff;
+	line-height: 1.4;
+	white-space: nowrap;
 }

@@ -10,9 +10,13 @@
 var BlockEditor = function(el, options) {
 	/** @property {jQuery} $el plugin data variable name */
     this.$el = $(el);
+	this.debug = false;
 
 	/** @property {string} defaults default options */
 	this.defaults = {
+		viewOnly: false,
+		scrollLeft: 0, // px to scroll from left - used for view only mode
+		scrollTop: 0, // px to scroll from top - used for view only mode
 		paletteData: '/admin/block-editor-palette.json',
 		historyLimit: 1000, // count of remembered changes,
 		splineTension: 0.3, // used to render connections, more means higher elasticity of connections
@@ -30,7 +34,7 @@ var BlockEditor = function(el, options) {
 	this.storage = new Storage(localStorage, BlockEditor._namespace);
 
 	// options stored in data attribute
-	var meta = this.$el.data(this._namespace + '-opts');
+	var meta = this.$el.data(BlockEditor._namespace + '-opts');
 
 	// merge all options together
 	this.options = $.extend(this.defaults, options, meta);
@@ -41,6 +45,10 @@ var BlockEditor = function(el, options) {
 	// init block editor
 	this._createContainer();
 	this._init();
+
+	if (this.options.viewOnly && 'C2S' in window) {
+		this.canvas.redraw();
+	}
 };
 
 /** @property {string} _namespace plugin namespace */
@@ -53,6 +61,10 @@ BlockEditor.prototype._createContainer = function() {
 	this.$container = $('<div>');
 	this.$container.attr('class', BlockEditor._namespace);
 	this.$el.after(this.$container).hide();
+
+	if (this.options.viewOnly) {
+		this.$container.addClass(BlockEditor._namespace + '-view-only');
+	}
 };
 
 /**
@@ -77,7 +89,7 @@ BlockEditor.prototype._init = function() {
 		self.storage.set('palette', data, true);
 		self.canvas = new Canvas(self); // create canvas
 		self.palette = new Palette(self, data); // create blocks palette
-		self.processData(); // load and process data from textarea
+		self.processData(); // load and process data from <textarea>
 		self.box = self.getBoundingBox();
 		self.canvas.render(self.box);
 		self.palette.render();
@@ -87,16 +99,18 @@ BlockEditor.prototype._init = function() {
 	var palette = this.storage.get('palette', true);
 	if (palette) {
 		callback(palette); // load instantly from cache
-		setTimeout(function() {
-			self.palette.toolbar.$reload.click(); // and trigger reloading immediately
-		}, 100);
+		if (!this.options.viewOnly) {
+			setTimeout(function() {
+				self.palette.toolbar.$reload.click(); // and trigger reloading immediately
+			}, 100);
+		}
 	} else {
 		$.get(this.options.paletteData).done(callback);
 	}
 };
 
 /**
- * Parses textarea data and initializes parent block properties and child blocks
+ * Parses <textarea> data and initializes parent block properties and child blocks
  */
 BlockEditor.prototype.processData = function() {
 	this.data = JSON.parse(this.$el.val());
@@ -128,15 +142,28 @@ BlockEditor.prototype.render = function() {
 	}
 
 	// then render connections
+	var t0 = performance.now();
 	for (var id in this.blocks) {
 		this.blocks[id].renderConnections();
 	}
+	var t1 = performance.now();
+	if (this.debug) {
+		console.log("initial connections rendering: " + (t1 - t0) + " ms");
+	}
 
 	// scroll to top left corner of diagram bounding box
-	var top = this.box.minY - this.options.canvasOffset + this.canvas.options.canvasExtraWidth;
-	var left = this.box.minX - this.options.canvasOffset + this.canvas.options.canvasExtraHeight;
-	this.canvas.$container.scrollTop(top);
-	this.canvas.$container.scrollLeft(left);
+	var top = this.box.minY
+		- this.options.canvasOffset
+		+ this.canvas.options.canvasExtraWidth
+		- this.canvas.options.scrollTop;
+	var left = this.box.minX
+		- this.options.canvasOffset
+		+ this.canvas.options.canvasExtraHeight
+		- this.canvas.options.scrollLeft;
+	setTimeout(function() {
+		this.canvas.$container.scrollTop(top);
+		this.canvas.$container.scrollLeft(left);
+	}.bind(this), 0);
 };
 
 /**
@@ -167,7 +194,7 @@ BlockEditor.prototype.getBoundingBox = function(active) {
 };
 
 /**
- * Refreshes editor based on textarea data
+ * Refreshes editor based on <textarea> data
  */
 BlockEditor.prototype.refresh = function() {
 	// remove old blocks
@@ -200,7 +227,7 @@ BlockEditor.prototype.addBlock = function(id, data) {
 };
 
 /**
- * On change handler, propagates changes to textarea
+ * On change handler, propagates changes to <textarea>
  */
 BlockEditor.prototype.onChange = function() {
 	// normalize string from textarea
@@ -245,6 +272,42 @@ BlockEditor.prototype.serialize = function() {
 	}
 
 	return JSON.stringify(ret);
+};
+
+/**
+ * Creates help modal window
+ *
+ * @private
+ */
+BlockEditor.prototype._createHelp = function() {
+	var html = '<h2>Block Editor Help</h2>';
+	html += '<ul>';
+	html += '<li>Hold <kbd>ctrl</kbd> and drag canvas with mouse to move around</li>';
+	html += '<li>To append new blocks to this fragment, move mouse cursor to the left side of editor to show palette; then drag block from palette to canvas</li>';
+	html += '<li>To move block on canvas, drag it on its header</li>';
+	html += '<li>To change block name or type, double click on it</li>';
+	html += '<li>When selecting multiple blocks, selection from left to right will select only fully overlapping blocks. Selection from right to left will also select partially overlapping blocks. </li>';
+	html += '</ul>';
+	this.$help = $('<div>').addClass(BlockEditor._namespace + '-help-modal');
+	this.$help.html(html);
+	var $close = $('<a href="#close">&times;</a>');
+	$close.addClass(BlockEditor._namespace + '-close');
+	$close.on('click', function() {
+		this.$help.remove();
+		delete this.$help;
+		return false;
+	}.bind(this));
+	this.$help.append($close);
+	this.$container.append(this.$help);
+};
+
+BlockEditor.prototype.toggleHelp = function() {
+	if (this.$help) {
+		this.$help.remove();
+		delete this.$help;
+	} else {
+		this._createHelp();
+	}
 };
 
 /**

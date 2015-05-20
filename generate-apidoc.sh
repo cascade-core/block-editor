@@ -10,3 +10,5 @@
 	--recurse \
 	--destination api \
 	--readme README.md
+
+php generate-tex.php > cascade-editor.tex

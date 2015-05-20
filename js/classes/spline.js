@@ -1,5 +1,5 @@
 /**
- * Smooth curved line
+ * Smooth curved line, uses Cardinal Spline for rendering
  *
  * @param {Array} points
  * @param {Number} tension
@@ -15,29 +15,17 @@ var Spline = function(points, tension, context) {
 };
 
 /**
- * Computes vector from two points
- *
- * @param {Point} p1
- * @param {Point} p2
- * @returns {Point}
- * @private
- */
-Spline.prototype._vector = function(p1, p2) {
-	return new Point(p2.x - p1.x, p2.y - p1.y);
-};
-
-/**
- * Computes bezier curve control points based on 3 following points
+ * Computes Bezier curve control points based on 3 following points
  *
  * @param {Point} p1
  * @param {Point} p2
  * @param {Point} p3
- * @returns {[{Point}, {Point}]}
+ * @returns {Array}
  * @private
  */
 Spline.prototype._controlPoints = function(p1, p2, p3) {
 	var t = this.tension;
-	var v = this._vector(p1, p3);
+	var v = p3.minus(p1);
 	var d12 = p1.dist(p2);
 	var d23 = p2.dist(p3);
 	var d123 = d12 + d23;
@@ -74,8 +62,9 @@ Spline.prototype._drawCurvedPath = function(cps) {
 	// render points
 	if (this.showPoints) {
 		for (var i in this.points) {
+			ctx.strokeStyle = 'darkviolet';
 			ctx.beginPath();
-			ctx.arc(this.points[i].x, this.points[i].y, 5, 0, 2 * Math.PI);
+			ctx.arc(this.points[i].x, this.points[i].y, 3, 0, 2 * Math.PI);
 			ctx.closePath();
 			ctx.stroke();
 		}
@@ -84,7 +73,7 @@ Spline.prototype._drawCurvedPath = function(cps) {
 		for (var i in cps) {
 			ctx.beginPath();
 			ctx.strokeStyle = 'red';
-			ctx.arc(cps[i].x, cps[i].y, 5, 0, 2 * Math.PI);
+			ctx.arc(cps[i].x, cps[i].y, 3, 0, 2 * Math.PI);
 			if (i > 0 && i % 2 === 1) {
 				ctx.moveTo(cps[i - 1].x, cps[i - 1].y);
 				ctx.lineTo(cps[i].x, cps[i].y);

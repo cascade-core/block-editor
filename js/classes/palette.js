@@ -1,5 +1,5 @@
 /**
- * palette class
+ * Palette of blocks
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
  *
@@ -16,7 +16,7 @@ var Palette = function(editor, blocks) {
 };
 
 /**
- * Creates palette filter
+ * Creates palette filter <select> element
  *
  * @returns {jQuery}
  * @private
@@ -45,8 +45,12 @@ Palette.prototype._createFilter = function() {
  * Renders palette
  */
 Palette.prototype.render = function() {
+	if (this.editor.options.viewOnly) {
+		return;
+	}
+
 	if (this.$container) {
-		this.$container.remove();
+		this.$container.parent().remove();
 	}
 
 	this.$container = $('<div>');
@@ -66,7 +70,12 @@ Palette.prototype.render = function() {
 		this.$container.append(b.$container);
 	}
 
-	this.editor.$container.append(this.$container);
+	var $wrap = $('<div>').addClass(BlockEditor._namespace + '-palette-container');
+	$wrap.append(this.$container);
+	var $handle = $('<div>').addClass(BlockEditor._namespace + '-handle');
+	$handle.html('&raquo;');
+	$wrap.append($handle);
+	this.editor.$container.append($wrap);
 };
 
 /**
