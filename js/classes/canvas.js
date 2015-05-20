@@ -101,7 +101,7 @@ Canvas.prototype._create = function() {
  * @private
  */
 Canvas.prototype._onMouseDown = function(e) {
-	if (!(e.metaKey || e.ctrlKey) && $(e.target).is('canvas')) { // selecting blocks
+	if (!(e.metaKey || e.ctrlKey || e.button == 1) && $(e.target).is('canvas')) { // selecting blocks
 		this.editor.palette.toolbar.disableSelection();
 		this._cursor = {
 			x: e.pageX - this.$container.offset().left + this.$container.scrollLeft(),
