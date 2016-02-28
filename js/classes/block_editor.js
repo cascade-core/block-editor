@@ -86,6 +86,9 @@ BlockEditor.prototype._init = function() {
 	// load palette data from cache and trigger reloading
 	var self = this;
 	var callback = function(data) {
+		if(typeof(data) != 'object') {
+			data = JSON.parse(data);
+		}
 		self.storage.set('palette', data, true);
 		self.canvas = new Canvas(self); // create canvas
 		self.palette = new Palette(self, data); // create blocks palette
