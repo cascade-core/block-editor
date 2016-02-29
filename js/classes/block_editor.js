@@ -252,6 +252,7 @@ BlockEditor.prototype.onChange = function() {
 
 	// set data to textarea
 	this.$el.val(newData);
+	this.$el.change();
 };
 
 /**
