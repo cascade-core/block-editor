@@ -14,9 +14,18 @@ var BlockEditor = function(el, options) {
 
 	/** @property {string} defaults default options */
 	this.defaults = {
-		onInit: null,	// callback invoked after initialization, args: this
-		onHelpToggle: null, // callback invoked when help changes visibility, args: bool isVisible
+		onInit: function() {},	// callback invoked after initialization
+		onHelpToggle: function(isVisible) {}, // callback invoked when help changes visibility
+		onCopyAvailable: function(isAvailable) {},
+		onCutAvailable: function(isAvailable) {},
+		onPasteAvailable: function(isAvailable) {},
+		onUndoAvailable: function(isAvailable) {},
+		onRedoAvailable: function(isAvailable) {},
+		onZoomInAvailable: function(isAvailable) {},
+		onZoomOutAvailable: function(isAvailable) {},
+		onZoomResetAvailable: function(isAvailable) {},
 		viewOnly: false,
+		toolbarsVisible: true,
 		scrollLeft: 0, // px to scroll from left - used for view only mode
 		scrollTop: 0, // px to scroll from top - used for view only mode
 		paletteData: '/admin/block-editor-palette.json',

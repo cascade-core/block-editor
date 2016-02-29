@@ -57,6 +57,9 @@ Toolbar.prototype.render = function($container) {
 	this.$container = $container;
 	this.$toolbar = $('<div>');
 	this.$toolbar.addClass(BlockEditor._namespace + '-toolbar');
+	if (!this.editor.options.toolbarsVisible) {
+		this.$toolbar.hide();
+	}
 
 	var $divider = $('<div>').addClass(BlockEditor._namespace + '-toolbar-divider');
 
@@ -127,6 +130,9 @@ Toolbar.prototype.render = function($container) {
 	// right toolbar
 	this.$right = $('<div>');
 	this.$right.addClass(BlockEditor._namespace + '-toolbar-right');
+	if (!this.editor.options.toolbarsVisible) {
+		this.$right.hide();
+	}
 
 	// help button
 	this.$help = this._createButton('help', 'lightbulb-o', 'Help [Ctrl + H]', true);
@@ -474,48 +480,64 @@ Toolbar.prototype.updateDisabledClasses = function() {
 	var undo = this.editor.session.get('undo', true);
 	if (undo && undo.length) {
 		this.$undo.removeClass('disabled');
+		this.editor.options.onUndoAvailable(true);
 	} else {
 		this.$undo.addClass('disabled');
+		this.editor.options.onUndoAvailable(false);
 	}
 
 	var redo = this.editor.session.get('redo', true);
 	if (redo && redo.length) {
 		this.$redo.removeClass('disabled');
+		this.editor.options.onRedoAvailable(true);
 	} else {
 		this.$redo.addClass('disabled');
+		this.editor.options.onRedoAvailable(false);
 	}
 
 	var clipboard = this.editor.storage.get('clipboard', true);
 	if (clipboard) {
 		this.$paste.removeClass('disabled');
+		this.editor.options.onPasteAvailable(true);
 	} else {
 		this.$paste.addClass('disabled');
+		this.editor.options.onPasteAvailable(false);
 	}
 
 	if (this._zoom < this._zoomMax) {
 		this.$zoomIn.removeClass('disabled');
+		this.editor.options.onZoomInAvailable(true);
 	} else {
 		this.$zoomIn.addClass('disabled');
+		this.editor.options.onZoomInAvailable(false);
 	}
 
 	if (this._zoom > this._zoomMin) {
 		this.$zoomOut.removeClass('disabled');
+		this.editor.options.onZoomOutAvailable(true);
 	} else {
 		this.$zoomOut.addClass('disabled');
+		this.editor.options.onZoomOutAvailable(false);
 	}
 
 	if (this._zoom !== 1.0) {
 		this.$zoomReset.removeClass('disabled');
+		this.editor.options.onZoomResetAvailable(true);
 	} else {
 		this.$zoomReset.addClass('disabled');
+		this.editor.options.onZoomResetAvailable(false);
 	}
 
 	if (active) {
 		this.$copy.removeClass('disabled');
 		this.$cut.removeClass('disabled');
+		this.editor.options.onCopyAvailable(true);
+		this.editor.options.onCutAvailable(true);
 	} else {
 		this.$copy.addClass('disabled');
 		this.$cut.addClass('disabled');
+		this.editor.options.onCopyAvailable(false);
+		this.editor.options.onCutAvailable(false);
 	}
 };
 

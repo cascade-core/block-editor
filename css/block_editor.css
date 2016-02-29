@@ -76,7 +76,7 @@
 	position: absolute;
 	top: 24px;
 	left: -256px;
-	bottom: 0;
+	bottom: 24px;
 	width: 276px;
 	overflow: hidden;
 
@@ -111,7 +111,7 @@
 	margin-top: -25px;
 	padding: 13px 0 0 3px;
 	color: #eee;
-	font-size: 130%;
+	font-size: 19px;
 	background: #666;
 	border-top: 1px solid #aaa;
 	border-bottom: 1px solid #aaa;
@@ -134,7 +134,6 @@
 .block-editor-toolbar:hover + .block-editor-palette,
 .block-editor-palette:hover {
 	display: block;
-	border-bottom: 0;
 }
 
 .block-editor-toolbar,
