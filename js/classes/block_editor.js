@@ -14,6 +14,8 @@ var BlockEditor = function(el, options) {
 
 	/** @property {string} defaults default options */
 	this.defaults = {
+		onInit: null,	// callback invoked after initialization, args: this
+		onHelpToggle: null, // callback invoked when help changes visibility, args: bool isVisible
 		viewOnly: false,
 		scrollLeft: 0, // px to scroll from left - used for view only mode
 		scrollTop: 0, // px to scroll from top - used for view only mode
@@ -109,6 +111,10 @@ BlockEditor.prototype._init = function() {
 		}
 	} else {
 		$.get(this.options.paletteData).done(callback);
+	}
+
+	if (this.options.onInit) {
+		this.options.onInit(this);
 	}
 };
 
@@ -299,18 +305,34 @@ BlockEditor.prototype._createHelp = function() {
 	$close.on('click', function() {
 		this.$help.remove();
 		delete this.$help;
+		if (this.options.onHelpToggle) {
+			this.options.onHelpToggle(false);
+		}
 		return false;
 	}.bind(this));
 	this.$help.append($close);
 	this.$container.append(this.$help);
 };
 
-BlockEditor.prototype.toggleHelp = function() {
-	if (this.$help) {
-		this.$help.remove();
-		delete this.$help;
+BlockEditor.prototype.toggleHelp = function(show) {
+	if (show === undefined) {
+		show = !this.$help;
+	}
+	if (show) {
+		if (!this.$help) {
+			this._createHelp();
+			if (this.options.onHelpToggle) {
+				this.options.onHelpToggle(true);
+			}
+		}
 	} else {
-		this._createHelp();
+		if (this.$help) {
+			this.$help.remove();
+			delete this.$help;
+			if (this.options.onHelpToggle) {
+				this.options.onHelpToggle(false);
+			}
+		}
 	}
 };
 
