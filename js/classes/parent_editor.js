@@ -24,7 +24,7 @@ var ParentEditor = function(editor) {
 	};
 
 	// clone properties to temp location
-	this._data = JSON.parse(JSON.stringify(this.editor.properties));
+	this._data = JSON.parse(JSON.stringify(this.editor.properties), null, 4);
 	this._data._other = {};
 	for (var t in this._data) {
 		if (!this._types[t]) {
@@ -89,7 +89,7 @@ ParentEditor.prototype._create = function() {
 		if (this._data[type]) {
 			$tabs.find('a.active').removeClass('active');
 			$tabs.find('[data-type="' + type + '"]').addClass('active');
-			$textarea.val(JSON.stringify(this._data[type], null, "\t"));
+			$textarea.val(JSON.stringify(this._data[type], null, 4));
 			break;
 		}
 	}
@@ -154,7 +154,7 @@ ParentEditor.prototype._changeTab = function(e) {
 	type = $(e.target).data('type');
 	this.$container.find('a.active').removeClass('active');
 	if (this._data[type]) {
-		$ta.val(JSON.stringify(this._data[type], null, "\t"));
+		$ta.val(JSON.stringify(this._data[type], null, 4));
 	} else {
 		$ta.val('');
 	}

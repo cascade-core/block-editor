@@ -234,7 +234,7 @@ BlockEditor.prototype.addBlock = function(id, data) {
  */
 BlockEditor.prototype.onChange = function() {
 	// normalize string from textarea
-	var oldData = JSON.stringify(JSON.parse(this.$el.val()));
+	var oldData = JSON.stringify(JSON.parse(this.$el.val()), null, 4);
 	var newData = this.serialize();
 	if (oldData !== newData) {
 		// save new history state
@@ -275,7 +275,7 @@ BlockEditor.prototype.serialize = function() {
 		ret[t] = this.properties[t];
 	}
 
-	return JSON.stringify(ret);
+	return JSON.stringify(ret, null, 4);
 };
 
 /**

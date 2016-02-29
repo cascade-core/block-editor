@@ -154,7 +154,7 @@ Editor.prototype._create = function() {
 		$textarea.val(values[this._variable]);
 	} else {
 		$type.val('json');
-		$textarea.val(JSON.stringify(values[this._variable], null, "\t"));
+		$textarea.val(JSON.stringify(values[this._variable], null, 4));
 	}
 	$type.change();
 	this._type = $type.val();
